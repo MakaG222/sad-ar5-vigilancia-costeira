@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 
 from geo import gerar_procura, ponto_em_mar, ponto_em_mar_mapa, proj
-from dm.geocode import geocode
+from geocode import geocode
 from risco import DISTRITO_COSTA
 
 XLSX = os.path.join(os.path.dirname(__file__), "..", "dados", "fontes", "apreensoes_droga_PT.xlsx")
@@ -96,7 +96,6 @@ def apreensoes_para_mapa(ano_min: int | None = 2020, ano_max: int | None = None)
     """
     global _CACHE_RESULT
     if _CACHE_RESULT is not None and ano_min == 2020 and ano_max is None:
-        return _CACHE_RESULT
         return _CACHE_RESULT
 
     if not os.path.exists(XLSX):
