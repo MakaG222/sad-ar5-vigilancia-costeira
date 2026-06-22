@@ -113,15 +113,40 @@
       "resposta": "9 AR5 faixa costeira (24 h); 11 AR5 área total de alto risco.",
       "frota_total": 11,
       "frota_costeira": 9,
-      "n_simultaneos": 3
+      "n_simultaneos_costeira": 3,
+      "n_simultaneos_total": 4,
+      "bases_dimensionamento_costeira": [
+        "Santa Cruz",
+        "Cascais (Tires)",
+        "Sines",
+        "Portimão",
+        "Faro"
+      ],
+      "bases_dimensionamento_total": [
+        "Porto (Sá Carneiro)",
+        "Aveiro (S. Jacinto)",
+        "Braga",
+        "Monte Real (BA5)",
+        "Santa Cruz",
+        "Sintra (BA1)",
+        "Cascais (Tires)",
+        "Lisboa (H. Delgado)",
+        "Montijo (BA6)",
+        "Sines",
+        "Portimão",
+        "Faro"
+      ],
+      "nota": "A frota 9/11 assume bases distribuídas ao longo da costa para reduzir trânsito; com apenas Porto+Portimão (MCLP k=2) seriam necessários 13 AR5."
     },
     "Q3_bases": {
-      "resposta": "2 bases: Porto (Sá Carneiro), Portimão.",
-      "bases": [
+      "resposta": "MCLP (k=2): Porto (Sá Carneiro), Portimão — cobrem 100 % do risco com o mínimo de instalações.",
+      "bases_mclp": [
         "Porto (Sá Carneiro)",
         "Portimão"
       ],
-      "frac_risco": 1.0
+      "frac_risco_mclp": 1.0,
+      "frota_se_apenas_estas_bases": 13,
+      "nota": "Q3 responde à localização mínima (MCLP); Q2 usa rede costeira completa para o dimensionamento de frota."
     }
   },
   "n_incidentes_iom": 0,

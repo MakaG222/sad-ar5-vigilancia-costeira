@@ -146,8 +146,10 @@ LIMIAR_RISCO_OPERACIONAL = 0.5
 
 # ---------------------------------------------------------------------------
 # 5. PESOS RELATIVOS DAS AMEAÇAS NO ÍNDICE DE RISCO
-#    Ponderação multi-critério (soma = 1). Definida a partir da relevância
-#    marítima de cada ameaça nas fontes verificadas (ver relatório, secção Dados).
+#    Ponderação multi-critério (soma = 1). Valores adoptados após AHP (Saaty):
+#    0,376 / 0,243 / 0,191 / 0,191 (CR ≈ 0; ver dm/ahp_pesos.py). Arredondados
+#    para 0,35 / 0,25 / 0,20 / 0,20 por legibilidade operacional; sensibilidade
+#    ±10 % não altera a hierarquia espacial (relatório, Secção 4.5.1).
 # ---------------------------------------------------------------------------
 PESOS_AMEACA = {
     "droga": 0.35,       # tráfico marítimo (87,2% da cocaína via mar — UNCTE 2024)

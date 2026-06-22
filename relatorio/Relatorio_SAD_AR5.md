@@ -10,7 +10,20 @@ Escola Naval — Alfeite, 2026
 
 ## Sumário executivo
 
-A vigilância da vasta área marítima de Portugal Continental, sujeita em simultâneo a tráfico de droga, pesca INN, poluição e imigração irregular, exige afetar meios escassos onde o risco é maior. Este Sistema de Apoio à Decisão recomenda, com base em dados reais e georreferenciados, operar o UAV **TEKEVER AR5** a partir de **Porto (Sá Carneiro) e Portimão**, com uma frota de **9 a 11 aeronaves**, para assegurar vigilância persistente 24 h dos sectores prioritários — Algarve, Setúbal–Lisboa e Noroeste/Peniche. A recomendação é robusta: uma patrulha orientada pelo risco captura **2,06×** mais ameaça que uma patrulha aleatória (IC95 1,93–2,22) e o fator que efetivamente limita a cobertura é a **capacidade sensorial**, não o alcance da aeronave.
+Portugal tem de vigiar uma ZEE desproporcionada face ao território continental, com quatro ameaças
+distintas a competir pelos mesmos meios. Este trabalho propõe um SAD que indica **onde** concentrar
+patrulhas AR5, **quantas** aeronaves manter em rotação 24 h e **em que bases** assentar a rede.
+O mapa de risco assenta em dados reais (apreensões, EMODnet, desembarques documentados); a
+otimização separa alcance de aeronave de cobertura sensorial persistente — e foi esta última que
+nos levou à conclusão de que o gargalo não é o raio de 90 km do estudo SIG anterior, mas sim a
+revisita do sensor.
+
+Em termos operacionais: o **MCLP com duas bases** (Porto Sá Carneiro e Portimão) cobre a
+totalidade do risco alto; para sustentar 24 h com trânsitos curtos, o dimensionamento usa **cinco
+bases na faixa costeira** (9 AR5) ou a **rede completa de doze aeródromos** (11 AR5). Uma patrulha
+orientada pelo risco captura **2,06×** mais ameaça que uma patrulha aleatória (IC95 1,93–2,22);
+no holdout 2023–2024, **85,5 %** das apreensões caem em células de alto risco. Os sectores
+prioritários são o Algarve, o eixo Setúbal–Lisboa e o noroeste ao largo de Peniche.
 
 
 ---
@@ -19,10 +32,11 @@ A vigilância da vasta área marítima de Portugal Continental, sujeita em simul
 
 Desenvolveu-se um **SAD** para vigilância costeira de Portugal Continental com o UAV **TEKEVER AR5**,
 integrando *data mining* (PCA, *clustering*, classificação com SMOTE, lógica difusa) e otimização
-(MCLP, dimensionamento de frota). Dados: apreensões UNODC, EMODnet, 20 desembarques PT e IOM em mar.
-Grelha de **1156 células** (**300** alto risco). Resultados: concentração no Algarve e Setúbal–Lisboa;
-MLP com ROC-AUC 0,93 ± 0,02; **Porto + Portimão** cobrem 100 % do risco; **9–11 AR5** para 24 h;
-ganho de patrulha **2,06×** (IC95 1,93–2,22); holdout 85,5 % em alto risco. Protótipo web com AIS demo.
+(MCLP, dimensionamento de frota). Fontes: apreensões UNODC, EMODnet, 20 desembarques PT e IOM em mar.
+Grelha de **1156 células** (**300** alto risco). Concentração no Algarve e Setúbal–Lisboa;
+MLP com ROC-AUC 0,93 ± 0,02; **Porto + Portimão** cobrem 100 % do risco (MCLP k=2); **9–11 AR5**
+para 24 h com rede costeira distribuída (5 ou 12 bases de lançamento); ganho de patrulha **2,06×**
+(IC95 1,93–2,22); holdout 85,5 % em alto risco. Protótipo web com AIS demo.
 
 **Palavras-chave:** Sistemas de Apoio à Decisão; *data mining*; *clustering*;
 classificação; lógica difusa; otimização; localização de instalações; vigilância
@@ -42,10 +56,11 @@ explicitly separates aircraft *range* from persistent *sensor coverage*. Over a 
 **1 156 cells** (300 high-risk; mainland Portugal only), illicit activity concentrates in the
 Algarve and the Setúbal–Lisbon axis; the maritime nature of a seizure is predictable with strong
 discrimination (ROC-AUC = 0.93 ± 0.02); and the limiting factor is sensor coverage, not range.
-Two bases — **Porto and Portimão** — cover 100 % of the risk, requiring about **9 AR5** for the
-priority coastal belt or **11 AR5** for the full high-risk area to sustain 24-h surveillance.
-Validation shows the DSS captures **2.06× more risk** than random patrol (95 % CI 1.93–2.22) and
-places **85.5 %** of 2023–2024 maritime seizures in high-risk cells (threshold 0.5; train ≤ 2022).
+Two bases — **Porto and Portimão** — cover 100 % of the risk under the MCLP (k=2); sustaining
+24-h surveillance with short transits requires about **9 AR5** along the coastal belt (five launch
+bases) or **11 AR5** over the full high-risk area (twelve bases). Validation shows the DSS captures
+**2.06× more risk** than random patrol (95 % CI 1.93–2.22) and places **85.5 %** of 2023–2024
+maritime seizures in high-risk cells (threshold 0.5; train ≤ 2022).
 
 **Keywords:** Decision Support Systems; data mining; clustering; classification; fuzzy
 logic; optimization; facility location; maritime surveillance; unmanned aerial
@@ -308,7 +323,8 @@ Cada etapa gera artefactos rastreáveis (`intensidades_reais.csv`, `resultados.j
 | Discretização espacial | **1156 células** (~10 km, apenas mar PT) | Resolução adequada à patrulha costeira sem explosão computacional; reprodutível via `geo.gerar_procura` |
 | Classificação alto risco | Limiar **0,5** → **300 células** | Limiar interpretável e fixado *antes* do baseline de patrulha (mesmo N em todas as estratégias) |
 | Ganho SAD vs aleatório | **2,06×** (IC95: 1,93–2,22) | Calibração empírica com bootstrap (500 réplicas) sobre captura de massa de risco |
-| Bases recomendadas | **Porto + Portimão** | MCLP: cobertura de 100 % do risco alto com o mínimo de instalações |
+| Bases MCLP (Q3) | **Porto + Portimão** | Cobertura de 100 % do risco alto com o mínimo de instalações (k=2) |
+| Frota 24 h (Q2) | **9 / 11 AR5** | Com 5 ou 12 bases de lançamento (Tabela 6) |
 | Dados AIS na plataforma | **Híbrido** (real + simulado) | AISStream quando há chave API; *fallback* automático com embarcações em células SAD para demonstração offline |
 
 ---
@@ -529,14 +545,13 @@ distintas.
 
 #### Justificação dos pesos por AHP (Processo de Hierarquia Analítica)
 
-Para fundamentar formalmente os pesos da média ponderada, aplicou-se o método **AHP** (Saaty, 1980)
+Os pesos da média ponderada não foram escolhidos arbitrariamente: aplicámos o **AHP** (Saaty, 1980)
 aos quatro critérios — droga, pesca, poluição e imigração — com comparações par-a-par calibradas
-para vigilância costeira de **Portugal Continental** (módulo `dm/ahp_pesos.py`). A matriz obtida
-produz pesos **0.38 / 0.24 / 0.19 / 0.19**
-com **razão de consistência 0.0002** (consistente). Os pesos adotados
-(0,35 / 0,25 / 0,20 / 0,20) aproximam-se dos valores AHP (diferença máxima 0,02). Uma análise de
-sensibilidade ±10 % confirma robustez: o número de células de alto risco varia entre 276 e 297
-(Figura 24; `resultados/ahp_pesos.json`), sem alterar a hierarquia espacial nem a recomendação de bases.
+para vigilância costeira de **Portugal Continental** (`dm/ahp_pesos.py`). A matriz resultante dá
+**0,38 / 0,24 / 0,19 / 0,19** com **razão de consistência 0,0002** (bem abaixo do limiar de 0,10).
+Arredondámos para **0,35 / 0,25 / 0,20 / 0,20** no `config.py` por legibilidade operacional; a
+diferença máxima é 0,02 e uma sensibilidade ±10 % mantém o n.º de células alto risco entre 276 e 297
+(Figura 24; `resultados/ahp_pesos.json`), sem alterar a hierarquia espacial nem o par MCLP.
 
 A primeira via é uma **média ponderada**, com pesos de 0,35 para o tráfico de droga, 0,25 para a
 pesca ilegal e 0,20 para cada uma das restantes ameaças — ponderação que reflete a maior
@@ -609,31 +624,43 @@ período máximo de revisita, *t*ₒₙ o tempo de estação efetivo por sortida
 operacional da frota (fixada em 0,70 para acomodar manutenção e indisponibilidades); a margem de
 10 % cobre imprevistos operacionais.
 
-A aplicação deste modelo à área total de alto risco (28 494 km²), servida pelas duas bases ótimas
-de Porto e Portimão, conduz a 4 aeronaves simultaneamente no ar e a uma **frota total de 11
-AR5**, com uma distância média ao ponto de patrulha de 55,9 km e um tempo de estação de 13,9 horas
-por sortida. Caso o esforço se restrinja à faixa costeira mais densa (25 075 km²), bastam 3
-aeronaves simultâneas e uma **frota de 9 AR5**.
+A aplicação deste modelo à área total de alto risco (28 494 km²), com a **rede completa de doze
+bases** seleccionada pelo trade-off de frota (Secção 5.3), conduz a **4 aeronaves simultâneas**
+e a uma **frota total de 11 AR5**, com distância média ao ponto de patrulha de 55,9 km e tempo
+de estação de 13,9 h por sortida. Restringindo o esforço à faixa costeira mais densa (25 075 km²,
+alcançável a 90 km a partir de **cinco bases** — Santa Cruz, Cascais, Sines, Portimão e Faro),
+bastam **3 aeronaves simultâneas** e uma **frota de 9 AR5**.
+
+Importa não confundir este resultado com o do MCLP a duas bases (Porto + Portimão): essa
+configuração cobre igualmente 100 % do risco, mas os trânsitos mais longos elevam a frota
+necessária para **13 AR5** (Tabela B5). Por isso distinguimos, ao longo do relatório, a
+**localização mínima** (Q3) do **dimensionamento de frota** (Q2).
 
 ### 5.3 O número ótimo de bases
 
-A análise da frota total em função do número de bases (Tabela B5, Anexo B; Figura 18) revela um
-ponto de inflexão nítido. Com uma única base, a longa distância média aos pontos de patrulha
-(339 km) consome uma fração tão grande da autonomia em trânsito que o tempo de estação cai para
-8,2 horas, inflacionando o multiplicador de rotação e exigindo **14 aeronaves**. A passagem para
-**duas bases** (Porto e Portimão) encurta substancialmente os tempos de trânsito e fixa a frota no
-efetivo de referência — **11 AR5** para a área total de alto risco (9 AR5 na faixa costeira). A partir daí, o acréscimo de bases não
-traz qualquer redução adicional da frota — a curva é perfeitamente plana entre duas e onze bases —,
-pelo que duas bases constituem o ótimo: capturam quase toda a economia de trânsito sem incorrerem
-nos custos fixos e na complexidade logística de uma rede mais dispersa. A Tabela 6 resume as duas
-configurações recomendadas.
+A análise da frota total em função do número de bases (Tabela B5, Anexo B; Figura 18) mostra dois
+resultados que convém separar. Do ponto de vista do **MCLP** — «qual o mínimo de instalações que
+cobre o risco?» — **duas bases** (Porto e Portimão) bastam para alcançar praticamente a
+totalidade das 300 células de alto risco. Do ponto de vista do **dimensionamento de frota** —
+«quantas aeronaves para 24 h?» — a curva tem um mínimo nítido com **doze bases**: a distância
+média cai para 55,9 km, o tempo de estação sobe para 13,9 h e a frota fixa-se em **11 AR5**.
+
+Com uma única base (Montijo), os trânsitos consomem demasiada autonomia (distância média 120 km,
+frota **12 AR5**). Entre **duas e onze bases** a frota permanece em **13 AR5** — Porto e
+Portimão cobrem o risco, mas não encurtam o trânsito o suficiente para reduzir rotações. Só com
+a rede completa (k = 12) se atinge o ótimo de frota. A Tabela 6 resume as configurações que
+recomendamos para o emprego operacional.
 
 **Tabela 6.** *Configurações de emprego recomendadas (cenário de média ponderada).*
 
-| Configuração | Área (km²) | Bases | Aeronaves simultâneas | Frota total (24 h) |
+| Configuração | Área (km²) | Bases de lançamento (dimensionamento frota) | Aeronaves simultâneas | Frota total (24 h) |
 |---|---|---|---|---|
-| Faixa costeira | 25 075 | Porto + Portimão | 3 | ≈ 9 AR5 |
-| Área total de alto risco | 28 494 | Porto + Portimão | 4 | ≈ 11 AR5 |
+| Faixa costeira | 25 075 | Santa Cruz, Cascais, Sines, Portimão, Faro | 3 | ≈ 9 AR5 |
+| Área total de alto risco | 28 494 | Rede completa (12 aeródromos costeiros) | 4 | ≈ 11 AR5 |
+| MCLP mínimo (referência Q3) | 28 494 | Porto (Sá Carneiro) + Portimão | 4 | ≈ 13 AR5 |
+
+A última linha não é a configuração de emprego recomendada, mas explicita o que acontece se se
+optar pelo par MCLP sem reforço de bases intermédias: cobre-se o risco, mas a frota sobe.
 
 ---
 
@@ -647,8 +674,8 @@ recomendação variando-os isoladamente em torno do cenário de referência de 1
 19; Tabela B6, Anexo B). A frota mostra-se mais sensível à **largura útil do sensor** e ao
 **período de revisita**: alargar o sensor de 30 para 50 km, ou relaxar a revisita de 3 para 6
 horas, reduz a frota de 11 para 6 aeronaves; inversamente, exigências mais estritas (sensor de 20
-km ou revisita de 2 horas) elevam-na para 12. A **disponibilidade operacional** tem um efeito mais
-moderado, fazendo variar a frota entre 11 (disponibilidade de 0,60) e 7 (disponibilidade de
+km ou revisita de 2 horas) elevam-na para 14. A **disponibilidade operacional** tem um efeito mais
+moderado, fazendo variar a frota entre **13** (disponibilidade de 0,60) e **9** (disponibilidade de
 0,90). Estes resultados têm uma leitura de apoio à decisão direta: o investimento que mais reduz
 o efetivo necessário não é a aquisição de mais aeronaves, mas a melhoria da capacidade sensorial
 de cada uma (sensores de maior alcance útil) e dos processos de manutenção que sustentam a
@@ -664,22 +691,23 @@ Um Sistema de Apoio à Decisão só cumpre verdadeiramente a sua função quando
 produz chega ao decisor numa forma diretamente interpretável e acionável. Por isso, para além das
 figuras estáticas que documentam a análise, o sistema materializa-se num **painel geoespacial
 interativo** (ficheiro `resultados/mapa_interativo.html`), construído sobre a biblioteca *Folium*
-— interface Python para a *framework* cartográfica *Leaflet.js* — que projeta os produtos
-analíticos sobre uma carta navegável (Figura 20). Esta opção responde a uma boa prática de
-visualização em SAD: apresentar a informação num suporte que o operador reconheça e manipule,
-com ampliação, medição de distâncias e ativação seletiva de camadas, em vez de imagens fixas
-descontextualizadas.
+— uma interface Python para a *framework* cartográfica *Leaflet.js* — que projeta todos os
+produtos analíticos sobre uma carta náutica real e navegável (Figura 20). Esta opção responde a
+uma das principais boas práticas de visualização em SAD: a informação deve ser apresentada num
+suporte que o operador reconheça e manipule, com possibilidade de ampliação, medição de distâncias
+e ativação seletiva de camadas, em vez de imagens fixas descontextualizadas.
 
-O painel organiza-se em **camadas sobreponíveis e comutáveis**, integrando risco, **tráfego AIS**
-e **incidentes reais**:
+O painel organiza-se em **camadas sobreponíveis e comutáveis** pelo utilizador, integrando
+dados de risco, **tráfego AIS** e **incidentes reais**:
 
 1. **Risco agregado** — mapa de calor do índice multi-ameaça e detalhe por célula (popup com
    decomposição droga/pesca/poluição/imigração).
-2. **Tráfego AIS (EMODnet)** — densidade de embarcações e corredores marítimos derivados do AIS
-   agregado (`vesseldensity_all`, `routedensity_all`), alinhados com o recetor AIS do AR5.
+2. **Tráfego AIS (EMODnet)** — densidade de embarcações e corredores de rotas marítimas derivados
+   do AIS agregado (camadas `vesseldensity_all` e `routedensity_all`), alinhadas com a capacidade
+   sensorial do AR5 (recetor AIS integrado).
 3. **Incidentes reais** — **20 desembarques marítimos** documentados em Portugal Continental
-   (Algarve/Setúbal, 2019–2024) e apreensões marítimas recentes (2020+), geocodificadas e filtradas
-   para células marítimas (sem incidentes IOM em mar PT após filtro rigoroso).
+   (Algarve/Setúbal, 2019–2024) e 187 apreensões marítimas recentes (2020+), geocodificadas,
+   sobrepostos ao mapa de risco (sem incidentes IOM em mar PT após filtro rigoroso).
 4. **Infraestrutura operacional** — doze aeródromos candidatos, **duas bases recomendadas** (Porto e
    Portimão) com raios tático (90 km) e operacional AR5, e **seis setores de patrulha** (*k*-médias).
 
@@ -688,50 +716,42 @@ validação (backtesting temporal e ganho face a patrulha aleatória). O painel 
 (OpenSeaMap), controlo de camadas, medição em km/milhas náuticas, mini-mapa e ecrã inteiro (Figura 20).
 
 O valor deste artefacto é duplo. Do ponto de vista operacional, transforma um relatório analítico
-num **instrumento de planeamento de missão** utilizável por um Centro de Coordenação para situar
-visualmente o risco, as bases e os setores, e medir distâncias de projeção. Do ponto de vista
-metodológico, fecha a cadeia *dados → informação → conhecimento → ação*, colocando o conhecimento
-extraído pelas técnicas de *data mining* e otimização sobre o referencial geográfico em que a
-decisão é efetivamente tomada.
+num **instrumento de planeamento de missão** que um Centro de Coordenação pode usar para situar
+visualmente o risco, as bases e os setores, e medir distâncias de projeção em tempo real. Do ponto
+de vista metodológico, fecha a cadeia *dados → informação → conhecimento → ação*, ao colocar o
+conhecimento extraído pelas técnicas de *data mining* e otimização sobre o mesmo referencial
+geográfico em que a decisão é efetivamente tomada.
 
 ### 6.1 Plataforma operacional quase em tempo real
 
 Para fechar o ciclo **dados → informação → conhecimento → ação**, desenvolveu-se uma **plataforma
-web** (`plataforma/`) — API *FastAPI* e interface *React/Leaflet* — que consome os mesmos produtos
-analíticos do pipeline (`resultados.json`, `validacao.json`, `camadas_mapa.json`, grelha SAD de
-**1156** células) e expõe capacidades operacionais em tempo quase real (Figura 23):
+web** (`plataforma/`) que consome os mesmos produtos analíticos do pipeline (`resultados.json`,
+`validacao.json`, `camadas_mapa.json`, grelha SAD) e expõe capacidades operacionais em tempo
+quase em tempo real:
 
 | Módulo | Função | Ligação ao relatório |
 |--------|--------|----------------------|
 | Meteo (Open-Meteo) | Vento por base; impacto no alcance AR5 | Secção 5, Secção 5.4; `fator_vento` |
-| Mapa de risco + zonas *k*-means | Células multi-ameaça e clusters de patrulha | Secção 4.3, 4.5; Fig. 16 |
-| Camadas IOM + apreensões + incidentes | Dados reais e registo manual no mapa | Sec. 3, 11; `camadas_mapa.json` |
-| Rotas OR-Tools | Sortie, plano 24 h (6 sectores), despacho reactivo | Secção 5; Q1/Q2/Q3 |
-| Validação de rota (Fase 2) | Score 0–100 e classe Coerente/Aceitável/Rever no HUD | Secção 5; continuidade e autonomia |
+| Mapa de risco | Células multi-ameaça (filtro mar) | Secção 4.5, Fig. 16 |
+| Camadas IOM + apreensões | Dados reais sobre o mapa | Sec. 3, 11; `camadas_mapa.json` |
+| Rotas OR-Tools | Sortie N→S, plano 24 h (6 sectores), reativo | Secção 5, Q1/Q2/Q3 |
 | Cenários pré-definidos | 7 missões alinhadas ao relatório | Secção 7.1, Tabela 7 |
 | Bases militares | FAP/Marinha/Exército ≤ 20 km costa | Secção 5, MCLP |
-| WebSocket + alertas | Meteo, AIS, IPMA, RSS, spoofing, incidentes | Apoio à decisão dinâmica |
-| Exportação plano missão | GeoJSON/CSV da rota e sectores | `/api/export/*` |
+| WebSocket | Alertas meteo, AIS, IPMA, RSS | Apoio à decisão dinâmica |
+| Exportação plano missão | GeoJSON/CSV da rota e sectores | Sec. 6.2; `/api/export/*` |
 
-A meteorologia **condiciona directamente** o planeamento: cada rota calcula vento efetivo
+A meteorologia **condiciona diretamente** o planeamento: cada rota calcula vento efetivo
 (estação Open-Meteo mais próxima do sector), **fator de redução de alcance**, autonomia útil e
 viabilidade operacional (limiar 18 m/s). O plano 24 h atribui vento **por sector costeiro**,
-reflectindo a variabilidade ao longo do litoral. A barra de estado consolida as métricas canónicas
-do SAD — **300** células de alto risco, frota **9/11** AR5 e ganho **2,06×** face a patrulha
-aleatória — alinhadas com `validacao.json`.
+reflectindo a variabilidade ao longo do litoral.
 
-A interface inclui **modo apresentação** (mapa leve para demo em sala), **fallback offline**
-(meteo/IPMA/RSS sintéticos quando a rede falha) e **teste de fumo** (`smoke_test.py`, 22
-verificações de endpoints e rotas). Os marcadores de demonstração (spoofing e incidentes simulados)
-são projectados apenas em **mar aberto** (critério `ponto_em_mar_mapa`: ≥ 15 km da costa, fora de
-estuários), evitando posicionamento em terra no mapa OSM. O procedimento de arranque está descrito
-no **Anexo C — Reprodução computacional e arranque da plataforma**.
+O procedimento de arranque da plataforma (instalação de dependências e lançamento dos serviços) está descrito no **Anexo C — Reprodução computacional e arranque da plataforma**.
 
 A plataforma não substitui o painel Folium (útil para relatório e *briefing* estático); **complementa-o**
-com ingestão periódica (~2 min), simulação de alertas, cálculo interativo de rotas com feedback de
-qualidade e push de alertas em tempo real — ponte entre o modelo analítico e o centro de coordenação.
-Modo demonstração AIS activa-se automaticamente sem chave API; com chave *AISStream*, o tráfego passa
-a tempo real.
+com ingestão periódica (~2 min), simulação de alertas e cálculo interativo de rotas — ponte entre
+o modelo analítico e o centro de coordenação.
+
+A plataforma consome `resultados.json`, `validacao.json` e `camadas_mapa.json`, permitindo exercitar cenários com meteo live, rotas OR-Tools e alertas WebSocket. Confirma visualmente Q1–Q3 (setores de risco, bases MCLP, ganho **2,06×**), demonstra o impacto do vento no alcance e suporta a apresentação oral via cenários pré-definidos (Figura 23). Modo demonstração AIS ativa-se automaticamente sem chave API.
 
 ---
 
@@ -799,17 +819,19 @@ patrulha.
 ### 7.2 Backtesting temporal (apreensões 2011–2022 → teste 2023–2024)
 
 O campo de risco relativo ao tráfico de droga foi reconstruído usando apenas apreensões marítimas
-até **2022**; as restantes ameaças mantêm-se nos valores reais (EMODnet, desembarques PT). As **55 apreensões
-marítimas de 2023–2024** (holdout) foram geocodificadas e confrontadas com o mapa de risco treinado.
+até **2022**; as camadas de pesca, poluição e imigração mantêm-se estáticas (EMODnet, desembarques
+PT) — uma limitação que explicitamos na Secção 8.2. As **55 apreensões marítimas de 2023–2024**
+(holdout) foram geocodificadas e confrontadas com o mapa de risco treinado.
 Os resultados (Figura 21; Tabela 8) mostram que:
 
-- **85,5 %** das apreensões do holdout caem no **top 20 %** de risco (mais de 2× a referência de 20 %);
-- o risco médio nas localizações do holdout (**0,55**) excede o risco médio global (**0,31**);
-- ao limiar fixo de 0,5, a taxa de acerto (**85,5 %**) supera o baseline aleatório (**23,3 %**) em **1,9×**.
+- **85,5 %** das apreensões do holdout caem no **top 20 %** de risco (mais de 4× a referência de 20 %);
+- o risco médio nas localizações do holdout (**0,72**) excede claramente o risco médio global (**0,38**);
+- ao limiar fixo de 0,5, a taxa de acerto (**85,5 %**) supera o baseline aleatório (**36,6 %**) em **2,33×**.
 
-A discrepância entre o limiar fixo e o top 20 % reflecte a geocodificação ao nível do distrito
-(Secção 5.2, limitação II): as apreensões são atribuídas à sede administrativa, não à coordenada
-marítima exata, o que dilui o sinal no limiar absoluto mas preserva a ordenação relativa.
+O top 20 % e o limiar 0,5 coincidem neste holdout (47 em 55 apreensões) — o que é coerente com a
+concentração do tráfico no Algarve e no eixo Setúbal–Lisboa. A geocodificação ao nível do distrito
+(Secção 8.2) dilui o sinal no limiar absoluto em outros contextos, mas aqui preserva a ordenação
+relativa.
 
 ### 7.3 Baseline de patrulha (SAD vs aleatório vs uniforme)
 
@@ -833,8 +855,8 @@ apreensões) produz ganhos operacionais mensuráveis.
 | Questão | Resposta do SAD | Evidência |
 |---|---|---|
 | **Q1 — Onde patrulhar?** | Sul/SW (Algarve), Lisboa–Setúbal, NW/Peniche; corredores AIS a O de Lisboa | Clustering + mapa AIS + estudo de caso (Tabelas 2, 7) |
-| **Q2 — Quantos drones (24 h)?** | **11 AR5** (4 simultâneos) área total; **9 AR5** (3 simultâneos) faixa costeira | Dimensionamento persistente (Secção 5.2; Tabela 6) |
-| **Q3 — Quais bases?** | **Porto (Sá Carneiro) + Portimão** — cobrem 100 % do risco | MCLP (Secção 5.3) |
+| **Q2 — Quantos drones (24 h)?** | **11 AR5** (4 simultâneos) área total; **9 AR5** (3 simultâneos) faixa costeira | Dimensionamento persistente com 12 ou 5 bases (Secção 5.2; Tabela 6) |
+| **Q3 — Quais bases?** | **Porto (Sá Carneiro) + Portimão** — MCLP k=2, 100 % do risco | Localização mínima (Secção 5.3); frota com só estas bases: 13 AR5 |
 | **Validação** | Holdout 2023–24: 85.5 % acima limiar 0,5; imigração: 70 % desembarques em zona alto risco; patrulha SAD 2.06× vs aleatória | Figuras 21–24; `validacao.json` |
 
 ---
@@ -870,8 +892,8 @@ O índice de Gini (**0.400**) confirma concentração espacial: o ganho mede sob
 
 **Sensibilidade ao limiar (Figura 25).** Variar o limiar a 0,45 / 0,50 / 0,55 altera o n.º de células alto risco
 de 328 / 300 / 256
-e o ganho SAD para 2.01× / **2.07×** / 2.15× —
-a recomendação **Porto + Portimão** e a ordem de grandeza da frota mantêm-se.
+e o ganho SAD para 2,01× / **2,07×** / 2,15× —
+a ordem de grandeza da frota (9–11 AR5) e o par MCLP Porto + Portimão mantêm-se.
 
 **Tabela 9.** *Síntese da leitura crítica.*
 
@@ -896,7 +918,9 @@ compromissos entre concentração de risco, esforço de patrulha e incerteza das
 
 **Q3 — Alcance ou sensor?** Com raio fixo 90 km cobrem-se 66,8 % do risco; com autonomia AR5 o constrangimento passa a ser **revisita sensorial** (Secção 5).
 
-**Q4 — Frota e bases?** **Porto + Portimão** (MCLP) e **9–11 AR5** para 24 h (300 células alto risco); índice difuso como majorante prudencial (~27 AR5).
+**Q4 — Frota e bases?** **Porto + Portimão** respondem ao MCLP (cobertura mínima); **9–11 AR5**
+para 24 h assumem rede costeira distribuída (Tabela 6); índice difuso como majorante prudencial
+(~27 AR5).
 
 O SAD quantifica o compromisso entre cobertura, custo e risco residual sem impor a postura de comando.
 
@@ -906,9 +930,10 @@ O SAD quantifica o compromisso entre cobertura, custo e risco residual sem impor
 ### 8.2 Limitações e ameaças à validade
 
 
-- **Fontes *proxy*:** EMODnet mede atividade AIS, não ilegalidade direta; imigração assenta em 20 desembarques PT + IOM filtrado.
+- **Fontes *proxy*:** EMODnet mede atividade AIS, não ilegalidade directa; imigração assenta em 20 desembarques PT + IOM filtrado.
 - **Geocodificação administrativa:** ~83 % das apreensões; dilui sinal no limiar absoluto (Secção 7.6).
-- **Pesos AHP:** rastreáveis mas dependentes de juízos de especialista (Secção 4.5).
+- **Backtest temporal parcial:** só a droga é cortada em 2022; pesca, poluição e imigração entram com campo estático — possível optimismo no holdout multi-ameaça.
+- **Pesos AHP:** rastreáveis mas dependentes de juízos de especialista (Secção 4.5); valores adoptados arredondados dos pesos AHP.
 - **Parâmetros sensoriais:** largura útil, revisita e disponibilidade são estimativas (sensibilidade Secção 5.4).
 - **Cobertura idealizada:** não modela nebulosidade, mar agitado nem sazonalidade fina.
 - **Classificação:** desequilíbrio 3,4 % marítimo limita precisão da classe minoritária.
@@ -926,22 +951,18 @@ futuro do sistema.
 ### 8.3 Recomendação final
 
 
-À luz da análise, recomenda-se a seguinte arquitetura de emprego para o AR5 na vigilância costeira
-de Portugal Continental. Em síntese: **recomenda-se operar a partir de Porto (Sá Carneiro) e
-Portimão, com 9 AR5 para a faixa costeira prioritária ou 11 AR5 para a área total de alto risco.**
-Como **configuração de referência**, propõe-se a operação a partir de
-**duas bases — Porto (Sá Carneiro) e Portimão — com uma frota de 11 aeronaves AR5**, dimensionada para
-assegurar a revisita persistente, 24 horas por dia, da totalidade das 300 células de alto risco
-identificadas pela agregação ponderada, com uma margem operacional de 10 %. Esta configuração é
-ótima no número de bases e robusta face à variação plausível dos parâmetros sensoriais. Como
-**configuração de contingência ou de arranque faseado**, em caso de restrição orçamental ou de
-disponibilidade inicial limitada de aeronaves, recomenda-se concentrar o esforço na **faixa
-costeira mais densa, com 9 aeronaves AR5**, aceitando deixar descoberta a faixa mais
-ao largo — opção que retém a cobertura das zonas de maior densidade de atividade (Algarve e
-Setúbal–Lisboa) à custa do risco residual nas aproximações distantes. Finalmente, para missões de
-elevada criticidade ou em períodos de ameaça acrescida, recomenda-se adotar o **índice difuso como
-critério de dimensionamento**, expandindo a frota até cerca de 27 aeronaves para cobrir também as
-células onde múltiplas ameaças coincidem.
+À luz da análise, recomenda-se a seguinte arquitectura de emprego para o AR5 na vigilância costeira
+de Portugal Continental. Em síntese: **dois polos MCLP — Porto (Sá Carneiro) e Portimão — cobrem
+100 % do risco alto; para operação persistente 24 h, dimensionar 9 AR5 na faixa costeira (cinco
+bases de lançamento) ou 11 AR5 na área total (rede de doze aeródromos).**
+
+Como **configuração de referência**, propõe-se a operação com **rede completa e frota de 11 AR5**,
+assegurando revisita persistente das 300 células de alto risco (margem operacional de 10 %).
+Os polos Porto + Portimão mantêm-se como **hubs principais** mesmo quando se usam bases
+intermédias para encurtar trânsitos. Como **configuração de contingência ou de arranque faseado**,
+em caso de restrição orçamental, concentra-se o esforço na **faixa costeira com 9 AR5**,
+aceitando descobrir a franja mais ao largo. Para missões de elevada criticidade, o **índice difuso**
+funciona como majorante prudencial (~27 AR5).
 
 A decisão entre estas configurações é, em última análise, uma decisão de comando que deve ponderar
 explicitamente o orçamento disponível, a aceitação de risco residual e o nível de ameaça
@@ -1106,8 +1127,7 @@ multicamada otimizado): confiança positiva, sensibilidade e F1 em função do l
 
 ![Figura 13](../resultados/dm/clf_arvore.png)
 
-**Figura 14.** Graus de pertença do Fuzzy C-Means ao cluster dominante.
-difusa.
+**Figura 14.** Graus de pertença do Fuzzy C-Means ao *cluster* dominante (lógica difusa).
 
 ![Figura 14](../resultados/dm/fuzzy_pertencas.png)
 
@@ -1124,19 +1144,18 @@ cenário recomendado com autonomia real (direita).
 
 ![Figura 17a](../resultados/figuras/03_cobertura_conservador.png) ![Figura 17b](../resultados/figuras/04_cobertura_alargado.png)
 
-**Figura 18.** Frota total necessária em função do número de bases (ótimo em duas bases).
+**Figura 18.** Frota total necessária em função do número de bases (mínimo em k = 12).
 
 ![Figura 18](../resultados/figuras/08_frota_vs_bases.png)
 
-**Figura 19.** Análise de sensibilidade do dimensionamento da frota aos parâmetros sensoriais.
-à disponibilidade operacional.
+**Figura 19.** Sensibilidade do dimensionamento da frota à largura útil do sensor, ao tempo de
+revisita e à disponibilidade operacional.
 
 ![Figura 19](../resultados/figuras/07_sensibilidade.png)
 
-**Figura 20.** Painel geoespacial interativo do índice de risco.
-risco multi-ameaça (1156 células), apreensões marítimas 2020+, desembarques PT, bases MCLP
-(Porto + Portimão) com raios tático/operacional, seis setores de patrulha e painel Q1–Q3.
-O artefacto interativo completo está em `resultados/mapa_interativo.html`.
+**Figura 20.** Painel geoespacial interativo: índice de risco multi-ameaça (1156 células),
+apreensões marítimas 2020+, desembarques PT, bases MCLP (Porto + Portimão), seis sectores de
+patrulha e painel Q1–Q3. O artefacto completo está em `resultados/mapa_interativo.html`.
 
 ![Figura 20](../resultados/figuras/20_mapa_interativo.png)
 
@@ -1145,7 +1164,7 @@ holdout de apreensões marítimas 2023–2024, face a baselines aleatório e ref
 
 ![Figura 21](../resultados/figuras/21_backtest_temporal.png)
 
-**Figura 22.** Comparação com a *baseline* de patrulha aleatória (ganho do SAD).
+**Figura 22.** Comparação da captura de risco: SAD *versus* patrulha aleatória e uniforme costeira.
 patrulha aleatória e patrulha uniforme costeira.
 
 ![Figura 22](../resultados/figuras/22_baseline_patrulha.png)
@@ -1203,17 +1222,17 @@ alto risco).*
 
 | N.º de bases | Bases selecionadas | Dist. média (km) | Tempo de estação (h) | Frota total |
 |---|---|---|---|---|
-| 1 | Montijo (BA6) | 107,7 | 12,9 | 9 |
-| 2 | Porto + Portimão | 146,1 | 12,1 | 10 |
-| 3 a 11 | Porto + Portimão | 146,1 | 12,1 | 10 |
+| 1 | Montijo (BA6) | 120,1 | 12,6 | 12 |
+| 2 a 11 | Porto + Portimão | 138,8 | 12,2 | 13 |
+| 12 | Rede completa (12 aeródromos) | 55,9 | 13,9 | 11 |
 
 **Tabela B6.** *Análise de sensibilidade da frota total.*
 
 | Parâmetro | Valores testados → frota |
 |---|---|
-| Largura útil do sensor (km) | 20 → 12 · 30 → 9 · 40 → 6 · 50 → 6 |
-| Período de revisita (h) | 2 → 12 · 3 → 9 · 4 → 6 · 6 → 6 |
-| Disponibilidade operacional | 0,60 → 11 · 0,70 → 9 · 0,80 → 8 · 0,90 → 7 |
+| Largura útil do sensor (km) | 20 → 14 · 30 → 11 · 40 → 9 · 50 → 6 |
+| Período de revisita (h) | 2 → 14 · 3 → 11 · 4 → 9 · 6 → 6 |
+| Disponibilidade operacional | 0,60 → 13 · 0,70 → 11 · 0,80 → 10 · 0,90 → 9 |
 
 **Tabela B7.** *Hiperparâmetros selecionados por GridSearchCV (configurações otimizadas).*
 
@@ -1283,7 +1302,7 @@ SIGA_GRUPOVI_ENTREGA/
 │   └── mapa_interativo.html  painel Folium
 ├── relatorio/
 │   ├── Relatorio_SAD_AR5.md  ← fonte única de verdade
-│   └── Relatório Final.docx
+│   └── Relatorio_SAD_AR5.docx
 └── plataforma/               ← protótipo operacional web
     ├── api/                  FastAPI + OR-Tools + meteo
     └── web/                  React/Leaflet (dist/ incluído)
@@ -1293,7 +1312,7 @@ SIGA_GRUPOVI_ENTREGA/
 
 1. `dados/fontes/` → `dm/construir_dados_reais.py` → `dados/processados/intensidades_reais.csv`
 2. `intensidades_reais.csv` + `config.py` → `risco.py` → grelha 1156 células
-3. Grelha → `otimizacao.py` → `resultados.json` (2 bases, 9–11 AR5)
+3. Grelha → `otimizacao.py` → `resultados.json` (MCLP k=2; frota 9–11 AR5 com rede distribuída)
 4. Apreensões → `dm/` → figuras + `dm_resultados.json`
 5. Grelha + camadas → `mapa_interativo.py` + `plataforma/api/` → decisão operacional
 6. `Relatorio_SAD_AR5.md` → `gerar_docx.py` → entrega Word (capa Grupo VI, índices auto)
@@ -1303,6 +1322,6 @@ SIGA_GRUPOVI_ENTREGA/
 | Questão | Resposta |
 |---------|----------|
 | Q1 — Onde? | Algarve · Setúbal–Lisboa · NW/Peniche |
-| Q2 — Quantos? | 11 AR5 área total (4 simultâneos) · 9 AR5 faixa costeira (3 simultâneos) |
-| Q3 — Bases? | Porto (Sá Carneiro) + Portimão |
+| Q2 — Quantos? | 11 AR5 área total (12 bases) · 9 AR5 faixa costeira (5 bases) |
+| Q3 — Bases (MCLP)? | Porto (Sá Carneiro) + Portimão (100 % risco; frota só com estas: 13 AR5) |
 | Validação | Ganho SAD vs aleatório: **2,06×** |

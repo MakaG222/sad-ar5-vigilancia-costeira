@@ -511,11 +511,15 @@ def caixa_objetivo() -> dict:
         b = data.get("cenario_B") or data.get("cenarios", {}).get("B_alcance_AR5", {})
         fr_c = b.get("frota_persistencia_costeira", {})
         fr_t = b.get("frota_persistencia_total", {})
-        nomes = ["Porto (Sá Carneiro)", "Portimão"]
-        for row in data.get("frota_vs_k", []):
-            if row.get("k") == 2 and row.get("bases"):
-                nomes = row["bases"][:2]
-                break
+        mclp_k2 = next((r for r in data.get("frota_vs_k", []) if r.get("k") == 2), None)
+        nomes_mclp = (mclp_k2 or {}).get("bases", ["Porto (Sá Carneiro)", "Portimão"])[:2]
+        frac_mclp = round(float((mclp_k2 or {}).get("frac_risco", 1.0)), 4)
+        frota_mclp_k2 = (mclp_k2 or {}).get("frota_total")
+        sc90 = (data.get("cenarios", {}).get("A_conservador_vento", {})
+                .get("calmo (4 m/s)", {}).get("set_cover", {}))
+        bases_costeira = (data.get("cenarios", {}).get("A_conservador_vento", {})
+                          .get("calmo (4 m/s)", {}).get("bases_nomes", []))
+        bases_total = b.get("bases_recomendadas", [])
         return {
             "Q1_onde": {
                 "resposta": "Sul/SW (Algarve), corredor Lisboa–Setúbal e NW/Peniche; "
@@ -527,12 +531,22 @@ def caixa_objetivo() -> dict:
                             f"{fr_t.get('frota_total', 11)} AR5 área total de alto risco.",
                 "frota_total": fr_t.get("frota_total", 11),
                 "frota_costeira": fr_c.get("frota_total", 9),
-                "n_simultaneos": fr_c.get("n_simultaneos", 3),
+                "n_simultaneos_costeira": fr_c.get("n_simultaneos", 3),
+                "n_simultaneos_total": fr_t.get("n_simultaneos", 4),
+                "bases_dimensionamento_costeira": bases_costeira,
+                "bases_dimensionamento_total": bases_total,
+                "nota": "A frota 9/11 assume bases distribuídas ao longo da costa para reduzir "
+                        "trânsito; com apenas Porto+Portimão (MCLP k=2) seriam necessários "
+                        f"{frota_mclp_k2 or 13} AR5.",
             },
             "Q3_bases": {
-                "resposta": f"2 bases: {', '.join(nomes[:2])}.",
-                "bases": nomes[:2],
-                "frac_risco": 1.0,
+                "resposta": f"MCLP (k=2): {', '.join(nomes_mclp)} — cobrem {frac_mclp*100:.0f} % "
+                            f"do risco com o mínimo de instalações.",
+                "bases_mclp": nomes_mclp,
+                "frac_risco_mclp": frac_mclp,
+                "frota_se_apenas_estas_bases": frota_mclp_k2,
+                "nota": "Q3 responde à localização mínima (MCLP); Q2 usa rede costeira completa "
+                        "para o dimensionamento de frota.",
             },
         }
 
@@ -595,11 +609,7 @@ def main():
     decomp = decomposicao_ganho(pts)
     nota_map = nota_mapas_risco(pts)
     apr = apreensoes_geocodificadas(ano_min=2020)
-    try:
-        from apreensoes_mapa import apreensoes_para_mapa
-        apr_out = apreensoes_para_mapa(ano_min=2020)
-    except Exception:
-        apr_out = apr[["lat", "lon", "ano"]].to_dict(orient="records")
+    apr_out = apr[["lat", "lon", "ano"]].to_dict(orient="records")
 
     out = {
         "backtest_temporal": bt,
