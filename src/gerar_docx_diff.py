@@ -131,7 +131,7 @@ METRICS_REPLACEMENTS: list[tuple[str, str]] = [
     ),
     (
         "Results show a strong spatial concentration of illicit activity in the Algarve and the Setúbal–Lisbon axis. The best-performing MLP classifier achieves a ROC-AUC of 0.93 ± 0.02. Optimization results indicate that Porto and Portimão provide full coverage of the identified risk, requiring a fleet of 9 AR5 UAVs for the priority coastal belt or 11 AR5 UAVs for the full high-risk area, enabling continuous 24-hour surveillance. The system achieves a 2.06× patrol efficiency gain (95% CI: 1.93–2.22) and captures 85.5% of maritime seizures in high-risk cells under holdout validation. A web-based prototype with AIS visualization was also implemented.",
-        "Results show concentration in the Algarve and Setúbal–Lisbon axis. The MLP achieves ROC-AUC 0.93 ± 0.02. Porto and Portimão cover 100 % of risk (MCLP k=2); 9 AR5 sustain 24 h surveillance with five or twelve launch bases. The DSS captures 2.17× more risk than random patrol (95 % CI 2.01–2.35) and places 85.2 % of 2023–2024 seizures in high-risk cells (n=54). Concelho-level geocoding (231/335 maritime seizures). Web prototype with demo AIS.",
+        "Results show concentration in the Algarve and Setúbal–Lisbon axis. The MLP achieves ROC-AUC 0.93 ± 0.02. Porto and Portimão cover 100 % of risk (MCLP k=2); 9 AR5 sustain 24 h surveillance with distributed launch bases. The DSS captures 2.13× more risk than random patrol (95% CI 1.97–2.31) and places 85.2 % of 2023–2024 seizures in high-risk cells (n=54). Concelho-level geocoding (231/335 maritime seizures). Web prototype with demo AIS.",
     ),
     (
         "Uma única base bem posicionada passa a alcançar a totalidade das 300 células de alto risco, e o problema de cobertura deixa de ser sobre se é possível cobrir o risco, para passar a ser sobre como o cobrir de forma persistente e eficiente.",
@@ -195,7 +195,7 @@ METRICS_REPLACEMENTS: list[tuple[str, str]] = [
     ),
     (
         "Fontes *proxy*: EMODnet mede atividade AIS, não ilegalidade directa; imigração assenta em 20 desembarques PT + IOM filtrado. Geocodificação administrativa: ~83 % das apreensões; dilui sinal no limiar absoluto (Secção 7.6). Backtest temporal parcial: só a droga é cortada em 2022; pesca, poluição e imigração entram com campo estático. Pesos AHP: rastreáveis; valores adoptados arredondados dos pesos AHP (Secção 4.5). Parâmetros sensoriais: largura útil, revisita e disponibilidade são estimativas (Secção 5.4). Cobertura idealizada: não modela nebulosidade, mar agitado nem sazonalidade fina. Classificação: desequilíbrio 3,4 % marítimo limita precisão da classe minoritária. Índice offline vs. plataforma: risco estratégico estático; protótipo tático não recalcula o mapa em tempo real. Validação externa: estudo de caso e backtest não substituem interceções subquilométricas.",
-        "Fontes *proxy*: EMODnet mede atividade AIS, não ilegalidade directa; imigração assenta em 20 desembarques PT + IOM filtrado. Geocodificação por concelho: 231/335 apreensões marítimas (proxy offshore 12 km). Backtest: droga e imigração filtradas até 2022 na variante rigorosa; pesca/poluição estáticas (EMODnet). Pesos AHP adoptados directamente (Secção 4.5). Classificação MLP: ROC-AUC elevada mas precisão da classe minoritária modesta (3,4 % marítimo). Índice offline vs. plataforma: risco estratégico estático. Validação externa: Tabela 10 (4 interceções documentadas, 75 % em alto risco) complementa o backtest.",
+        "Fontes *proxy*: EMODnet mede atividade AIS, não ilegalidade directa; imigração assenta em 20 desembarques PT + IOM filtrado. Geocodificação por concelho: 231/335 apreensões marítimas (proxy offshore 12 km). Backtest: droga e imigração filtradas até 2022 na variante rigorosa; pesca/poluição estáticas (EMODnet). Pesos AHP arredondados (Secção 4.5). Classificação MLP: ROC-AUC elevada mas precisão da classe minoritária modesta (3,4 % marítimo). Índice offline vs. plataforma: risco estratégico estático. Validação externa: interceções documentadas (Secção 7.3; 4 eventos, 75 % em alto risco) complementa o backtest.",
     ),
     (
         "À luz da análise, recomenda-se a seguinte arquitectura de emprego para o AR5 na vigilância costeira de Portugal Continental. Em síntese: dois polos MCLP — Porto (Sá Carneiro) e Portimão — cobrem 100 % do risco alto; para operação persistente 24 h, dimensionar 9 AR5 na faixa costeira (cinco bases) ou 11 AR5 na área total (rede de doze aeródromos). Como configuração de referência, propõe-se a rede completa com frota de 11 AR5, mantendo Porto e Portimão como hubs principais. ",
@@ -236,6 +236,9 @@ GLOBAL_TEXT_REPLACEMENTS: list[tuple[str, str]] = [
     ("2.17×", "2,13×"),
     ("IC95 2,01–2,35", "IC95 1,97–2,31"),
     ("IC95 1,93–2,22", "IC95 1,97–2,31"),
+    ("95 % CI 2.01–2.35", "95% CI 1.97–2.31"),
+    ("95% CI 2.01–2.35", "95% CI 1.97–2.31"),
+    ("2.17×", "2.13×"),
     ("85,5 %", "85,2 %"),
     ("85.5 %", "85,2 %"),
     ("85,5%", "85,2%"),
@@ -257,9 +260,13 @@ GLOBAL_TEXT_REPLACEMENTS: list[tuple[str, str]] = [
     ("22 035", "23 080"),
     ("excluídos", "excluídas"),
     ("Secção 3.4", "Secção 5.4"),
-    ("2,13×sembarques", "2,13× sem desembarques"),
-    ("2,17×sembarques", "2,13× sem desembarques"),
-    ("ganho 2,13×sembarques", "ganho 2,13× sem desembarques"),
+    ("ganho 2,13× sem desembarques em zona alto risco", "Holdout 2023–2024: 85,2% (n=54); interceções documentadas: 75% em zona de alto risco; patrulha SAD 2,13× vs aleatória."),
+    ("ganho 2,13×sembarques", "patrulha SAD 2,13× vs aleatória"),
+    ("ganho 2,13× sem desembarques", "patrulha SAD 2,13× vs aleatória"),
+    ("Tabela 10 (4 interceções documentadas, 75 % em alto risco)", "interceções documentadas (Secção 7.3; 4 eventos, 75 % em alto risco)"),
+    ("Anexo C", "Secção 6 e plataforma/README.md"),
+    ("Bases de lançamento (dimensionamento frota) de lançamento", "Bases de lançamento"),
+    ("Bases de lançamento (dimensionamento frota)", "Bases de lançamento"),
     ("0,60 → 11", "0,60 → 11"),
     ("0,80 → 8", "0,80 → 8"),
     ("0,90 → 7", "0,90 → 7"),
@@ -298,40 +305,61 @@ def _apply_global_text(doc: Document, highlight: bool) -> int:
 
 def _fix_formal_issues(doc: Document, highlight: bool) -> int:
     """Capa duplicada, cabeçalhos repetidos na Tabela 6, páginas vazias no início."""
+    import re
     n = 0
-    seen_cover = False
     to_delete = []
-    for p in doc.paragraphs[:40]:
+    paras = doc.paragraphs[:60]
+    title_idxs: list[int] = []
+    for i, p in enumerate(paras):
         t = p.text.strip()
-        if not t and len(to_delete) < 3:
+        if not t and i < 15:
             to_delete.append(p)
             continue
-        if "Sistema de Apoio à Decisão" in t or "Vigilância Costeira" in t:
-            if seen_cover:
+        if re.fullmatch(r"\d{1,3}", t):
+            to_delete.append(p)
+            continue
+        if "Sistema de Apoio à Decisão" in t or (
+            "Vigilância Costeira" in t and "AR5" in t
+        ):
+            title_idxs.append(i)
+    if len(title_idxs) >= 2:
+        for p in paras[title_idxs[1] :]:
+            tl = p.text.strip().lower()
+            if tl in {"resumo", "abstract"} or p.text.startswith("Resumo") or p.text.startswith("Abstract"):
+                break
+            if p not in to_delete:
                 to_delete.append(p)
-            else:
-                seen_cover = True
     for p in to_delete:
         el = p._element
         el.getparent().remove(el)
         n += 1
     if len(doc.tables) > 3:
         table = doc.tables[3]
-        header = "Bases de lançamento"
-        prev_text = ""
+        if table.rows and len(table.rows[0].cells) > 2:
+            hdr = table.rows[0].cells[2].paragraphs[0]
+            if "Bases" in hdr.text:
+                _set_paragraph_text(hdr, "Bases de lançamento", highlight=highlight)
+                n += 1
         for row in table.rows:
             for cell in row.cells:
                 for p in cell.paragraphs:
-                    if header in p.text and prev_text and header in prev_text:
-                        _set_paragraph_text(p, p.text.replace(header, "").strip() or "—",
-                                            highlight=highlight)
+                    txt = p.text
+                    if "dimensionamento frota" in txt and txt.count("lançamento") > 1:
+                        _set_paragraph_text(
+                            p,
+                            "Bases de lançamento" if "Bases" in txt else txt.split("de lançamento")[0].strip(),
+                            highlight=highlight,
+                        )
                         n += 1
-                    prev_text = p.text
+                    elif "(dimensionamento frota)" in txt:
+                        _set_paragraph_text(
+                            p, txt.replace(" (dimensionamento frota)", ""), highlight=highlight
+                        )
+                        n += 1
     return n
 
 
 TABLE_CELL_REPLACEMENTS: list[tuple[int, int, int, str, str]] = [
-    (3, 0, 2, "Bases", "Bases de lançamento (dimensionamento frota)"),
     (3, 1, 2, "Porto + Portimão", "Santa Cruz, Cascais, Sines, Portimão, Faro"),
     (3, 2, 2, "Porto + Portimão", "Rede completa (12 aeródromos costeiros)"),
     (7, 2, 1, "11 AR5 (4 simultâneos) área total; 9 AR5 (3 simultâneos) faixa costeira",
@@ -371,7 +399,11 @@ TABLE_CELL_REPLACEMENTS: list[tuple[int, int, int, str, str]] = [
     (7, 3, 2, "Localização mínima (Secção 5.3); frota só com estas bases: 13 AR5",
      "Localização mínima (Secção 5.3); frota só com estas bases: 10 AR5"),
     (7, 4, 1, "Holdout 2023–24: 85.5 % acima limiar 0,5; imigração: 70 % de",
-     "Holdout 2023–24: 85,2 % (n=54); interceções documentadas: 75 %; ganho 2,13×"),
+     "Holdout 2023–2024: 85,2% (n=54); interceções documentadas: 75% em zona de alto risco; patrulha SAD 2,13× vs aleatória."),
+    (7, 4, 1, "Holdout 2023–24: 85,2 % (n=54); interceções documentadas: 75 %; ganho 2,13×",
+     "Holdout 2023–2024: 85,2% (n=54); interceções documentadas: 75% em zona de alto risco; patrulha SAD 2,13× vs aleatória."),
+    (7, 4, 1, "ganho 2,13× sem desembarques em zona alto risco",
+     "Holdout 2023–2024: 85,2% (n=54); interceções documentadas: 75% em zona de alto risco; patrulha SAD 2,13× vs aleatória."),
     (8, 1, 1, "85.5 % (n=55)", "85,2 % (n=54)"),
     (8, 1, 3, "Geocódigo administrativo", "Proxy offshore 12 km"),
     (8, 2, 1, "0.0 % (top 20 %)", "94,4 % (top 20 %)"),

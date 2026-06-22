@@ -11,7 +11,7 @@ imigração irregular** — determinando:
 
 **Âmbito geográfico:** costa e águas marítimas de Portugal Continental (longitude
 −11,0° a −7,38°, latitude 36,85° a 42,20°), **excluindo Espanha**. Grelha de
-**1 156 células**; **300** células de alto risco (limiar 0,5).
+**1 156 células**; **274** células de alto risco (limiar 0,5).
 
 O trabalho estende a prova de conceito SIG/QGIS original (Escola Naval, Alfeite),
 acrescentando: dados verificados das quatro ameaças, um índice de risco espacial,
@@ -93,14 +93,13 @@ temporal e baseline de patrulha.
 
 ## Resultado principal
 
-Com **2 bases costeiras (Porto Sá Carneiro + Portimão)** que cobrem 100 % do risco de
-alto, são necessários **≈ 9 AR5** para vigilância persistente 24 h de toda a área de
-alto risco (≈ 24 600 km²), ou **≈ 9 AR5** na configuração costeira com 4 bases táticas
-(raio 90 km). Com o raio conservador de 90 km do estudo anterior, **mesmo 12 bases
-cobrem apenas 66,8 % do risco** — o constrangimento é a cobertura sensorial, não o
-alcance. Validação quantitativa: SAD captura **2,06× mais risco** que patrulha aleatória
-(IC95: 1,93–2,22); **85,5 %** das apreensões marítimas 2023–2024 em células de alto risco
-(limiar 0,5; treino ≤2022).
+O **MCLP com duas bases** (Porto Sá Carneiro + Portimão) cobre 100 % do risco alto. Para
+vigilância persistente 24 h, o dimensionamento indica **9 AR5** na faixa costeira e na área total
+(rede distribuída); com apenas Porto + Portimão seriam precisos **10 AR5**. Validação: SAD captura
+**2,13×** mais risco que patrulha aleatória (IC95: 1,97–2,31); **85,2 %** das apreensões
+2023–2024 em células de alto risco (n=54; treino ≤2022). Backtest só droga (top 20 %): **94,4 %**.
+
+Métricas completas em `NOTAS_ENTREGA.md` e `resultados/validacao.json`.
 
 Ver `relatorio/Relatorio_SAD_AR5.md` para o relatório completo.
 
