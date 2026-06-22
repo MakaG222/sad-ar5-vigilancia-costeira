@@ -15,13 +15,47 @@ from __future__ import annotations
 import argparse
 import copy
 import os
+import re
 import shutil
 import sys
 
 from docx import Document
-from docx.enum.text import WD_COLOR_INDEX
+from docx.enum.text import WD_BREAK, WD_COLOR_INDEX
 from docx.oxml import OxmlElement
 from docx.text.paragraph import Paragraph
+
+try:
+    from gerar_docx import SIGLAS
+except ImportError:
+    SIGLAS = [
+        ("AHP", "Analytic Hierarchy Process (Processo Analítico Hierárquico)"),
+        ("AIS", "Automatic Identification System (sistema de identificação automática)"),
+        ("AR5", "Aeronave TEKEVER AR5 (UAV de asa fixa)"),
+        ("CART", "Classification and Regression Trees"),
+        ("CRISP-DM", "Cross-Industry Standard Process for Data Mining"),
+        ("DBSCAN", "Density-Based Spatial Clustering of Applications with Noise"),
+        ("EMODnet", "European Marine Observation and Data Network"),
+        ("EMSA", "European Maritime Safety Agency"),
+        ("EO/IR", "Electro-Optical / Infrared (sensor eletro-ótico/infravermelho)"),
+        ("FCM", "Fuzzy C-Means (clustering difuso)"),
+        ("FPC", "Fuzzy Partition Coefficient (coeficiente de partição difusa)"),
+        ("INN", "Pesca ilegal, não declarada e não regulamentada"),
+        ("IOM", "International Organization for Migration"),
+        ("KDE", "Kernel Density Estimation (estimação de densidade por núcleos)"),
+        ("MAOC-N", "Maritime Analysis and Operations Centre — Narcotics"),
+        ("MCLP", "Maximal Covering Location Problem"),
+        ("MLP", "Multilayer Perceptron (perceptrão multicamada)"),
+        ("PCA", "Principal Component Analysis (análise de componentes principais)"),
+        ("PR-AUC", "Área sob a curva precisão–sensibilidade"),
+        ("ROC-AUC", "Área sob a curva ROC"),
+        ("SAD", "Sistema de Apoio à Decisão"),
+        ("SMOTE", "Synthetic Minority Over-sampling Technique"),
+        ("UAV", "Unmanned Aerial Vehicle (veículo aéreo não tripulado)"),
+        ("UNODC", "United Nations Office on Drugs and Crime"),
+        ("ZEE", "Zona Económica Exclusiva"),
+    ]
+
+TABLE_CAPTION_RE = re.compile(r"^Tabela\s+((?:\d+|B\d+))\s*-\s*.+$", re.I)
 
 BASE = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 REL_DIR = os.path.join(BASE, "relatorio")
@@ -224,8 +258,20 @@ METRICS_REPLACEMENTS: list[tuple[str, str]] = [
         "A rede completa é óptima em frota (9 AR5) e robusta face à sensibilidade dos parâmetros sensoriais. Como contingência, concentra-se o esforço na faixa costeira com 9 AR5, aceitando descobrir a franja ao largo. ",
     ),
     (
+        "Tabela B3 - Cobertura por cenário de vento (raio de 90 km; células de alto risco alcançáveis com as doze bases; 300 células de alto risco).",
+        "Tabela B3 - Cobertura por cenário de vento (universo: as 274 células de alto risco; alcance geográfico a ≤ raio efetivo de qualquer uma das doze bases costeiras; cobríveis + não cobríveis = 274).",
+    ),
+    (
         "Tabela B3 - Cobertura por cenário de vento (raio de 90 km; células de alto risco alcançáveis com as doze bases; 263 células de alto risco).",
+        "Tabela B3 - Cobertura por cenário de vento (universo: as 274 células de alto risco; alcance geográfico a ≤ raio efetivo de qualquer uma das doze bases costeiras; cobríveis + não cobríveis = 274).",
+    ),
+    (
         "Tabela B3 - Cobertura por cenário de vento (raio de 90 km; células de alto risco alcançáveis com as doze bases; 274 células de alto risco).",
+        "Tabela B3 - Cobertura por cenário de vento (universo: as 274 células de alto risco; alcance geográfico a ≤ raio efetivo de qualquer uma das doze bases costeiras; cobríveis + não cobríveis = 274).",
+    ),
+    (
+        "Sob este paradigma, 19 das 300 células de alto risco situadas mais ao largo permanecem estruturalmente fora de alcance e a situação agrava-se com vento desfavorável, subindo as células não cobríveis para 46 (vento moderado) e 90 (vento forte), à medida que o raio efetivo se contrai para 76,5 km e 63 km, respetivamente.",
+        "Sob este paradigma, 31 das 274 células de alto risco situadas mais ao largo permanecem estruturalmente fora de alcance (Tabela B3) e a situação agrava-se com vento desfavorável, subindo as não cobríveis para 58 (vento moderado) e 100 (vento forte), à medida que o raio efetivo se contrai para 76,5 km e 63 km, respetivamente.",
     ),
 ]
 
@@ -237,7 +283,10 @@ GLOBAL_TEXT_REPLACEMENTS: list[tuple[str, str]] = [
     ("22,8 %", "23,7 %"),
     ("134 células ≥", "170 células ≥"),
     ("300 células de alto risco", "274 células de alto risco"),
-    ("19 das 300 células", "19 das 274 células"),
+    ("19 das 300 células", "31 das 274 células"),
+    ("19 das 274 células", "31 das 274 células"),
+    ("subindo as células não cobríveis para 46 (vento moderado) e 90 (vento forte)",
+     "subindo as não cobríveis para 58 (vento moderado) e 100 (vento forte)"),
     ("682 células contra as 300", "682 células contra as 274"),
     ("11 AR5 na área total", "9 AR5 na área total"),
     ("11 AR5 para a área total", "9 AR5 para a área total"),
@@ -293,6 +342,8 @@ GLOBAL_TEXT_REPLACEMENTS: list[tuple[str, str]] = [
     ("0,60 → 13", "0,60 → 11"),
     ("0,70 → 11", "0,70 → 9"),
     ("0,90 → 9", "0,90 → 7"),
+    ("Tabela B3 - Cobertura por cenário de vento (raio de 90 km; células de alto risco alcançáveis com as doze bases; 274 células de alto risco).",
+     "Tabela B3 - Cobertura por cenário de vento (universo: as 274 células de alto risco; alcance geográfico a ≤ raio efetivo de qualquer uma das doze bases costeiras; cobríveis + não cobríveis = 274)."),
     ("Q1 — Onde? Q2 — Quantos? Q3 — Bases? Q4 —",
      "Q1 — Onde?\n\nQ2 — Quantos?\n\nQ3 — Bases?\n\nQ4 —"),
 ]
@@ -353,6 +404,111 @@ def _restore_cover(doc: Document, ref_path: str) -> int:
         body.insert(0, copy.deepcopy(ref.paragraphs[i]._element))
 
     return ref_end + 1
+
+
+def _insert_paragraph_before(
+    ref: Paragraph,
+    text: str,
+    *,
+    style: str = "Normal",
+    bold: bool = False,
+) -> Paragraph:
+    new_p = OxmlElement("w:p")
+    ref._element.addprevious(new_p)
+    para = Paragraph(new_p, ref.part)
+    para.style = style
+    run = para.add_run(text)
+    if bold:
+        run.bold = True
+    return para
+
+
+def _insert_page_break_before(ref: Paragraph) -> Paragraph:
+    para = _insert_paragraph_before(ref, "", style="Normal")
+    para.add_run().add_break(WD_BREAK.PAGE)
+    return para
+
+
+def _insert_siglas_table_before(doc: Document, ref: Paragraph) -> None:
+    tbl = doc.add_table(rows=1, cols=2)
+    tbl.style = "Table Grid"
+    hdr = tbl.rows[0].cells
+    h0 = hdr[0].paragraphs[0].add_run("Abreviatura")
+    h0.bold = True
+    h1 = hdr[1].paragraphs[0].add_run("Significado")
+    h1.bold = True
+    for sigla, significado in SIGLAS:
+        row = tbl.add_row().cells
+        r0 = row[0].paragraphs[0].add_run(sigla)
+        r0.bold = True
+        row[1].paragraphs[0].add_run(significado)
+    tbl_el = tbl._tbl
+    tbl_el.getparent().remove(tbl_el)
+    ref._element.addprevious(tbl_el)
+
+
+def _collect_table_captions(doc: Document) -> list[str]:
+    """Recolhe legendas de tabelas no corpo (após a Introdução), por ordem de aparição."""
+    started = False
+    seen: set[str] = set()
+    captions: list[str] = []
+    for p in doc.paragraphs:
+        t = p.text.strip()
+        if re.match(r"^1\.\s*Introdução", t):
+            started = True
+            continue
+        if not started:
+            continue
+        m = TABLE_CAPTION_RE.match(t)
+        if not m:
+            continue
+        num = m.group(1)
+        if num in seen:
+            continue
+        seen.add(num)
+        captions.append(t)
+    return captions
+
+
+def _has_front_matter_indices(doc: Document) -> bool:
+    for p in doc.paragraphs:
+        t = p.text.strip()
+        if t == "Índice de Tabelas":
+            return True
+        if t.startswith("Lista de Abreviaturas"):
+            return True
+    return False
+
+
+def _insert_indices_e_abreviaturas(doc: Document) -> int:
+    """Insere Índice de Tabelas e Lista de Abreviaturas antes da Secção 1."""
+    if _has_front_matter_indices(doc):
+        return 0
+
+    intro = next(
+        (p for p in doc.paragraphs if re.match(r"^1\.\s*Introdução", p.text.strip())),
+        None,
+    )
+    if intro is None:
+        return 0
+
+    captions = _collect_table_captions(doc)
+    if not captions:
+        return 0
+
+    anchor = intro
+    _insert_paragraph_before(anchor, "Índice de Tabelas", style="Heading 1")
+    for caption in captions:
+        _insert_paragraph_before(anchor, caption, style="Normal")
+    _insert_paragraph_before(
+        anchor,
+        "Lista de Abreviaturas, Siglas e Acrónimos",
+        style="Heading 1",
+    )
+    _insert_siglas_table_before(doc, anchor)
+    _insert_page_break_before(anchor)
+
+    return 2 + len(captions)
 
 
 def _fix_formal_issues(doc: Document, highlight: bool) -> int:
@@ -443,6 +599,13 @@ TABLE_CELL_REPLACEMENTS: list[tuple[int, int, int, str, str]] = [
     (17, 3, 2, "55,9", "55,7"),
     (17, 3, 4, "11", "9"),
     (18, 3, 1, "0,90 → 9", "0,90 → 7"),
+    # Tabela B3 — cobertura 90 km (resultados.json: A_conservador_vento)
+    (15, 1, 2, "240", "243"),
+    (15, 1, 3, "19", "31"),
+    (15, 2, 2, "213", "216"),
+    (15, 2, 3, "46", "58"),
+    (15, 3, 2, "169", "174"),
+    (15, 3, 3, "90", "100"),
 ]
 
 
@@ -566,6 +729,7 @@ def aplicar_correcoes(
     n_formal = _fix_formal_issues(doc, highlight)
     n_removed = _remove_sumario_executivo(doc)
     n_cover = _restore_cover(doc, COVER_REF)
+    n_indices = _insert_indices_e_abreviaturas(doc)
 
     doc.save(out_path)
     modo = "diff (amarelo)" if highlight else "entrega (limpo)"
@@ -576,6 +740,7 @@ def aplicar_correcoes(
     print(f"  Correcções formais: {n_formal}")
     print(f"  Blocos removidos (sumário/nota): {n_removed}")
     print(f"  Capa restaurada: {n_cover} parágrafos")
+    print(f"  Secções pré-textuais inseridas: {n_indices} blocos")
     return out_path
 
 

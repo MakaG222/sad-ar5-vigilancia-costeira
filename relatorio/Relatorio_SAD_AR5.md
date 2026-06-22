@@ -589,9 +589,9 @@ análise de cobertura. Replicando o pressuposto do estudo de referência, com um
 de 90 km, e resolvendo o problema de cobertura máxima sobre o conjunto de doze aeródromos
 candidatos, obtém-se um resultado contundente: **mesmo selecionando todas as doze bases
 disponíveis, apenas 66,8 % do risco total fica coberto** (Tabela B2, Anexo B). Sob este
-paradigma, 19 das 300 células de alto risco situadas mais ao largo permanecem
-estruturalmente fora de alcance — e a situação agrava-se com vento desfavorável, subindo as
-células não cobríveis para 46 (vento moderado) e 90 (vento forte), à medida que o raio efetivo
+paradigma, 31 das 274 células de alto risco situadas mais ao largo permanecem
+estruturalmente fora de alcance (Tabela B3) — e a situação agrava-se com vento desfavorável, subindo as
+não cobríveis para 58 (vento moderado) e 100 (vento forte), à medida que o raio efetivo
 se contrai para 76,5 km e 63 km, respetivamente. A conclusão é inequívoca: o raio de 90 km não é
 uma propriedade da aeronave, mas uma restrição autoimposta pelo estudo anterior, e é ela, e não
 a capacidade do AR5, que limita a cobertura.
@@ -1198,14 +1198,15 @@ patrulha aleatória e patrulha uniforme costeira.
 |---|---|---|---|---|---|---|---|---|---|
 | Fração do risco coberta | 31,1 % | 44,0 % | 51,6 % | 57,7 % | 61,0 % | 64,4 % | 65,3 % | 66,2 % | 66,8 % |
 
-**Tabela B3.** *Cobertura por cenário de vento (raio de 90 km; células de alto risco alcançáveis
-com as doze bases; 300 células de alto risco).*
+**Tabela B3.** *Cobertura por cenário de vento (universo: as 274 células de alto risco;
+alcance geográfico a ≤ raio efetivo de qualquer uma das doze bases costeiras;
+cobríveis + não cobríveis = 274).*
 
 | Cenário de vento | Raio efetivo (km) | Células cobríveis | Células não cobríveis |
 |---|---|---|---|
-| Calmo (4 m/s) | 90,0 | 240 | 19 |
-| Moderado (12 m/s) | 76,5 | 213 | 46 |
-| Forte (18 m/s) | 63,0 | 169 | 90 |
+| Calmo (4 m/s) | 90,0 | 243 | 31 |
+| Moderado (12 m/s) | 76,5 | 216 | 58 |
+| Forte (18 m/s) | 63,0 | 174 | 100 |
 
 **Tabela B4.** *Validação cruzada estratificada de cinco folds das configurações otimizadas
 (média ± desvio-padrão). Em negrito, os melhores valores.*
