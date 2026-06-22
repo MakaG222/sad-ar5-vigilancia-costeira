@@ -9,6 +9,12 @@ __pycache__/
 .env
 .run/
 
+# Relatório académico (fora deste repositório)
+relatorio/
+*.docx
+*.pdf
+!plataforma/**
+
 plataforma/api/.venv/
 plataforma/web/node_modules/
 plataforma/web/dist/

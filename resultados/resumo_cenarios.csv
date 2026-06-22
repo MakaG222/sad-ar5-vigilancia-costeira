@@ -1,6 +1,0 @@
-Cenario,Vento_ms,Raio_km,N_bases,Drones_por_base,Frota_total,Bases
-A:calmo (4 m/s),4.0,90,5,3,17,Santa Cruz; Cascais (Tires); Sines; Portimão; Faro
-A:moderado (12 m/s),12.0,76,5,3,17,Santa Cruz; Cascais (Tires); Sines; Portimão; Faro
-A:forte (18 m/s),18.0,63,5,3,17,Santa Cruz; Cascais (Tires); Sines; Portimão; Faro
-B:persist. costeira,4.0,90,5,-,9,Santa Cruz; Cascais (Tires); Sines; Portimão; Faro
-B:persist. total (recomendado),4.0,450,12,-,11,Porto (Sá Carneiro); Aveiro (S. Jacinto); Braga; Monte Real (BA5); Santa Cruz; Sintra (BA1); Cascais (Tires); Lisboa (H. Delgado); Montijo (BA6); Sines; Portimão; Faro
