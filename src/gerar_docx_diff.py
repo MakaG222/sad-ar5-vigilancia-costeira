@@ -13,6 +13,7 @@ Modos:
 from __future__ import annotations
 
 import argparse
+import copy
 import os
 import shutil
 import sys
@@ -34,6 +35,7 @@ ANTIGO_DEFAULT = _default_antigo()
 OUT_ENTREGA = os.path.join(REL_DIR, "Trabalho Final SAD.docx")
 OUT_DIFF = os.path.join(os.path.dirname(BASE), "Trabalho Final SAD - ALTERACOES.docx")
 OUT_DIFF_REL = os.path.join(REL_DIR, "Trabalho Final SAD - ALTERACOES.docx")
+COVER_REF = os.path.join(REL_DIR, "Relatorio_SAD_AR5_ALTERACOES.docx")
 
 PARA_REPLACEMENTS: list[tuple[str, str]] = [
     (
@@ -50,7 +52,7 @@ PARA_REPLACEMENTS: list[tuple[str, str]] = [
     ),
     (
         "Dado que alguns parâmetros do modelo de dimensionamento são estimativas (designadamente a largura útil do sensor, o período de revisita e a disponibilidade), aferiu-se a robustez da recomendação variando-os isoladamente em torno do cenário de referência de 11 aeronaves (Figura 19; Tabela B6, Anexo B). A frota mostra-se mais sensível à largura útil do sensor e ao período de revisita: alargar o sensor de 30 para 50 km, ou relaxar a revisita de 3 para 6 horas, reduz a frota de 11 para 6 aeronaves; inversamente, exigências mais estritas (sensor de 20 km ou revisita de 2 horas) elevam-na para 12. A disponibilidade operacional tem um efeito mais moderado, fazendo variar a frota entre 11 (disponibilidade de 0,60) e 7 (disponibilidade de 0,90). Estes resultados têm uma leitura de apoio à decisão direta: o investimento que mais reduz o efetivo necessário não é a aquisição de mais aeronaves, mas a melhoria da capacidade sensorial de cada uma (sensores de maior alcance útil) e dos processos de manutenção que sustentam a disponibilidade. A recomendação de 11 aeronaves (área total de alto risco) é, em qualquer caso, estável dentro de uma banda plausível de parâmetros, o que lhe confere credibilidade para efeitos de planeamento.",
-        "Dado que alguns parâmetros do modelo de dimensionamento são estimativas (largura útil do sensor, período de revisita e disponibilidade), aferiu-se a robustez variando-os isoladamente (Figura 19; Tabela B6). A frota é mais sensível à largura útil e à revisita: sensor de 50 km ou revisita de 6 h reduzem a frota de 11 para 6 aeronaves; exigências mais estritas (20 km ou 2 h) elevam-na para 14. A disponibilidade operacional varia a frota entre 13 (D = 0,60) e 9 (D = 0,90). O investimento que mais reduz o efetivo é melhorar sensores e manutenção, não adquirir mais aeronaves à toa. A recomendação de 11 AR5 mantém-se estável numa banda plausível de parâmetros.",
+        "Aferiu-se a robustez variando largura útil, revisita e disponibilidade (Figura 19; Tabela B6). Sensor de 50 km ou revisita de 6 h reduzem a frota de 9 para 6 AR5; exigências mais estritas (sensor de 20 km ou revisita de 2 h) elevam-na para 15 AR5. A disponibilidade operacional varia a frota entre 11 (D = 0,60) e 7 (D = 0,90). O investimento que mais reduz o efetivo é melhorar sensores e manutenção, não adquirir mais aeronaves à toa. A recomendação de 9 AR5 mantém-se estável numa banda plausível de parâmetros.",
     ),
     (
         "O campo de risco relativo ao tráfico de droga foi reconstruído usando apenas apreensões marítimas até 2022; as restantes ameaças mantêm-se nos valores reais (EMODnet, desembarques PT). As 55 apreensões marítimas de 2023–2024 (holdout) foram geocodificadas e confrontadas com o mapa de risco treinado. ",
@@ -101,6 +103,14 @@ PARA_REPLACEMENTS: list[tuple[str, str]] = [
         "Figura 20 - Painel geoespacial interativo: índice de risco multi-ameaça (1156 células), apreensões 2020+, desembarques PT, bases MCLP (Porto + Portimão), seis sectores de patrulha e painel Q1–Q3 (resultados/mapa_interativo.html).",
     ),
     (
+        "O procedimento de arranque da plataforma (instalação de dependências e lançamento dos serviços) está descrito no Anexo C - Reprodução computacional e arranque da plataforma.",
+        "O procedimento de arranque da plataforma (instalação de dependências e lançamento dos serviços) está descrito na Secção 6 e no ficheiro plataforma/README.md.",
+    ),
+    (
+        "O procedimento de arranque da plataforma (instalação de dependências e lançamento dos serviços) está descrito no Secção 6 e plataforma/README.md - Reprodução computacional e arranque da plataforma.",
+        "O procedimento de arranque da plataforma (instalação de dependências e lançamento dos serviços) está descrito na Secção 6 e no ficheiro plataforma/README.md.",
+    ),
+    (
         "Figura 22 - Comparação com a baseline de patrulha aleatória (ganho do SAD). patrulha aleatória e patrulha uniforme costeira.",
         "Figura 22 - Comparação da captura de risco: SAD versus patrulha aleatória e uniforme costeira.",
     ),
@@ -139,15 +149,23 @@ METRICS_REPLACEMENTS: list[tuple[str, str]] = [
     ),
     (
         "A aplicação deste modelo à área total de alto risco (28 494 km²), com a rede completa de doze bases seleccionada pelo trade-off de frota (Secção 5.3), conduz a 4 aeronaves simultâneas e a uma frota total de 11 AR5, com distância média de 55,9 km e tempo de estação de 13,9 h por sortida. Restringindo o esforço à faixa costeira (25 075 km²), alcançável a 90 km a partir de cinco bases — Santa Cruz, Cascais, Sines, Portimão e Faro —, bastam 3 aeronaves simultâneas e uma frota de 9 AR5. Importa não confundir este resultado com o MCLP a duas bases (Porto + Portimão): cobre igualmente 100 % do risco, mas exige 13 AR5 (Tabela B5). Distinguimos, ao longo do relatório, a localização mínima (Q3) do dimensionamento de frota (Q2).",
-        "A aplicação deste modelo à área total de alto risco (24 980 km²), com a rede completa de doze bases (Secção 5.3), conduz a 3 aeronaves simultâneas e a uma frota total de 9 AR5, com distância média de 56,2 km e tempo de estação de 13,9 h. Na faixa costeira (22 035 km²; cinco bases — Santa Cruz, Cascais, Sines, Portimão e Faro), mantêm-se 3 aeronaves simultâneas e 9 AR5. O MCLP a duas bases (Porto + Portimão) cobre 100 % do risco, mas exige 10 AR5 (Tabela B5). Frase-chave: Q3 (MCLP) responde onde instalar o mínimo de bases; Q2 responde quantos AR5 para 24 h.",
+        "A aplicação deste modelo à área total de alto risco (26 025 km²) conduz a 3 aeronaves simultâneas e a uma frota total de 9 AR5. A frota mínima de 9 AR5 mantém-se quer no cenário com base central (Montijo, BA6), quer no cenário de rede distribuída de doze aeródromos (Secção 5.3); a rede distribuída reduz tempos médios de trânsito (55,7 km vs 120,9 km) e aumenta robustez operacional. Na faixa costeira (23 080 km²; cinco bases — Santa Cruz, Cascais, Sines, Portimão e Faro), mantêm-se 3 aeronaves simultâneas e 9 AR5. O MCLP a duas bases (Porto + Portimão) cobre 100 % do risco, mas exige 10 AR5 (Tabela B5). Frase-chave: Q3 (MCLP) responde onde instalar o mínimo de bases; Q2 responde quantos AR5 para 24 h.",
     ),
     (
         "A análise da frota em função do número de bases (Tabela B5; Figura 18) mostra dois resultados distintos. No MCLP — qual o mínimo de instalações que cobre o risco? — duas bases (Porto e Portimão) bastam. No dimensionamento de frota — quantas aeronaves para 24 h? — o mínimo é com doze bases (distância média 55,9 km, frota 11 AR5). Com Montijo sozinha: 120 km de trânsito médio, 12 AR5. Entre duas e onze bases a frota mantém-se em 13 AR5; só a rede completa reduz para 11. A Tabela 6 resume as configurações de emprego.",
         "A análise da frota em função do número de bases (Tabela B5; Figura 18) distingue MCLP e dimensionamento. Duas bases (Porto e Portimão) bastam para cobrir o risco (MCLP). Para 24 h, o mínimo é com doze bases (56,2 km de trânsito médio, frota 9 AR5). Com Montijo sozinha: 122 km, 10 AR5. Entre duas e onze bases a frota mantém-se em 10 AR5; só a rede completa reduz para 9. A Tabela 6 resume as configurações de emprego.",
     ),
     (
-        "Dado que alguns parâmetros do modelo de dimensionamento são estimativas (largura útil do sensor, período de revisita e disponibilidade), aferiu-se a robustez variando-os isoladamente (Figura 19; Tabela B6). A frota é mais sensível à largura útil e à revisita: sensor de 50 km ou revisita de 6 h reduzem a frota de 11 para 6 aeronaves; exigências mais estritas (20 km ou 2 h) elevam-na para 14. A disponibilidade operacional varia a frota entre 13 (D = 0,60) e 9 (D = 0,90). O investimento que mais reduz o efetivo é melhorar sensores e manutenção, não adquirir mais aeronaves à toa. A recomendação de 11 AR5 mantém-se estável numa banda plausível de parâmetros.",
+        "A aplicação deste modelo à área total de alto risco (26 025 km²), com a rede completa de doze bases (Secção 5.3), conduz a 3 aeronaves simultâneas e a uma frota total de 9 AR5, com distância média de 56,2 km e tempo de estação de 13,9 h. Na faixa costeira (23 080 km²; cinco bases — Santa Cruz, Cascais, Sines, Portimão e Faro), mantêm-se 3 aeronaves simultâneas e 9 AR5. O MCLP a duas bases (Porto + Portimão) cobre 100 % do risco, mas exige 10 AR5 (Tabela B5). Frase-chave: Q3 (MCLP) responde onde instalar o mínimo de bases; Q2 responde quantos AR5 para 24 h.",
+        "A aplicação deste modelo à área total de alto risco (26 025 km²) conduz a 3 aeronaves simultâneas e a uma frota total de 9 AR5. A frota mínima de 9 AR5 mantém-se quer no cenário com base central (Montijo, BA6), quer no cenário de rede distribuída de doze aeródromos (Secção 5.3); a rede distribuída reduz tempos médios de trânsito (55,7 km vs 120,9 km) e aumenta robustez operacional. Na faixa costeira (23 080 km²; cinco bases — Santa Cruz, Cascais, Sines, Portimão e Faro), mantêm-se 3 aeronaves simultâneas e 9 AR5. O MCLP a duas bases (Porto + Portimão) cobre 100 % do risco, mas exige 10 AR5 (Tabela B5). Frase-chave: Q3 (MCLP) responde onde instalar o mínimo de bases; Q2 responde quantos AR5 para 24 h.",
+    ),
+    (
         "Aferiu-se a robustez variando largura útil, revisita e disponibilidade (Figura 19; Tabela B6). Sensor de 50 km ou revisita de 6 h reduzem a frota de 9 para 6 aeronaves; exigências mais estritas (20 km ou 2 h) elevam-na para 14. A disponibilidade varia a frota entre 13 (D = 0,60) e 9 (D = 0,90). A recomendação de 9 AR5 mantém-se estável numa banda plausível de parâmetros.",
+        "Aferiu-se a robustez variando largura útil, revisita e disponibilidade (Figura 19; Tabela B6). Sensor de 50 km ou revisita de 6 h reduzem a frota de 9 para 6 AR5; exigências mais estritas (sensor de 20 km ou revisita de 2 h) elevam-na para 15 AR5. A disponibilidade operacional varia a frota entre 11 (D = 0,60) e 7 (D = 0,90). O investimento que mais reduz o efetivo é melhorar sensores e manutenção. A recomendação de 9 AR5 mantém-se estável numa banda plausível de parâmetros.",
+    ),
+    (
+        "Dado que alguns parâmetros do modelo de dimensionamento são estimativas (largura útil do sensor, período de revisita e disponibilidade), aferiu-se a robustez variando-os isoladamente (Figura 19; Tabela B6). A frota é mais sensível à largura útil e à revisita: sensor de 50 km ou revisita de 6 h reduzem a frota de 11 para 6 aeronaves; exigências mais estritas (20 km ou 2 h) elevam-na para 14. A disponibilidade operacional varia a frota entre 13 (D = 0,60) e 9 (D = 0,90). O investimento que mais reduz o efetivo é melhorar sensores e manutenção, não adquirir mais aeronaves à toa. A recomendação de 11 AR5 mantém-se estável numa banda plausível de parâmetros.",
+        "Aferiu-se a robustez variando largura útil, revisita e disponibilidade (Figura 19; Tabela B6). Sensor de 50 km ou revisita de 6 h reduzem a frota de 9 para 6 AR5; exigências mais estritas (sensor de 20 km ou revisita de 2 h) elevam-na para 15 AR5. A disponibilidade operacional varia a frota entre 11 (D = 0,60) e 7 (D = 0,90). O investimento que mais reduz o efetivo é melhorar sensores e manutenção. A recomendação de 9 AR5 mantém-se estável numa banda plausível de parâmetros.",
     ),
     (
         "Os pesos da média ponderada não foram escolhidos arbitrariamente: aplicámos o AHP (Saaty, 1980) aos quatro critérios — droga, pesca, poluição e imigração — com comparações par-a-par para vigilância costeira de Portugal Continental (dm/ahp_pesos.py). A matriz dá 0,38 / 0,24 / 0,19 / 0,19 com razão de consistência 0,0002. Arredondámos para 0,35 / 0,25 / 0,20 / 0,20 no config.py por legibilidade operacional; sensibilidade ±10 % mantém o n.º de células alto risco entre 276 e 297 (Figura 24), sem alterar a hierarquia espacial nem o par MCLP.",
@@ -259,19 +277,22 @@ GLOBAL_TEXT_REPLACEMENTS: list[tuple[str, str]] = [
     ("25 075", "23 080"),
     ("22 035", "23 080"),
     ("excluídos", "excluídas"),
-    ("Secção 3.4", "Secção 5.4"),
+    ("elevam-na para 14", "elevam-na para 15 AR5"),
+    ("entre 13 (D = 0,60) e 9 (D = 0,90)", "entre 11 (D = 0,60) e 7 (D = 0,90)"),
+    ("no Secção 6 e plataforma/README.md", "na Secção 6 e no ficheiro plataforma/README.md"),
     ("ganho 2,13× sem desembarques em zona alto risco", "Holdout 2023–2024: 85,2% (n=54); interceções documentadas: 75% em zona de alto risco; patrulha SAD 2,13× vs aleatória."),
     ("ganho 2,13×sembarques", "patrulha SAD 2,13× vs aleatória"),
     ("ganho 2,13× sem desembarques", "patrulha SAD 2,13× vs aleatória"),
     ("Tabela 10 (4 interceções documentadas, 75 % em alto risco)", "interceções documentadas (Secção 7.3; 4 eventos, 75 % em alto risco)"),
-    ("Anexo C", "Secção 6 e plataforma/README.md"),
     ("Bases de lançamento (dimensionamento frota) de lançamento", "Bases de lançamento"),
     ("Bases de lançamento (dimensionamento frota)", "Bases de lançamento"),
-    ("0,60 → 11", "0,60 → 11"),
-    ("0,80 → 8", "0,80 → 8"),
-    ("0,90 → 7", "0,90 → 7"),
-    ("20 → 14", "20 → 15"),
-    ("2 → 14", "2 → 15"),
+    ("campo de intensidade espacial (Secção 3.4)", "campo de intensidade espacial (Secção 3.3)"),
+    ("descritas na Secção 3.4", "descritas na Secção 3.3"),
+    ("descritas na Secção 5.4", "descritas na Secção 3.3"),
+    ("campo de intensidade espacial (Secção 5.4)", "campo de intensidade espacial (Secção 3.3)"),
+    ("0,60 → 13", "0,60 → 11"),
+    ("0,70 → 11", "0,70 → 9"),
+    ("0,90 → 9", "0,90 → 7"),
     ("Q1 — Onde? Q2 — Quantos? Q3 — Bases? Q4 —",
      "Q1 — Onde?\n\nQ2 — Quantos?\n\nQ3 — Bases?\n\nQ4 —"),
 ]
@@ -303,36 +324,40 @@ def _apply_global_text(doc: Document, highlight: bool) -> int:
     return n
 
 
-def _fix_formal_issues(doc: Document, highlight: bool) -> int:
-    """Capa duplicada, cabeçalhos repetidos na Tabela 6, páginas vazias no início."""
-    import re
-    n = 0
-    to_delete = []
-    paras = doc.paragraphs[:60]
-    title_idxs: list[int] = []
-    for i, p in enumerate(paras):
-        t = p.text.strip()
-        if not t and i < 15:
-            to_delete.append(p)
-            continue
-        if re.fullmatch(r"\d{1,3}", t):
-            to_delete.append(p)
-            continue
-        if "Sistema de Apoio à Decisão" in t or (
-            "Vigilância Costeira" in t and "AR5" in t
-        ):
-            title_idxs.append(i)
-    if len(title_idxs) >= 2:
-        for p in paras[title_idxs[1] :]:
-            tl = p.text.strip().lower()
-            if tl in {"resumo", "abstract"} or p.text.startswith("Resumo") or p.text.startswith("Abstract"):
-                break
-            if p not in to_delete:
-                to_delete.append(p)
-    for p in to_delete:
-        el = p._element
+def _restore_cover(doc: Document, ref_path: str) -> int:
+    """Restaura a capa (parágrafos até «Sistemas de Apoio à Decisão») a partir do documento de referência."""
+    if not os.path.isfile(ref_path):
+        return 0
+
+    ref = Document(ref_path)
+
+    def _sistemas_idx(d: Document) -> int | None:
+        for i, p in enumerate(d.paragraphs):
+            if p.text.strip() == "Sistemas de Apoio à Decisão":
+                return i
+        return None
+
+    ref_end = _sistemas_idx(ref)
+    out_end = _sistemas_idx(doc)
+    if ref_end is None or out_end is None:
+        return 0
+
+    body = doc.element.body
+    for _ in range(out_end + 1):
+        if not doc.paragraphs:
+            break
+        el = doc.paragraphs[0]._element
         el.getparent().remove(el)
-        n += 1
+
+    for i in range(ref_end, -1, -1):
+        body.insert(0, copy.deepcopy(ref.paragraphs[i]._element))
+
+    return ref_end + 1
+
+
+def _fix_formal_issues(doc: Document, highlight: bool) -> int:
+    """Cabeçalhos repetidos na Tabela 6 (não altera a capa)."""
+    n = 0
     if len(doc.tables) > 3:
         table = doc.tables[3]
         if table.rows and len(table.rows[0].cells) > 2:
@@ -381,11 +406,11 @@ TABLE_CELL_REPLACEMENTS: list[tuple[int, int, int, str, str]] = [
     (17, 3, 2, "146,1", "55,9"),
     (17, 3, 3, "12,1", "13,9"),
     (17, 3, 4, "10", "11"),
-    (18, 1, 1, "20 → 12", "20 → 14"),
-    (18, 2, 1, "2 → 12", "2 → 14"),
-    (18, 3, 1, "0,60 → 11", "0,60 → 13"),
-    (18, 3, 1, "0,70 → 9", "0,70 → 9"),
-    (18, 3, 1, "0,90 → 7", "0,90 → 9"),
+    (18, 1, 1, "20 → 14", "20 → 15"),
+    (18, 2, 1, "2 → 14", "2 → 15"),
+    (18, 3, 1, "0,60 → 13", "0,60 → 11"),
+    (18, 3, 1, "0,70 → 11", "0,70 → 9"),
+    (18, 3, 1, "0,90 → 9", "0,90 → 7"),
     # Métricas actualizadas (estado actual do documento)
     (3, 1, 1, "25 075", "22 035"),
     (3, 2, 1, "28 494", "24 980"),
@@ -525,8 +550,13 @@ def aplicar_correcoes(
     n_para = 0
     for old, new in (*PARA_REPLACEMENTS, *METRICS_REPLACEMENTS):
         for p in doc.paragraphs:
-            if p.text.strip() == old.strip() or old in p.text:
+            text = p.text
+            if text.strip() == old.strip():
                 _set_paragraph_text(p, new, highlight=highlight)
+                n_para += 1
+                break
+            if old in text:
+                _set_paragraph_text(p, text.replace(old, new, 1), highlight=highlight)
                 n_para += 1
                 break
 
@@ -535,6 +565,7 @@ def aplicar_correcoes(
     n_global = _apply_global_text(doc, highlight)
     n_formal = _fix_formal_issues(doc, highlight)
     n_removed = _remove_sumario_executivo(doc)
+    n_cover = _restore_cover(doc, COVER_REF)
 
     doc.save(out_path)
     modo = "diff (amarelo)" if highlight else "entrega (limpo)"
@@ -544,6 +575,7 @@ def aplicar_correcoes(
     print(f"  Substituições globais: {n_global}")
     print(f"  Correcções formais: {n_formal}")
     print(f"  Blocos removidos (sumário/nota): {n_removed}")
+    print(f"  Capa restaurada: {n_cover} parágrafos")
     return out_path
 
 
