@@ -3,6 +3,8 @@
 Protótipo web quasi-tempo-real para apoio à vigilância costeira com o UAV TEKEVER AR5:
 mapa de risco, meteo, AIS, rotas de patrulha, plano 24 h, dimensionamento de frota e alertas.
 
+**Repositório:** https://github.com/MakaG222/sad-ar5-vigilancia-costeira
+
 ## Arranque rápido (macOS)
 
 ```bash

@@ -2,6 +2,8 @@
 
 Interface web quasi-tempo-real: meteo, AIS, mapa de risco, rotas de patrulha, plano 24 h, frota e alertas.
 
+**Repositório:** https://github.com/MakaG222/sad-ar5-vigilancia-costeira
+
 ---
 
 ## macOS
