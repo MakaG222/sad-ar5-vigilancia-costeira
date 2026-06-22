@@ -22,4 +22,6 @@ Métricas canónicas (pipeline `main.py` + `validacao.py`, Jun 2025):
 
 **Ficheiros de prova:** `resultados/validacao.json`, `resultados/resultados.json`, `relatorio/SIGAVI_FINAL.docx`.
 
+**Versões anteriores do Word:** `relatorio/versoes/` (geradas automaticamente por `scripts/gerar_sigavi_final.sh`).
+
 **Plataforma:** `cd plataforma && ./setup.sh && ./start.sh` — barra de estado lê os JSON acima.
