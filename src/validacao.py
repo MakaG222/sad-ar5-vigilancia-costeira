@@ -24,12 +24,15 @@ from geo import gerar_procura, proj, zona_maritima_pt, LON_MIN, LON_MAX, LAT_MIN
 from risco import calcular_risco, _norm
 from dm.construir_dados_reais import (
     kde, _norm as _norm_arr,
-    DISTRITO_COSTA, IOM,     campo_droga,
+    DISTRITO_COSTA, IOM, campo_droga,
+    campo_imigracao_iom, campo_imigracao_pt_costa,
 )
+from dm.coords_apreensao import geocodificar_dataframe
 from dm.geocode import geocode
 
 BASE = os.path.join(os.path.dirname(__file__), "..")
 XLSX = os.path.join(BASE, "dados/fontes/apreensoes_droga_PT.xlsx")
+INTERC = os.path.join(BASE, "dados/fontes/intercecoes_documentadas.csv")
 CSV_REAIS = os.path.join(BASE, "dados/processados/intensidades_reais.csv")
 FIGDIR = os.path.join(BASE, "resultados/figuras")
 OUTDIR = os.path.join(BASE, "resultados")
@@ -53,22 +56,78 @@ def apreensoes_geocodificadas(ano_min=None, ano_max=None) -> pd.DataFrame:
         df = df[df["ano"] >= ano_min]
     if ano_max is not None:
         df = df[df["ano"] <= ano_max]
-    coords = []
-    for _, row in df.iterrows():
-        reg = row.get("Administrative Region")
-        if not isinstance(reg, str):
-            coords.append(None); continue
-        token = reg.split("/")[0].strip()
-        c = geocode(token)
-        if c is None:
-            dc = DISTRITO_COSTA.get(token)
-            c = (dc[1], dc[0]) if dc else None  # DISTRITO_COSTA é (lon, lat)
-        if c is None and "/" in reg:
-            c = geocode(reg.split("/")[-1].strip())
-        coords.append(c)
-    df["lat"] = [c[0] if c else np.nan for c in coords]
-    df["lon"] = [c[1] if c else np.nan for c in coords]
-    return df.dropna(subset=["lat", "lon"])
+    return geocodificar_dataframe(df)
+
+
+def _campo_droga_temporal(pts, ano_max: int):
+    """Campo de droga só com apreensões até ano_max (KDE com peso temporal)."""
+    fd, _, _ = campo_droga(pts, ano_max=ano_max, atlantico=False)
+    return fd
+
+
+def campo_imigracao_iom_ano(pts: list[dict], ano_max: int | None = None) -> np.ndarray:
+    """KDE IOM em mar PT; opcionalmente só incidentes até ano_max."""
+    if not os.path.exists(IOM):
+        return np.zeros(len(pts))
+    from geo import ponto_em_mar
+    df = pd.read_csv(IOM)
+
+    def parse(c):
+        try:
+            a, b = str(c).split(",")
+            return float(a), float(b)
+        except Exception:
+            return np.nan, np.nan
+
+    lat, lon = zip(*df["location_coodinates"].map(parse))
+    df["lat"], df["lon"] = lat, lon
+    df["ano"] = pd.to_datetime(df.get("reported_date", ""), errors="coerce").dt.year
+    df = df.dropna(subset=["lat", "lon"])
+    if ano_max is not None:
+        df = df[df["ano"].fillna(0) <= ano_max]
+    box = df[df.apply(
+        lambda r: zona_maritima_pt(r["lon"], r["lat"]) and ponto_em_mar(r["lon"], r["lat"]), axis=1)]
+    if box.empty:
+        return np.zeros(len(pts))
+    peso = pd.to_numeric(box["total_dead_and_missing"], errors="coerce").fillna(1.0).clip(lower=1.0).to_numpy()
+    pts_xy = np.array([(p["x"], p["y"]) for p in pts])
+    fontes_xy = [proj(lo, la) for lo, la in zip(box["lon"], box["lat"])]
+    return _norm_arr(kde(pts_xy, fontes_xy, peso, sigma_km=70.0))
+
+
+def risco_backtest_rigoroso(pts: list[dict], ano_max: int) -> tuple[np.ndarray, dict]:
+    """Camadas temporais (droga, imigração) filtradas até ano_max; pesca/poluição estáticas (EMODnet)."""
+    fd = _campo_droga_temporal(pts, ano_max)
+    fi_pt = campo_imigracao_pt_ano(pts, ano_max)
+    fi_iom = campo_imigracao_iom_ano(pts, ano_max)
+    if fi_pt.max() > 0 and fi_iom.max() > 0:
+        fi = _norm_arr(0.30 * fi_iom + 0.70 * fi_pt)
+    elif fi_pt.max() > 0:
+        fi = fi_pt
+    else:
+        fi = fi_iom
+    if os.path.exists(CSV_REAIS):
+        dfr = pd.read_csv(CSV_REAIS)
+        fp = dfr["r_pesca"].to_numpy()
+        fo = dfr["r_poluicao"].to_numpy()
+    else:
+        from risco import campo_pesca, campo_poluicao
+        pts_xy = np.array([(p["x"], p["y"]) for p in pts])
+        dist = np.array([p["dist_costa_km"] for p in pts])
+        fp = campo_pesca(pts_xy, dist)
+        fo = campo_poluicao(pts_xy)
+    r = (PESOS_AMEACA["droga"] * fd + PESOS_AMEACA["pesca"] * fp +
+         PESOS_AMEACA["poluicao"] * fo + PESOS_AMEACA["imigracao"] * fi)
+    meta = {
+        "ano_max": ano_max,
+        "camadas_temporais": ["droga", "imigracao_pt", "imigracao_iom"],
+        "camadas_estaticas": ["pesca (EMODnet)", "poluicao (EMODnet)"],
+        "nota": (
+            "Pesca e poluição não têm dimensão anual nas fontes abertas usadas; "
+            "mantêm-se fixas enquanto droga e imigração são filtradas no treino."
+        ),
+    }
+    return _norm(r), meta
 
 
 def celula_mais_proxima(pts: list[dict], lon: float, lat: float) -> int:
@@ -77,13 +136,73 @@ def celula_mais_proxima(pts: list[dict], lon: float, lat: float) -> int:
     return int(np.argmin(d2))
 
 
-def _campo_droga_temporal(pts, ano_max: int):
-    """Campo de droga só com apreensões até ano_max (KDE com peso temporal)."""
-    fd, _ = campo_droga(pts, ano_max=ano_max, atlantico=False)
-    return fd
+def _avaliar_holdout(risco_train: np.ndarray, holdout: pd.DataFrame, pts: list[dict]) -> dict:
+    n_hold = len(holdout)
+    if n_hold == 0:
+        return {"n_holdout": 0}
+    alto = risco_train >= LIMIAR
+    n_alto = int(alto.sum())
+    hits_limiar, hits_top20, riscos = 0, 0, []
+    limiar20 = float(np.percentile(risco_train, 80))
+    for _, row in holdout.iterrows():
+        idx = celula_mais_proxima(pts, row["lon"], row["lat"])
+        rv = float(risco_train[idx])
+        riscos.append(rv)
+        if rv >= LIMIAR:
+            hits_limiar += 1
+        if rv >= limiar20:
+            hits_top20 += 1
+    frac_alto = n_alto / len(pts)
+    rng = np.random.default_rng(42)
+    sims = [
+        float((risco_train[rng.integers(0, len(pts), size=n_hold)] >= LIMIAR).mean())
+        for _ in range(2000)
+    ]
+    baseline_rand = float(np.mean(sims))
+    return {
+        "n_holdout": n_hold,
+        "n_celulas_alto_risco_train": n_alto,
+        "frac_celulas_alto_risco": round(frac_alto, 4),
+        "taxa_acerto_limiar": round(hits_limiar / n_hold, 4),
+        "taxa_acerto_top20": round(hits_top20 / n_hold, 4),
+        "baseline_aleatorio_limiar": round(baseline_rand, 4),
+        "baseline_top20": 0.20,
+        "ganho_relativo_limiar": round((hits_limiar / n_hold) / max(baseline_rand, 1e-6), 2),
+        "risco_medio_holdout": round(float(np.mean(riscos)), 4),
+        "risco_medio_global": round(float(risco_train.mean()), 4),
+        "anos_holdout": sorted(holdout["ano"].unique().tolist()) if "ano" in holdout else [],
+    }
 
 
-def risco_com_droga_temporal(pts, ano_max: int) -> np.ndarray:
+def backtest_comparativo(pts: list[dict]) -> dict:
+    """Compara três variantes de treino temporal no holdout 2023–2024."""
+    holdout = apreensoes_geocodificadas(ano_min=ANO_CORTE + 1)
+    r_estatico, _ = risco_com_droga_temporal(pts, ANO_CORTE)
+    r_rigoroso, meta_rig = risco_backtest_rigoroso(pts, ANO_CORTE)
+    res = {
+        "ano_corte": ANO_CORTE,
+        "meta_rigoroso": meta_rig,
+        "modelo_droga_apenas": backtest_somente_droga(pts),
+        "modelo_multi_ameaca_parcial": _avaliar_holdout(r_estatico, holdout, pts),
+        "modelo_multi_ameaca_rigoroso": _avaliar_holdout(r_rigoroso, holdout, pts),
+        "n_eventos_geocodificados_treino_droga": int(
+            len(apreensoes_geocodificadas(ano_max=ANO_CORTE))
+        ),
+        "interpretacao": (
+            "A variante rigorosa filtra droga e imigração até 2022; pesca/poluição "
+            "permanecem estáticas por ausência de série temporal nas fontes EMODnet."
+        ),
+    }
+    res["modelo_multi_ameaca_parcial"]["rotulo"] = (
+        "Droga temporal + imigração estática (CSV produção)"
+    )
+    res["modelo_multi_ameaca_rigoroso"]["rotulo"] = (
+        "Droga + imigração temporal + pesca/poluição estáticas"
+    )
+    return res
+
+
+def risco_com_droga_temporal(pts, ano_max: int) -> tuple[np.ndarray, np.ndarray]:
     """Risco agregado com campo de droga temporal; restantes ameaças dos dados reais."""
     if os.path.exists(CSV_REAIS):
         dfr = pd.read_csv(CSV_REAIS)
@@ -431,9 +550,9 @@ def nota_mapas_risco(pts: list[dict]) -> dict:
         "n_alto_risco_backtest_treino": int((r_bt >= LIMIAR).sum()),
         "limiar": LIMIAR,
         "nota": (
-            "O mapa operacional (300 células) usa todas as fontes e pesos finais; "
-            "o backtest treina só a droga até 2022 e inclui camadas estáticas — "
-            "daí mais células acima do limiar no treino temporal (~423)."
+            "O mapa operacional usa todas as fontes e pesos AHP; o backtest treina droga "
+            "e imigração até 2022 com pesca/poluição estáticas — daí diferença no n.º de "
+            "células alto risco entre mapas operacional e de treino."
         ),
     }
 
@@ -502,6 +621,48 @@ def fig_baseline(bl: dict):
     plt.close(fig)
 
 
+def validacao_intercecoes_documentadas(pts: list[dict]) -> dict:
+    """Cruza eventos documentados (coordenadas reais) com o mapa de risco operacional."""
+    if not os.path.exists(INTERC):
+        return {"n_eventos": 0}
+    calcular_risco(pts, XLSX)
+    from geo import bases_proj
+    bases = bases_proj()
+    df = pd.read_csv(INTERC)
+    linhas = []
+    for _, row in df.iterrows():
+        lon, lat = float(row["lon"]), float(row["lat"])
+        idx = celula_mais_proxima(pts, lon, lat)
+        p = pts[idx]
+        # base mais próxima
+        bx, by = proj(lon, lat)
+        dist_b = [
+            (b["nome"], ((b["x"] - bx) ** 2 + (b["y"] - by) ** 2) ** 0.5)
+            for b in bases
+        ]
+        base_nom, _ = min(dist_b, key=lambda t: t[1])
+        linhas.append({
+            "ano": int(row["ano"]),
+            "ameaca": str(row["ameaca"]),
+            "lat": lat,
+            "lon": lon,
+            "fonte": str(row["fonte"]),
+            "descricao": str(row["descricao"]),
+            "risco_agregado": round(float(p["risco"]), 3),
+            "r_droga": round(float(p.get("r_droga", 0)), 3),
+            "r_imigracao": round(float(p.get("r_imigracao", 0)), 3),
+            "alto_risco": bool(p["risco"] >= LIMIAR),
+            "base_mais_proxima": base_nom,
+        })
+    n_alto = sum(1 for l in linhas if l["alto_risco"])
+    return {
+        "n_eventos": len(linhas),
+        "taxa_zona_alto_risco": round(n_alto / len(linhas), 3) if linhas else 0.0,
+        "eventos": linhas,
+        "nota": "Coordenadas de fontes abertas ou relatórios oficiais; proxy marítimo quando aplicável.",
+    }
+
+
 def caixa_objetivo() -> dict:
     """Respostas explícitas às três questões operacionais."""
     res_path = os.path.join(OUTDIR, "resultados.json")
@@ -528,16 +689,15 @@ def caixa_objetivo() -> dict:
             },
             "Q2_quantos": {
                 "resposta": f"{fr_c.get('frota_total', 9)} AR5 faixa costeira (24 h); "
-                            f"{fr_t.get('frota_total', 11)} AR5 área total de alto risco.",
-                "frota_total": fr_t.get("frota_total", 11),
+                            f"{fr_t.get('frota_total', 9)} AR5 área total de alto risco.",
+                "frota_total": fr_t.get("frota_total", 9),
                 "frota_costeira": fr_c.get("frota_total", 9),
                 "n_simultaneos_costeira": fr_c.get("n_simultaneos", 3),
-                "n_simultaneos_total": fr_t.get("n_simultaneos", 4),
+                "n_simultaneos_total": fr_t.get("n_simultaneos", 3),
                 "bases_dimensionamento_costeira": bases_costeira,
                 "bases_dimensionamento_total": bases_total,
-                "nota": "A frota 9/11 assume bases distribuídas ao longo da costa para reduzir "
-                        "trânsito; com apenas Porto+Portimão (MCLP k=2) seriam necessários "
-                        f"{frota_mclp_k2 or 13} AR5.",
+                "nota": "A frota 9 AR5 assume bases distribuídas; com apenas Porto+Portimão (MCLP k=2) "
+                        f"seriam necessários {frota_mclp_k2 or 10} AR5.",
             },
             "Q3_bases": {
                 "resposta": f"MCLP (k=2): {', '.join(nomes_mclp)} — cobrem {frac_mclp*100:.0f} % "
@@ -605,6 +765,8 @@ def main():
     val_imig = validacao_imigracao(pts)
     val_imig_ho = validacao_imigracao_holdout(pts)
     bt_droga = backtest_somente_droga(pts)
+    bt_comp = backtest_comparativo(pts)
+    val_inter = validacao_intercecoes_documentadas(pts)
     sens = sensibilidade_limiar(pts)
     decomp = decomposicao_ganho(pts)
     nota_map = nota_mapas_risco(pts)
@@ -613,7 +775,9 @@ def main():
 
     out = {
         "backtest_temporal": bt,
+        "backtest_comparativo": bt_comp,
         "backtest_somente_droga": bt_droga,
+        "validacao_intercecoes_documentadas": val_inter,
         "baseline_patrulha": bl,
         "validacao_imigracao": val_imig,
         "validacao_imigracao_holdout": val_imig_ho,
@@ -634,7 +798,10 @@ def main():
     fig_backtest(bt)
     fig_baseline(bl)
     fig_sensibilidade_limiar(sens)
-    print(f"   Sensibilidade limiar: ganho {sens['limiares'][1]['ganho_vs_aleatorio']:.2f}× @0,5")
+    print(f"   Backtest rigoroso: acerto limiar="
+          f"{bt_comp.get('modelo_multi_ameaca_rigoroso', {}).get('taxa_acerto_limiar', 0)*100:.1f}%")
+    print(f"   Interceções documentadas: {val_inter.get('n_eventos')} eventos, "
+          f"{val_inter.get('taxa_zona_alto_risco', 0)*100:.0f}% em alto risco")
     print(f"   Decomposição ganho: Gini={decomp['indice_gini_risco']:.3f}  "
           f"risco top-N={decomp['frac_risco_em_top_n']*100:.1f}%")
     print(f"   Imigração holdout: {val_imig_ho.get('taxa_acerto_holdout', 'N/A')} "

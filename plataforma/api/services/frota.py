@@ -31,7 +31,7 @@ def _validacao_frota() -> dict:
         "n_simultaneos_analise": q2.get("n_simultaneos", 3),
         "ganho_sad_vs_aleatorio": bl.get("ganho_sad_vs_aleatorio"),
         "pct_risco_capturado": bl.get("pct_risco_total_capturado_sad"),
-        "n_celulas_patrulha": bl.get("n_celulas_patrulha", 263),
+        "n_celulas_patrulha": bl.get("n_celulas_patrulha", 274),
         "revisita_h_analise": data.get("decomposicao_ganho", {}).get("frac_celulas_patrolhadas"),
     }
 
@@ -83,7 +83,7 @@ def dimensionar(vento_atual_ms: float, vento_previsto_ms: float | None = None) -
             "frota_costeira_24h": val.get("frota_costeira_analise", 9),
             "frota_total_alto_risco": val.get("frota_total_analise", 9),
             "n_simultaneos": val.get("n_simultaneos_analise", 3),
-            "n_celulas_patrulha": bl.get("n_celulas_patrulha", 263),
+            "n_celulas_patrulha": bl.get("n_celulas_patrulha", 274),
             "ganho_vs_aleatorio": bl.get("ganho_sad_vs_aleatorio", 2.17),
             "pct_risco_capturado": bl.get("pct_risco_total_capturado_sad", 49.3),
             "revisita_h": TEMPO_REVISITA_H,

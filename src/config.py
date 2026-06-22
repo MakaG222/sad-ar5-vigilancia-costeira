@@ -138,7 +138,7 @@ JANELA_SECTOR_H = 24.0 / N_SECTORES_COSTA
 # (t_on ≈ autonomia − 2×dist_média/V − reserva; sector ≈ 4 h)
 T_ON_SORTIE_H = 4.0
 
-# N.º de alvos de patrulha por sortie (alinhado com validação: 300 células / ~8 por sector)
+# N.º de alvos de patrulha por sortie (alinhado com validação: 274 células / ~8 por sector)
 N_ALVOS_SORTIE_PADRAO = 8
 
 # Limiar operacional de alto risco (validacao.json)
@@ -152,10 +152,10 @@ LIMIAR_RISCO_OPERACIONAL = 0.5
 #    ±10 % não altera a hierarquia espacial (relatório, Secção 4.5.1).
 # ---------------------------------------------------------------------------
 PESOS_AMEACA = {
-    "droga": 0.35,       # tráfico marítimo (87,2% da cocaína via mar — UNCTE 2024)
-    "pesca": 0.25,       # pesca INN (SIFICAP/EFCA)
-    "poluicao": 0.20,    # derrames (EMSA CleanSeaNet, ~250 alertas/ano em PT)
-    "imigracao": 0.20,   # imigração irregular (rota Atlântica — Frontex/IOM)
+    "droga": 0.35,       # AHP arredondado (exacto: 0,376); CR ≈ 0,0002
+    "pesca": 0.25,       # exacto: 0,243
+    "poluicao": 0.20,    # exacto: 0,191
+    "imigracao": 0.20,   # exacto: 0,190
 }
 
 # ---------------------------------------------------------------------------

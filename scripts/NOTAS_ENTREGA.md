@@ -1,35 +1,25 @@
-# Notas de entrega — SIGA Grupo VI
+# Notas de entrega — SAD AR5 (Grupo VI)
 
-**CT302 · SAD AR5 · Vigilância Costeira PT Continental · 2026**
-
----
-
-## Métricas canónicas (usar sempre estes valores)
+Métricas canónicas (pipeline `main.py` + `validacao.py`, Jun 2025):
 
 | Métrica | Valor |
 |---------|-------|
-| Células grelha | **1 156** |
-| Alto risco (limiar 0,5) | **300** |
-| Ganho SAD vs aleatório | **2,06×** (IC95: 1,93–2,22) |
-| Holdout 2023–24 | **85,5 %** em alto risco |
-| Frota 24 h (Q2) | **9** costeira (5 bases) · **11** total (12 bases) |
-| MCLP mínimo (Q3) | Porto (Sá Carneiro) + Portimão (100 % risco) |
-| Frota se só MCLP k=2 | **13 AR5** (trânsitos longos) |
+| Grelha | **1 156** células |
+| Alto risco (limiar 0,5) | **274** |
+| Holdout 2023–24 (multi-ameaça, limiar 0,5) | **85,2 %** (n=**54**) |
+| Holdout top 20 % | **87,0 %** |
+| Backtest só droga (top 20 %) | **94,4 %** |
+| Ganho SAD vs aleatório | **2,13×** (IC95: 1,97–2,31) |
+| Captura de risco (SAD) | **50,4 %** |
+| Frota 24 h — faixa costeira | **9 AR5** (5 bases) |
+| Frota 24 h — área total | **9 AR5** (rede distribuída) |
+| Frota se só MCLP k=2 (Porto + Portimão) | **10 AR5** |
+| MCLP k=2 | Porto + Portimão (100 % do risco) |
+| Sensibilidade limiar 0,45 / 0,50 / 0,55 | 312 / **274** / 227 células |
+| Sensibilidade disponibilidade D | 0,60→11 · 0,70→9 · 0,80→8 · 0,90→7 |
 
-Fonte: `resultados/validacao.json`, `resultados/resultados.json`
+**Narrativa frota:** Porto + Portimão resolvem o MCLP; para vigilância persistente 24 h são necessários **9 AR5** na faixa costeira e na área total (rede distribuída), ou **10 AR5** se operarem apenas essas duas bases.
 
-**Nota:** Q3 (localização mínima) e Q2 (frota 24 h) respondem a perguntas diferentes — ver Tabela 6 do relatório.
+**Ficheiros de prova:** `resultados/validacao.json`, `resultados/resultados.json`, `relatorio/SIGA_FINAL.docx`.
 
----
-
-## Demonstração ao vivo
-
-- Sem chave AIS: **modo demonstração** activo automaticamente (navios simulados em células marítimas).
-- Com `AISSTREAM_API_KEY` em `plataforma/.env`: dados AIS reais quando disponíveis.
-- Roteiro completo: `DEMONSTRACAO.md`
-
----
-
-## Estrutura da pasta
-
-Ver `README.md` (índice principal). Relatório: `relatorio/Relatorio_SAD_AR5.docx`.
+**Plataforma:** `cd plataforma && ./setup.sh && ./start.sh` — barra de estado lê os JSON acima.

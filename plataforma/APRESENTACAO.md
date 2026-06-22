@@ -20,7 +20,7 @@ Abrir: http://localhost:5173
 
 ## Roteiro de demo (5 min)
 
-1. Mostrar barra de estado (frota 9 AR5, alto risco 263, ganho 2,17×).
+1. Mostrar barra de estado (frota 9 AR5, alto risco 274, ganho 2,13×).
 2. Separador **Operação** → escolher base Portimão → **Calcular rota** (sortie).
 3. Apontar zona k-means no mapa e rota laranja.
 4. **Sim. spoofing** → alerta em tempo real.
