@@ -20,6 +20,6 @@ Métricas canónicas (pipeline `main.py` + `validacao.py`, Jun 2025):
 
 **Narrativa frota:** Porto + Portimão resolvem o MCLP; para vigilância persistente 24 h são necessários **9 AR5** na faixa costeira e na área total (rede distribuída), ou **10 AR5** se operarem apenas essas duas bases.
 
-**Ficheiros de prova:** `resultados/validacao.json`, `resultados/resultados.json`, `relatorio/SIGA_FINAL.docx`.
+**Ficheiros de prova:** `resultados/validacao.json`, `resultados/resultados.json`, `relatorio/SIGAVI_FINAL.docx`.
 
 **Plataforma:** `cd plataforma && ./setup.sh && ./start.sh` — barra de estado lê os JSON acima.
