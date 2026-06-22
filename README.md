@@ -1,186 +1,151 @@
-# SIGA GRUPO VI — SAD AR5 Vigilância Costeira
+# SAD AR5 — Plataforma Operacional
 
-**CT302 — Sistemas de Apoio à Decisão** · Grupo VI · Escola Naval, Alfeite, 2026
+Protótipo web para planear e demonstrar vigilância costeira de Portugal Continental com o UAV **TEKEVER AR5**: mapa de risco, rotas de patrulha, plano 24 h, meteo, AIS e alertas em tempo quasi-real.
 
-CAD M Santos Neto · CAD EN-AEL Canotilho Castro · CAD M Silva Guerreiro · CAD M Ribeiro Gaspar
-
----
-
-## O que é este projecto
-
-Sistema de Apoio à Decisão (SAD) que combina **data mining** e **otimização** para planear a
-vigilância costeira de Portugal Continental com o UAV **TEKEVER AR5**, face a quatro ameaças:
-droga, pesca INN, poluição e imigração irregular.
-
-Responde a três questões operacionais:
-
-1. **Onde** patrulhar → mapa de risco + sectores costeiros  
-2. **Quantos** AR5 → ~9 aeronaves para cobertura persistente 24 h  
-3. **Que bases** → Porto (Sá Carneiro) + Portimão (100 % risco alto)
+**CT302 — Sistemas de Apoio à Decisão** · Grupo VI · Escola Naval, 2026
 
 ---
 
-## Estrutura da entrega
+## Requisitos
 
-| Pasta | Conteúdo |
-|-------|----------|
-| `relatorio/` | Relatório final (.md + .docx) — **leitura principal para o júri** |
-| `dados/` | Fontes abertas (apreensões, IOM, EMODnet) + grelha processada |
-| `src/` | Pipeline Python reprodutível |
-| `resultados/` | Figuras, JSON, mapa interativo Folium |
-| `plataforma/` | Protótipo web quasi-tempo-real (demo operacional) |
+| Software | Versão mínima | macOS | Windows |
+|----------|---------------|-------|---------|
+| Python | 3.10+ | `brew install python` ou [python.org](https://www.python.org/downloads/) | [python.org](https://www.python.org/downloads/) — marcar **Add to PATH** |
+| Node.js | 18+ | `brew install node` ou [nodejs.org](https://nodejs.org/) | [nodejs.org](https://nodejs.org/) |
 
 ---
 
-## Arranque rápido
+## Instalação e arranque
 
-### Relatório Word (formato APA 7)
+### macOS
 
 ```bash
-cd src
-python3 condensar_relatorio_apa.py   # opcional: versão mais concisa
-python3 gerar_docx.py                # Times New Roman 12 pt, duplo espaçamento, refs APA
+git clone https://github.com/MakaG222/sad-ar5-vigilancia-costeira.git
+cd sad-ar5-vigilancia-costeira/plataforma
+
+chmod +x setup-mac.sh start-mac.sh stop-mac.sh   # só na 1.ª vez
+./setup-mac.sh    # instala dependências (uma vez)
+./start-mac.sh    # arranca API + interface web
 ```
 
-Abrir `relatorio/Relatório Final.docx` → actualizar índice no Word.
-
-### Mapa interactivo (estático)
-Abrir `resultados/mapa_interativo.html` no browser.
-
-### Plataforma operacional (demo live)
-
-**Requisitos:** macOS ou Linux, Python 3.10+, Node 18+
-
-```bash
-cd plataforma
-chmod +x setup-mac.sh start-mac.sh stop-mac.sh   # 1.ª vez
-./setup-mac.sh
-./start-mac.sh
-```
-
-Abrir **http://localhost:5173** (API em http://localhost:8080).
+Abrir **http://localhost:5173**
 
 Parar: `./stop-mac.sh`
 
-#### Utilização
+### Windows
 
-| Acção | Como |
-|-------|------|
-| **Plano 24 h** | Operação → modo «Plano 24 h» → Calcular rota. Mostra **6 sectores N→S** com rotas desde **Porto (Sá Carneiro)** e **Portimão**. |
-| **Horas de patrulha** | Campo **t_on patrulha (h)** — limitado à autonomia AR5 (16 h − reserva). Valor recomendado: 4 h/sector. |
-| **Cenários** | Botões de cenário (rotina 24 h, droga Algarve, vento forte, etc.) aplicam tipo de patrulha e parâmetros. |
-| **Camadas** | Separador Camadas — risco, EMODnet, apreensões, IOM, clusters k-means. Legenda com **escala de cores de risco**. |
-| **Spoofing / incidente** | Botões «Sim. spoofing» e «Sim. incidente» — ponto **aleatório no mar** ao longo de toda a costa. |
-| **Exportar missão** | Calcular rota → Exportar (GeoJSON/CSV). |
+Abra **PowerShell** na pasta `plataforma`:
 
-Modo apresentação (arranque rápido): activo por defeito — desactive em Camadas para ver todas as camadas.
+```powershell
+git clone https://github.com/MakaG222/sad-ar5-vigilancia-costeira.git
+cd sad-ar5-vigilancia-costeira\plataforma
 
-Ver também `plataforma/APRESENTACAO.md` e `DEMONSTRACAO.md`.
-
-### Reproduzir análise completa
-
-No macOS o comando é **`python3`** (não `python`). Na 1.ª vez:
-
-```bash
-chmod +x setup-python.sh && ./setup-python.sh
-source .venv/bin/activate
-cd src
-python sincronizar_relatorio.py && python validacao.py && python gerar_docx.py
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass   # só nesta sessão, se necessário
+.\setup-win.ps1    # instala dependências (uma vez)
+.\start-win.ps1    # arranca API + interface web
 ```
 
-Pipeline completo (dados + DM + relatório):
+Abrir **http://localhost:5173**
 
-```bash
-source .venv/bin/activate
-cd src
-python -m dm.construir_dados_reais
-python main.py
-python -m dm.main_dm
-python validacao.py
-python gerar_docx.py
-```
+Parar: `.\stop-win.ps1`
+
+> Se o Windows bloquear scripts PowerShell, use a política acima apenas na sessão actual ou execute os passos **manuais** abaixo.
 
 ---
 
-## Formatação (estilo CT302 / Grupo VI)
+## Arranque manual (dois terminais)
 
-O relatório Word segue a estrutura dos trabalhos de referência CT302:
+Útil para ver erros em directo. Funciona em **macOS** e **Windows**.
 
-- Capa institucional + página de rosto (Grupo VI, Escola Naval)
-- **Sumário executivo** (síntese assertiva)
-- Resumo / Abstract bilingues
-- Secções IMRaD numeradas com figuras e tabelas referenciadas
-- Índices automáticos de figuras, tabelas e siglas
-- Vocabulário alinhado com os PW: *data mining*, PCA, *clustering*, validação cruzada,
-  lógica difusa, cobertura de conjunto, MCLP, decisão semiestruturada
-
----
-
-## Resultados-chave (validação)
-
-| Métrica | Valor |
-|---------|-------|
-| Células grelha PT | 1 156 |
-| Alto risco (≥ 0,5) | 300 |
-| Bases MCLP | Porto + Portimão |
-| Frota 24 h | ≈ 9 AR5 (costeira) / 11 AR5 (total) |
-| Ganho SAD vs aleatório | **2,06×** (IC95: 1,93–2,22) |
-| ROC-AUC (MLP, CV 5-fold) | 0,93 ± 0,02 |
-
-Ver `resultados/validacao.json` e `NOTAS_ENTREGA.md`.
-
----
-
-## README técnico
-
-### Dependências
-
-- **Pipeline:** Python 3.10+ (`requirements.txt` na raiz)
-- **Plataforma API:** `plataforma/api/requirements.txt`
-- **Frontend:** Node 18+ (`plataforma/web/`)
-
-### Pipeline analítico
-
-```bash
-chmod +x setup-python.sh && ./setup-python.sh
-source .venv/bin/activate
-cd src
-python3 main.py          # grelha 1156 → risco → otimização → validação → mapa
-python3 gerar_docx.py    # relatório Word
-```
-
-### API FastAPI (isolada)
+**Terminal 1 — API (porta 8080)**
 
 ```bash
 cd plataforma/api
-python3 -m venv .venv && source .venv/bin/activate
+python3 -m venv .venv          # Windows: python -m venv .venv
+source .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-uvicorn main:app --reload --port 8080
+uvicorn main:app --reload --host 127.0.0.1 --port 8080
 ```
 
-### Modo AIS
+**Terminal 2 — Interface web (porta 5173)**
 
-| Condição | Comportamento |
-|----------|---------------|
-| `AISSTREAM_API_KEY` definida | Tenta AIS real; fallback simulado se stream falhar |
-| Sem chave | **Modo demonstração** automático — navios em células marítimas SAD |
+```bash
+cd plataforma/web
+npm install
+npm run dev
+```
 
-Copiar `plataforma/.env.example` → `plataforma/.env` para chave opcional.
+Abrir **http://localhost:5173**
 
-### Demonstração oral
-
-Roteiro 3–5 min: `DEMONSTRACAO.md`
+| URL | Serviço |
+|-----|---------|
+| http://localhost:5173 | Interface web (mapa, rotas, alertas) |
+| http://127.0.0.1:8080/docs | API (documentação Swagger) |
 
 ---
 
-## Ligação entre componentes
+## Utilização
+
+| Funcionalidade | Como usar |
+|----------------|-----------|
+| **Plano 24 h** | Separador Operação → modo «Plano 24 h» → **Calcular rota**. Mostra 6 sectores N→S com rotas desde **Porto (Sá Carneiro)** e **Portimão**. |
+| **Horas de patrulha** | Campo **t_on patrulha (h)** — ajustável até ao limite da autonomia AR5 (16 h − reserva). Recomendado: 4 h por sector. |
+| **Cenários** | Botões de cenário (rotina 24 h, droga Algarve, vento forte, etc.) aplicam tipo de patrulha e parâmetros. |
+| **Camadas do mapa** | Separador Camadas — risco, EMODnet, apreensões, IOM, clusters k-means. Legenda com escala de cores de risco. |
+| **Spoofing / incidente** | Botões «Sim. spoofing» e «Sim. incidente» — evento aleatório no mar ao longo da costa. |
+| **Despacho reactivo** | Modo «Reactivo» + clique no mapa calcula rota para o alvo. |
+| **Exportar missão** | Calcular rota → **Exportar** (GeoJSON/CSV). |
+
+O **modo apresentação** está activo por defeito (arranque mais rápido). Desactive em Camadas para ver todas as camadas.
+
+---
+
+## AIS em tempo real (opcional)
+
+Copie `plataforma/.env.example` para `plataforma/.env` e adicione uma chave [AISstream](https://aisstream.io):
 
 ```
-dados/fontes → construir_dados_reais → risco.py → otimizacao.py → resultados.json
-                                              ↓
-                                    mapa_interativo.html + plataforma/web
-                                              ↓
-                                    Relatorio_SAD_AR5.md → .docx
+AISSTREAM_API_KEY=sua_chave
 ```
 
-A Secção 9 e o **Anexo D** do relatório documentam esta integração em detalhe.
+Reinicie a plataforma. Sem chave, o sistema usa **navios simulados** em células marítimas — adequado para demonstração.
+
+---
+
+## Resolução de problemas
+
+| Problema | macOS | Windows |
+|----------|-------|---------|
+| Python não encontrado | `brew install python` | Reinstalar Python com «Add to PATH» |
+| Node não encontrado | `brew install node` | Reinstalar Node.js LTS |
+| Porta 8080/5173 ocupada | `./stop-mac.sh` | `.\stop-win.ps1` |
+| Mapa vazio | Confirmar API: `curl http://127.0.0.1:8080/api/estado` | Abrir http://127.0.0.1:8080/api/estado no browser |
+| Script bloqueado | `chmod +x *.sh` | `Set-ExecutionPolicy -Scope Process Bypass` |
+
+Logs automáticos: `plataforma/.run/api.log` e `plataforma/.run/web.log`
+
+---
+
+## Estrutura do repositório (plataforma)
+
+```
+plataforma/
+├── api/          # Backend FastAPI (rotas, meteo, AIS, alertas)
+├── web/          # Frontend React + Leaflet
+├── setup-mac.sh  # Instalação macOS
+├── start-mac.sh  # Arranque macOS
+├── stop-mac.sh   # Parar macOS
+├── setup-win.ps1 # Instalação Windows
+├── start-win.ps1 # Arranque Windows
+└── stop-win.ps1  # Parar Windows
+```
+
+Os dados analíticos (grelha de risco, validação) estão em `dados/` e `resultados/` e são carregados automaticamente pela API.
+
+---
+
+## Licença e autoria
+
+Trabalho académico CT302 — Grupo VI, Escola Naval, Alfeite.
+
+CAD M Santos Neto · CAD EN-AEL Canotilho Castro · CAD M Silva Guerreiro · CAD M Ribeiro Gaspar
