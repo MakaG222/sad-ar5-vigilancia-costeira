@@ -709,10 +709,12 @@ def rota_plano_24h_costeira(
     R = raio_por_autonomia(ton_sector, vento_mclp)
     bases_canonicas = _bases_mclp_canonicas(bases_op) or bases_mclp[:k_bases]
 
-    if base_nome or (lon_lanc is not None and lat_lanc is not None):
+    if k_bases >= 2 and lon_lanc is None and lat_lanc is None:
+        # Plano 24 h costa completa: sempre Porto + Portimão (ignora base do selector UI)
+        bases_sel = bases_canonicas
+    elif base_nome or (lon_lanc is not None and lat_lanc is not None):
         bases_sel = [_base_por_nome(base_nome, lon_lanc, lat_lanc)]
     else:
-        # Plano 24 h: sempre Porto + Portimão (recomendação SAD), não Belém/Lisboa do MCLP genérico
         bases_sel = bases_canonicas
 
     rec = mclp(pts, bases_op, R, k_bases)

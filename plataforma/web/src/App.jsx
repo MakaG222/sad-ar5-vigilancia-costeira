@@ -427,6 +427,8 @@ export default function App() {
 
   const paramsLanc = () => {
     if (lancCustom) return { lon_lanc: lancCustom.lon, lat_lanc: lancCustom.lat, base: null };
+    // Plano 24 h: Porto + Portimão (MCLP); não fixar base única do selector
+    if (modo === "plano24h") return {};
     if (baseSel) return { base: baseSel };
     return {};
   };
@@ -531,10 +533,11 @@ export default function App() {
     setCliqueRegiao(false);
     setCalculandoRota(true);
     try {
-      const resp = await post(`/cenarios/${c.id}/executar`, {
-        ...paramsMeteo(),
-        base: c.base || baseSel || undefined,
-      });
+      const body = { ...paramsMeteo() };
+      if (c.modo !== "plano24h" && (c.base || baseSel)) {
+        body.base = c.base || baseSel;
+      }
+      const resp = await post(`/cenarios/${c.id}/executar`, body);
       setRota(resp.rota);
       showToast(`Cenário: ${c.nome} — ${resumoRota(resp.rota)}`, "media");
     } catch (err) {
@@ -640,12 +643,12 @@ export default function App() {
             {estado?.modo_demo ? "Demo AIS" : "AIS live"}
           </div>
           <div className="pill">Navios <b>{estado?.n_navios ?? "—"}</b></div>
-          <div className="pill">Alto risco <b>{estado?.risco_resumo?.n_alto_risco ?? 274}</b></div>
+          <div className="pill">Alto risco <b>{estado?.risco_resumo?.n_alto_risco ?? 263}</b></div>
           <div className="pill">
             Frota <b>{frota?.analise_sad?.frota_costeira_24h ?? sadRespostas?.Q2_quantos?.frota_costeira ?? 9}</b>/
             <b>{frota?.analise_sad?.frota_total_alto_risco ?? sadRespostas?.Q2_quantos?.frota_total ?? 9}</b>
           </div>
-          <div className="pill">Ganho <b>{sadRespostas?.validacao?.ganho_sad_vs_aleatorio ?? "2,13"}×</b></div>
+          <div className="pill">Ganho <b>{sadRespostas?.validacao?.ganho_sad_vs_aleatorio ?? "2,17"}×</b></div>
           {modoApresentacao && <div className="pill apresentacao">Apresentação</div>}
           {fontesExternas !== "live" && (
             <div className="pill offline" title="Meteo/IPMA/RSS em cache local">
@@ -798,8 +801,9 @@ export default function App() {
               <option value="poluicao">Foco: poluição</option>
               <option value="imigracao">Foco: imigração</option>
             </select>
-            <select value={baseSel} onChange={(e) => { setBaseSel(e.target.value); setLancCustom(null); }}>
-              <option value="">— MCLP automático —</option>
+            <select value={baseSel} onChange={(e) => { setBaseSel(e.target.value); setLancCustom(null); }}
+              disabled={modo === "plano24h"} title={modo === "plano24h" ? "Plano 24 h usa Porto + Portimão automaticamente" : ""}>
+              <option value="">{modo === "plano24h" ? "Porto + Portimão (24 h)" : "— MCLP automático —"}</option>
               {basesLanc.map((b) => (
                 <option key={b.nome} value={b.nome}>[{b.forca}] {b.nome}</option>
               ))}

@@ -316,7 +316,7 @@ def executar_cenario(cenario_id: str, req: ExecutarCenarioReq):
     c = obter_cenario(cenario_id)
     if not c:
         return {"erro": "Cenário não encontrado"}
-    base = req.base or c.get("base")
+    base = req.base if c.get("base") else None
     regiao = c.get("regiao")
     if c["modo"] == "plano24h":
         rota = rota_plano_24h(

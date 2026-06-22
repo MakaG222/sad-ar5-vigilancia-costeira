@@ -73,6 +73,16 @@ def test_rota_vazia_e_reprovada():
     assert any("fora de alcance" in a.lower() or "sem pontos" in a.lower() for a in v["avisos"])
 
 
+def test_plano_24h_ignora_base_unica_com_duas_bases():
+    from services.patrulha_costeira import rota_plano_24h_costeira
+
+    r = rota_plano_24h_costeira(8.0, k_bases=2, base_nome="Porto (Sá Carneiro)")
+    bases = [rs["base"] for rs in r["rotas_sector"]]
+    assert "Portimão" in bases
+    assert bases.count("Portimão") >= 3
+    assert bases[0].startswith("Porto")
+
+
 def test_plano_24h_agrega_sectores():
     plano = {
         "modo": "plano_24h",
