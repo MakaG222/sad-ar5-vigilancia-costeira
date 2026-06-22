@@ -61,6 +61,7 @@ def main_smoke() -> int:
         rotas = [
             ("/api/rotas/sortie", {"base": "Portimão", "tipo_patrulha": "droga", "usar_meteo_live": False, "vento_ms": 8}),
             ("/api/rotas/plano24h", {"k_bases": 2, "usar_meteo_live": False, "vento_ms": 8}),
+            ("/api/rotas/plano24h", {"k_bases": 2, "base": "Porto (Sá Carneiro)", "usar_meteo_live": False, "vento_ms": 8}),
             ("/api/rotas/reativo", {"lon": -8.9, "lat": 37.0, "usar_meteo_live": False, "vento_ms": 8}),
         ]
         for path, body in rotas:
@@ -72,6 +73,14 @@ def main_smoke() -> int:
                 data = r.json()
                 if "validacao" not in data or data["validacao"].get("score") is None:
                     falhas.append(f"POST {path} -> sem bloco 'validacao' válido")
+                elif path.endswith("plano24h") and body.get("base") and body.get("k_bases", 2) >= 2:
+                    bases = [rs.get("base", "") for rs in data.get("rotas_sector", [])]
+                    if not any("portim" in b.lower() for b in bases):
+                        falhas.append(f"POST {path} -> plano 24h sem Portimão (bases={bases})")
+                    else:
+                        ok += 1
+                        v = data["validacao"]
+                        print(f"  ok  POST {path}  (qualidade {v['score']}/100 · {v['classe']})")
                 else:
                     ok += 1
                     v = data["validacao"]

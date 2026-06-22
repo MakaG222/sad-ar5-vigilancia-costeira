@@ -49,17 +49,25 @@ async def lifespan(app: FastAPI):
     await loop.run_in_executor(None, aquecer_grelha)
     estado.risco_celulas = await loop.run_in_executor(None, carregar_celulas, 0.12)
     invalidar_cache_clusters()
-    await loop.run_in_executor(None, aquecer_apreensoes)
 
-    # Resposta imediata em /api/estado — sem bloquear em meteo/IPMA/AIS (rede lenta)
+    # Resposta imediata em /api/estado — apreensões Excel em background (arranque mais rápido)
     estado.meteo_bases = meteo_fallback()
     estado.avisos_ipma = ipma_fallback()
     estado.noticias_rss = rss_fallback()
     estado.risco_resumo = resumo_risco()
 
+    async def _warm_apr():
+        await loop.run_in_executor(None, aquecer_apreensoes)
+
     task = asyncio.create_task(worker_loop(_stop))
+    apr_task = asyncio.create_task(_warm_apr())
     yield
     _stop.set()
+    if not apr_task.done():
+        try:
+            await asyncio.wait_for(apr_task, timeout=30.0)
+        except asyncio.TimeoutError:
+            pass
     await task
 
 
@@ -170,6 +178,14 @@ class ExportPlanoReq(BaseModel):
     lat_max: float | None = None
     lon_min: float | None = None
     lon_max: float | None = None
+
+
+def _base_plano24h(base: str | None, k_bases: int = 2, lon_lanc: float | None = None,
+                   lat_lanc: float | None = None) -> str | None:
+    """Plano 24 h com k≥2: ignorar base única do selector (usa Porto+Portimão)."""
+    if k_bases >= 2 and lon_lanc is None and lat_lanc is None:
+        return None
+    return base
 
 
 @app.get("/api/estado")
@@ -442,10 +458,13 @@ def post_rota_sortie(req: RotaSortieReq):
 @app.post("/api/rotas/plano24h")
 def post_rota_24h(req: Rota24Req):
     if req.cenario_id:
-        return executar_cenario(req.cenario_id, ExecutarCenarioReq(vento_ms=req.vento_ms, base=req.base)).get("rota", {})
+        c = obter_cenario(req.cenario_id)
+        base_cen = req.base if c and c.get("base") else None
+        return executar_cenario(req.cenario_id, ExecutarCenarioReq(vento_ms=req.vento_ms, base=base_cen)).get("rota", {})
     reg = _regiao_req(req)
+    base = _base_plano24h(req.base, req.k_bases, req.lon_lanc, req.lat_lanc)
     return rota_plano_24h(
-        req.vento_ms, req.k_bases, req.t_on_h, req.n_alvos, req.base, req.lon_lanc, req.lat_lanc,
+        req.vento_ms, req.k_bases, req.t_on_h, req.n_alvos, base, req.lon_lanc, req.lat_lanc,
         req.tipo_patrulha,
         regiao=reg, cenario_id=req.cenario_id,
         lat_min=req.lat_min, lat_max=req.lat_max, lon_min=req.lon_min, lon_max=req.lon_max,
@@ -482,8 +501,9 @@ def export_plano(req: ExportPlanoReq):
     meta = {"modo": req.modo, "base": req.base, "cenario_id": req.cenario_id, "tipo_patrulha": req.tipo_patrulha}
     kw = _kw_meteo(req)
     if req.modo == "plano24h":
+        base = _base_plano24h(req.base, req.k_bases, req.lon_lanc, req.lat_lanc)
         rota = rota_plano_24h(
-            req.vento_ms, req.k_bases, req.t_on_h, req.n_alvos, req.base, req.lon_lanc, req.lat_lanc,
+            req.vento_ms, req.k_bases, req.t_on_h, req.n_alvos, base, req.lon_lanc, req.lat_lanc,
             req.tipo_patrulha, regiao=reg, cenario_id=req.cenario_id,
             lat_min=req.lat_min, lat_max=req.lat_max, lon_min=req.lon_min, lon_max=req.lon_max,
             **kw,

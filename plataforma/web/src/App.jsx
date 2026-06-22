@@ -643,12 +643,12 @@ export default function App() {
             {estado?.modo_demo ? "Demo AIS" : "AIS live"}
           </div>
           <div className="pill">Navios <b>{estado?.n_navios ?? "—"}</b></div>
-          <div className="pill">Alto risco <b>{estado?.risco_resumo?.n_alto_risco ?? 263}</b></div>
+          <div className="pill">Alto risco <b>{estado?.risco_resumo?.n_alto_risco ?? sadRespostas?.validacao?.n_celulas_patrulha ?? 274}</b></div>
           <div className="pill">
             Frota <b>{frota?.analise_sad?.frota_costeira_24h ?? sadRespostas?.Q2_quantos?.frota_costeira ?? 9}</b>/
             <b>{frota?.analise_sad?.frota_total_alto_risco ?? sadRespostas?.Q2_quantos?.frota_total ?? 9}</b>
           </div>
-          <div className="pill">Ganho <b>{sadRespostas?.validacao?.ganho_sad_vs_aleatorio ?? "2,17"}×</b></div>
+          <div className="pill">Ganho <b>{sadRespostas?.validacao?.ganho_sad_vs_aleatorio ?? "2,13"}×</b></div>
           {modoApresentacao && <div className="pill apresentacao">Apresentação</div>}
           {fontesExternas !== "live" && (
             <div className="pill offline" title="Meteo/IPMA/RSS em cache local">
@@ -1215,7 +1215,7 @@ export default function App() {
               })} />
           )}
 
-          {camadas.rota && waypoints.map((w, i) => (
+          {camadas.rota && modo !== "plano24h" && waypoints.map((w, i) => (
             <Marker key={i} position={[w.lat, w.lon]}
               icon={L.divIcon({
                 className: "",

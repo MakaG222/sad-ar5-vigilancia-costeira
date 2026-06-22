@@ -45,7 +45,7 @@ free_port() {
 }
 
 wait_http() {
-  local url="$1" label="$2" max="${3:-45}"
+  local url="$1" label="$2" max="${3:-90}"
   local i=0
   while (( i < max )); do
     if curl -sf "$url" >/dev/null 2>&1; then

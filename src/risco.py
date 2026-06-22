@@ -3,7 +3,7 @@ risco.py — Construção do índice de risco marítimo multi-ameaça por célul
 
 Cada ameaça é representada por um campo espacial de intensidade (0–1). Por defeito,
 estas intensidades são derivadas de DADOS REAIS e abertos (ver
-dm/construir_dados_reais.py): EMODnet vessel density para pesca e poluição, IOM
+dados/processados/intensidades_reais.csv): EMODnet vessel density para pesca e poluição, IOM
 Missing Migrants para imigração e apreensões geocodificadas para droga. Caso o
 ficheiro de intensidades reais não exista, recorre-se a campos-prior gaussianos
 centrados em âncoras fundamentadas (fallback documentado). O risco final é a média
