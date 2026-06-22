@@ -39,8 +39,11 @@ def ponto_entrada_mar(base: dict, corredor: list[dict]) -> dict | None:
     """Ponto marítimo de lançamento/recuperação mais próximo da base."""
     if not corredor:
         return None
-    bx, by = _xy(base)
     best = min(corredor, key=lambda p: distancia_km(base, p))
+    return _mk_entrada(best)
+
+
+def _mk_entrada(best: dict) -> dict:
     return {
         "lon": best["lon"],
         "lat": best["lat"],
@@ -51,6 +54,19 @@ def ponto_entrada_mar(base: dict, corredor: list[dict]) -> dict | None:
         "dist_costa_km": best.get("dist_costa_km"),
         "risco": best.get("risco", 0),
     }
+
+
+def ponto_entrada_mar_sector(base: dict, corredor: list[dict], sector: list[dict]) -> dict | None:
+    """Entrada marítima no sector de patrulha (não a mais próxima da base globalmente)."""
+    if not corredor or not sector:
+        return ponto_entrada_mar(base, corredor)
+    lat0 = min(p["lat"] for p in sector) - 0.05
+    lat1 = max(p["lat"] for p in sector) + 0.05
+    no_sector = [p for p in corredor if lat0 <= p["lat"] <= lat1]
+    if not no_sector:
+        no_sector = list(sector)
+    best = min(no_sector, key=lambda p: distancia_km(base, p))
+    return _mk_entrada(best)
 
 
 def snap_maritimo(lon: float, lat: float, corredor: list[dict]) -> dict:
@@ -199,6 +215,7 @@ def expandir_rota_maritima(
     corredor: list[dict],
     base: dict | None = None,
     t_on_h: float = 4.0,
+    entrada_mar: dict | None = None,
 ) -> tuple[list[dict], float, dict]:
     """
     Expande sequência de pontos de patrulha em rota marítima completa.
@@ -209,8 +226,8 @@ def expandir_rota_maritima(
     if not nucleo:
         return [], 0.0, {"pernas_terra": 0, "pernas_mar": 0}
 
-    entrada = None
-    if base and corredor:
+    entrada = entrada_mar
+    if entrada is None and base and corredor:
         entrada = ponto_entrada_mar(base, corredor)
 
     seq = list(nucleo)

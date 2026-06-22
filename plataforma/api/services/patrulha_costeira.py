@@ -19,7 +19,7 @@ from geo import (
 from services.grelha_cache import pts_grelha, pts_mar
 from otimizacao import raio_por_autonomia, dimensionar_persistencia, mclp
 from rotas_maritimas import (
-    ponto_entrada_mar, expandir_rota_maritima, orbita_maritima,
+    ponto_entrada_mar, ponto_entrada_mar_sector, expandir_rota_maritima, orbita_maritima,
     snap_maritimo, distancia_km,
 )
 from corredores_operacionais import bonus_corredor, nome_corredor
@@ -81,6 +81,37 @@ def _enriquecer_foco(celulas: list[dict], pts: list[dict], zonas_info: dict, sec
                       and abs(p["lat"] - c["lat"]) < 0.01), None)
         if match and match not in out:
             out.append(match)
+    return out
+
+
+def _celulas_patrol_sector(pts: list[dict], sector: list[dict]) -> list[dict]:
+    """Células marítimas da grelha SAD dentro da faixa lat/lon do sector."""
+    from geo import ponto_em_mar
+    if not sector:
+        return []
+    lat0 = min(p["lat"] for p in sector) - 0.03
+    lat1 = max(p["lat"] for p in sector) + 0.03
+    lon0 = min(p["lon"] for p in sector) - 0.35
+    lon1 = max(p["lon"] for p in sector) + 0.35
+    seen: set[tuple[float, float]] = set()
+    out: list[dict] = []
+    for p in pts:
+        if not ponto_em_mar(p["lon"], p["lat"]):
+            continue
+        if not (lat0 <= p["lat"] <= lat1 and lon0 <= p["lon"] <= lon1):
+            continue
+        k = (round(p["lon"], 3), round(p["lat"], 3))
+        if k in seen:
+            continue
+        seen.add(k)
+        out.append(p)
+    for p in sector:
+        if not ponto_em_mar(p["lon"], p["lat"]):
+            continue
+        k = (round(p["lon"], 3), round(p["lat"], 3))
+        if k not in seen:
+            seen.add(k)
+            out.append(p)
     return out
 
 
@@ -224,6 +255,8 @@ def _pool_varrimento(
     tipo_patrulha: str,
     n_alvos: int = N_ALVOS_SORTIE_PADRAO,
     zona_cluster: dict | None = None,
+    lat_bounds: tuple[float, float] | None = None,
+    obrigatorios: list[dict] | None = None,
 ) -> tuple[list[dict], dict]:
     """
     Selecção de pontos para varrimento operacional:
@@ -240,8 +273,18 @@ def _pool_varrimento(
         return distancia_km(base_mar, p)
 
     cand = [p for p in celulas if dist_b(p) <= alcance * 0.94]
+    if lat_bounds:
+        lat0, lat1 = lat_bounds
+        cand_lat = [p for p in cand if lat0 <= p["lat"] <= lat1]
+        if len(cand_lat) >= 3:
+            cand = cand_lat
     if not cand:
         cand = sorted(celulas, key=dist_b)[:min(n_alvos * 2, len(celulas))]
+        if lat_bounds:
+            lat0, lat1 = lat_bounds
+            cand_lat = [p for p in cand if lat0 <= p["lat"] <= lat1]
+            if cand_lat:
+                cand = cand_lat
 
     # Refinar com células da zona cluster (se disponível)
     if zona_cluster and zona_cluster.get("celulas"):
@@ -259,12 +302,29 @@ def _pool_varrimento(
     if not scored:
         return [], {}
 
-    # Semente: melhor score dentro do alcance
-    pool: list[dict] = [scored[0]]
-    seen = {id(scored[0])}
+    # Semente: melhor score dentro do alcance (ou células obrigatórias da zona de foco)
+    pool: list[dict] = []
+    seen: set[int] = set()
+    for ob in obrigatorios or []:
+        if dist_b(ob) <= alcance * 0.98 and id(ob) not in seen:
+            pool.append(ob)
+            seen.add(id(ob))
+    if not pool and scored:
+        pool = [scored[0]]
+        seen = {id(scored[0])}
+    elif scored and not pool:
+        pool = [scored[0]]
+        seen.add(id(scored[0]))
+    elif scored and pool:
+        for s in scored:
+            if id(s) not in seen:
+                pool.append(s)
+                seen.add(id(s))
+                break
 
     # Crescimento por adjacência (varrimento contíguo)
-    frontier = list(_vizinhos(scored[0], cand, max_km=swath_km * 0.45))
+    anchor = pool[0] if pool else scored[0]
+    frontier = list(_vizinhos(anchor, cand, max_km=swath_km * 0.45))
     while len(pool) < n_alvos and frontier:
         frontier.sort(key=lambda p: _score_celula(p, tipo_patrulha), reverse=True)
         nxt = frontier.pop(0)
@@ -278,10 +338,11 @@ def _pool_varrimento(
             if id(v) not in seen:
                 frontier.append(v)
 
-    # Preencher com bandas N→S (cobertura costeira sistemática)
+    # Preencher com bandas N→S (cobertura costeira sistemática no sector)
     if len(pool) < n_alvos:
         bandas: dict[float, list] = {}
-        for p in cand:
+        fonte_bandas = [p for p in cand if id(p) not in seen] or cand
+        for p in fonte_bandas:
             if id(p) in seen:
                 continue
             bk = round(p["lat"], 1)
@@ -367,15 +428,22 @@ def _rota_sector(
     n_alvos: int = N_ALVOS_SORTIE_PADRAO,
     t_on_h: float = T_ON_SORTIE_H,
     zona_cluster: dict | None = None,
+    sector: list[dict] | None = None,
+    lat_bounds: tuple[float, float] | None = None,
+    obrigatorios: list[dict] | None = None,
 ) -> tuple[list[dict], float, list[dict], dict]:
     """TSP costeiro marítimo com varrimento por zona, limitado pela autonomia AR5."""
-    entrada = ponto_entrada_mar(base, corredor)
+    if sector:
+        entrada = ponto_entrada_mar_sector(base, corredor, sector)
+    else:
+        entrada = ponto_entrada_mar(base, corredor)
     if not entrada:
         return [], 0.0, [], {}
 
     alcance = meteo_ctx["alcance_patrol_km"] * 0.90
     pool, meta_var = _pool_varrimento(
         entrada, celulas, alcance, tipo_patrulha, n_alvos, zona_cluster,
+        lat_bounds=lat_bounds, obrigatorios=obrigatorios,
     )
     if not pool:
         return [], 0.0, [], meta_var
@@ -393,7 +461,7 @@ def _rota_sector(
         nucleo.append({**p, "tipo": "patrulha", "nome": f"Patrulha {j + 1}"})
     nucleo.append(dict(entrada, tipo="entrada_mar", nome="Recuperação marítima"))
 
-    wps, dist, meta = expandir_rota_maritima(nucleo, corredor, base, t_on_h)
+    wps, dist, meta = expandir_rota_maritima(nucleo, corredor, base, t_on_h, entrada_mar=entrada)
     meta = {**meta, **meta_var, "optimizador": "kmeans_varrimento_ortools_tsp"}
     if tipo_patrulha in ("droga", "imigracao", "pesca") and visitados:
         c0 = visitados[0]
@@ -411,20 +479,27 @@ def _rota_sector_local(
     tipo_patrulha: str,
     n_alvos: int,
     t_on_h: float,
+    sector: list[dict] | None = None,
+    lat_bounds: tuple[float, float] | None = None,
 ) -> tuple[list[dict], float, list[dict], dict]:
     """Patrulha do sector local alcançável quando a zona alvo está fora de alcance AR5.
 
-    Selecciona as células de mar mais próximas da entrada da base (round-trip viável),
+    Selecciona as células de mar mais próximas da entrada do sector (round-trip viável),
     prioriza risco entre as próximas e ordena por TSP. Garante que nenhuma base devolve
     rota vazia.
     """
     from geo import ponto_em_mar
-    ent = ponto_entrada_mar(base, corredor)
+    ent = ponto_entrada_mar_sector(base, corredor, sector) if sector else ponto_entrada_mar(base, corredor)
     if not ent:
         return [], 0.0, [], {}
     alc = meteo_ctx["alcance_patrol_km"] * 0.90
     reach = [p for p in pts if ponto_em_mar(p["lon"], p["lat"])
-             and distancia_km(ent, p) <= alc * 0.42]
+             and distancia_km(ent, p) <= alc * 0.94]
+    if lat_bounds:
+        lat0, lat1 = lat_bounds
+        reach_lat = [p for p in reach if lat0 <= p["lat"] <= lat1]
+        if reach_lat:
+            reach = reach_lat
     if not reach:
         return [], 0.0, [], {}
     reach.sort(key=lambda p: distancia_km(ent, p))
@@ -444,7 +519,7 @@ def _rota_sector_local(
     for j, p in enumerate(vis_l):
         nucleo.append({**p, "tipo": "patrulha", "nome": f"Patrulha {j + 1}"})
     nucleo.append(dict(ent, tipo="entrada_mar", nome="Recuperação marítima"))
-    wps, dist, meta_l = expandir_rota_maritima(nucleo, corredor, base, t_on_h)
+    wps, dist, meta_l = expandir_rota_maritima(nucleo, corredor, base, t_on_h, entrada_mar=ent)
     meta = {**meta_l, "estrategia": "sector_local_proximidade",
             "optimizador": "local_proximidade_ortools_tsp", "fallback_local": True}
     return wps, dist, vis_l, meta
@@ -670,22 +745,38 @@ def rota_plano_24h_costeira(
         lon_c, lat_c = inv_proj(cx, cy)
         base = _base_mclp_sector(bases_sel, sector)
 
-        celulas = _enriquecer_foco(list(sector), pts, zonas_info, i + 1 if not regiao else None)
+        celulas_base = _celulas_patrol_sector(pts, sector)
+        celulas = _enriquecer_foco(celulas_base, pts, zonas_info, i + 1 if not regiao else None)
         zona_sec = _zona_do_sector(sector)
         lat_min, lat_max = min(p["lat"] for p in sector), max(p["lat"] for p in sector)
+        lat_bounds = (lat_min - 0.02, lat_max + 0.02)
+
+        zona_foco = next((z for z in zonas_info.get("zonas", []) if z.get("sector") == i + 1), None)
+        obrigatorios: list[dict] = []
+        if zona_foco:
+            for c in zona_foco.get("celulas", []):
+                m = next(
+                    (p for p in celulas
+                     if abs(p["lon"] - c["lon"]) < 0.02 and abs(p["lat"] - c["lat"]) < 0.02),
+                    None,
+                )
+                if m and m not in obrigatorios:
+                    obrigatorios.append(m)
+        n_sector = min(max(n_alvos, len(obrigatorios) or n_alvos), 16)
 
         janela_ini = int((i * JANELA_SECTOR_H) % 24)
         janela_fim = int(((i + 1) * JANELA_SECTOR_H) % 24)
 
         meteo = _meteo_ctx(base, meteo_bases, vento_ms, usar_meteo_live, ton_sector, lat_c, lon_c)
         wps, dist, visitados, meta = _rota_sector(
-            base, corredor, celulas, meteo, tipo_patrulha, n_alvos, ton_sector,
-            zona_cluster=zona_sec,
+            base, corredor, celulas, meteo, tipo_patrulha, n_sector, ton_sector,
+            zona_cluster=zona_sec, sector=sector, lat_bounds=lat_bounds, obrigatorios=obrigatorios,
         )
         sec_fallback = False
         if not visitados:
             wps_l, dist_l, vis_l, meta_l = _rota_sector_local(
-                base, corredor, pts, meteo, tipo_patrulha, n_alvos, ton_sector,
+                base, corredor, celulas, meteo, tipo_patrulha, n_sector, ton_sector,
+                sector=sector, lat_bounds=lat_bounds,
             )
             if vis_l:
                 wps, dist, visitados, meta = wps_l, dist_l, vis_l, meta_l

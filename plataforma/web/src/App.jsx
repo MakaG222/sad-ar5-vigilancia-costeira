@@ -1164,8 +1164,8 @@ export default function App() {
               positions={(s.waypoints || []).map((w) => [w.lat, w.lon])}
               pathOptions={{
                 color: CORES_SECTOR_24H[(s.sector - 1) % 6],
-                weight: modo === "plano24h" ? 3 : 2,
-                opacity: 0.85,
+                weight: modo === "plano24h" ? 4 : 2,
+                opacity: modo === "plano24h" ? 0.92 : 0.85,
               }}
             />
           ))}
