@@ -119,11 +119,15 @@ METRICS_REPLACEMENTS: list[tuple[str, str]] = [
     ),
     (
         "Os resultados indicam concentração de atividade ilícita no Algarve e no eixo Setúbal–Lisboa. O modelo MLP obteve uma ROC-AUC de 0,93 ± 0,02. Porto e Portimão cobrem 100 % do risco (MCLP k=2); para 24 h de vigilância persistente são necessários 9 AR5 na faixa costeira (cinco bases de lançamento) ou 11 AR5 na área total (rede de doze aeródromos). O sistema apresenta um ganho de patrulha de 2,06× (IC95 1,93–2,22) e 85,5 % de acerto em holdout. Foi desenvolvido um protótipo web com demonstração AIS.",
-        "Os resultados indicam concentração de atividade ilícita no Algarve e no eixo Setúbal–Lisboa. O modelo MLP obteve uma ROC-AUC de 0,93 ± 0,02 (a precisão da classe minoritária — 3,4 % marítimo — permanece modesta). Porto e Portimão cobrem 100 % do risco (MCLP k=2); para 24 h persistentes são necessários 9 AR5 com cinco ou doze bases de lançamento. O sistema apresenta ganho de patrulha de 2,17× (IC95 2,01–2,35) e 85,2 % de acerto em holdout (n=54). Geocodificação por concelho: 231/335 apreensões marítimas. Protótipo web com demonstração AIS.",
+        "Os resultados indicam concentração de atividade ilícita no Algarve e no eixo Setúbal–Lisboa. O modelo MLP obteve uma ROC-AUC de 0,93 ± 0,02 (a precisão da classe minoritária — 3,4 % marítimo — permanece modesta). Porto e Portimão cobrem 100 % do risco (MCLP k=2); para 24 h persistentes são necessários 9 AR5 (rede distribuída). O sistema apresenta ganho de patrulha de 2,13× (IC95 1,97–2,31) e 85,2 % de acerto em holdout (n=54). Geocodificação por concelho: 231/335 apreensões marítimas. Protótipo web com demonstração AIS.",
     ),
     (
         "The study area is discretized into 1,156 spatial cells, of which 300 are classified as high-risk.",
+        "The study area is discretized into 1,156 spatial cells, of which 274 are classified as high-risk (threshold 0.5).",
+    ),
+    (
         "The study area is discretized into 1,156 spatial cells, of which 263 are classified as high-risk (threshold 0.5).",
+        "The study area is discretized into 1,156 spatial cells, of which 274 are classified as high-risk (threshold 0.5).",
     ),
     (
         "Results show a strong spatial concentration of illicit activity in the Algarve and the Setúbal–Lisbon axis. The best-performing MLP classifier achieves a ROC-AUC of 0.93 ± 0.02. Optimization results indicate that Porto and Portimão provide full coverage of the identified risk, requiring a fleet of 9 AR5 UAVs for the priority coastal belt or 11 AR5 UAVs for the full high-risk area, enabling continuous 24-hour surveillance. The system achieves a 2.06× patrol efficiency gain (95% CI: 1.93–2.22) and captures 85.5% of maritime seizures in high-risk cells under holdout validation. A web-based prototype with AIS visualization was also implemented.",
@@ -131,7 +135,7 @@ METRICS_REPLACEMENTS: list[tuple[str, str]] = [
     ),
     (
         "Uma única base bem posicionada passa a alcançar a totalidade das 300 células de alto risco, e o problema de cobertura deixa de ser sobre se é possível cobrir o risco, para passar a ser sobre como o cobrir de forma persistente e eficiente.",
-        "Uma única base bem posicionada passa a alcançar a totalidade das 263 células de alto risco, e o problema de cobertura deixa de ser sobre se é possível cobrir o risco, para passar a ser sobre como o cobrir de forma persistente e eficiente.",
+        "Uma única base bem posicionada passa a alcançar a totalidade das 274 células de alto risco, e o problema de cobertura deixa de ser sobre se é possível cobrir o risco, para passar a ser sobre como o cobrir de forma persistente e eficiente.",
     ),
     (
         "A aplicação deste modelo à área total de alto risco (28 494 km²), com a rede completa de doze bases seleccionada pelo trade-off de frota (Secção 5.3), conduz a 4 aeronaves simultâneas e a uma frota total de 11 AR5, com distância média de 55,9 km e tempo de estação de 13,9 h por sortida. Restringindo o esforço à faixa costeira (25 075 km²), alcançável a 90 km a partir de cinco bases — Santa Cruz, Cascais, Sines, Portimão e Faro —, bastam 3 aeronaves simultâneas e uma frota de 9 AR5. Importa não confundir este resultado com o MCLP a duas bases (Porto + Portimão): cobre igualmente 100 % do risco, mas exige 13 AR5 (Tabela B5). Distinguimos, ao longo do relatório, a localização mínima (Q3) do dimensionamento de frota (Q2).",
@@ -151,11 +155,11 @@ METRICS_REPLACEMENTS: list[tuple[str, str]] = [
     ),
     (
         "A barra de estado consolida as métricas canónicas do SAD, 300 células de alto risco, frota 9/11 AR5.",
-        "A barra de estado consolida as métricas canónicas do SAD: 263 células de alto risco, frota 9 AR5, ganho 2,17×.",
+        "A barra de estado consolida as métricas canónicas do SAD: 274 células de alto risco, frota 9 AR5, ganho 2,13×.",
     ),
     (
         "Confirma visualmente Q1–Q3 (setores de risco, bases MCLP, ganho 2,06×), demonstra o impacto do vento no alcance",
-        "Confirma visualmente Q1–Q3 (setores de risco, bases MCLP, ganho 2,17×), demonstra o impacto do vento no alcance",
+        "Confirma visualmente Q1–Q3 (setores de risco, bases MCLP, ganho 2,13×), demonstra o impacto do vento no alcance",
     ),
     (
         "O campo de risco relativo ao tráfico de droga foi reconstruído usando apenas apreensões marítimas até 2022; as camadas de pesca, poluição e imigração mantêm-se estáticas (EMODnet, desembarques PT) — limitação explicitada na Secção 8.2. As 55 apreensões marítimas de 2023–2024 (holdout) foram geocodificadas e confrontadas com o mapa treinado. Os resultados (Figura 21; Tabela 8) mostram que: 85,5 % das apreensões caem no top 20 % de risco; o risco médio no holdout (0,72) excede o global (0,38); ao limiar 0,5, a taxa de acerto (85,5 %) supera o baseline aleatório (36,6 %) em 2,33×.",
@@ -167,15 +171,15 @@ METRICS_REPLACEMENTS: list[tuple[str, str]] = [
     ),
     (
         "Fixado o mesmo número de células patrulhadas (300, igual ao n.º de células de alto risco), comparou-se a captura de risco (fração do risco total coberta) entre três estratégias (Figura 22; Tabela 8):",
-        "Fixado o mesmo número de células patrulhadas (263, igual ao n.º de células de alto risco), comparou-se a captura de risco entre três estratégias (Figura 22; Tabela 8):",
+        "Fixado o mesmo número de células patrulhadas (274, igual ao n.º de células de alto risco), comparou-se a captura de risco entre três estratégias (Figura 22; Tabela 8):",
     ),
     (
         "Dois mapas de risco distintos. O mapa operacional classifica 300 células como alto risco. O mapa de treino do backtest (droga temporal ≤ 2022 + camadas estáticas) regista 423 células ≥ 0,5 a diferença reflete o reforço imigração/EMODnet no produto final, não um erro de pipeline.",
-        "Dois mapas de risco distintos. O mapa operacional classifica 263 células como alto risco. O mapa de treino do backtest (droga e imigração temporais ≤ 2022 + pesca/poluição estáticas) regista 134 células ≥ 0,5.",
+        "Dois mapas de risco distintos. O mapa operacional classifica 274 células como alto risco. O mapa de treino do backtest (droga e imigração temporais ≤ 2022 + pesca/poluição estáticas) regista 170 células ≥ 0,5.",
     ),
     (
         "Ganho 2.06× na patrulha. Com 300 células patrulhadas (25.9 % da grelha), o SAD captura 53.6 % da massa total de risco frente a 26.0 % de uma patrulha aleatória com o mesmo esforço. O índice de Gini (0.400) confirma concentração espacial: o ganho mede sobretudo priorização de risco, não deteção garantida de eventos futuros.",
-        "Ganho 2,17× na patrulha. Com 263 células patrulhadas (22,8 % da grelha), o SAD captura 49,3 % da massa de risco frente a 22,8 % de uma patrulha aleatória. O índice de Gini (0,409) confirma concentração espacial: o ganho mede priorização de risco, não deteção garantida.",
+        "Ganho 2,13× na patrulha. Com 274 células patrulhadas (23,7 % da grelha), o SAD captura 50,4 % da massa de risco frente a 23,7 % de uma patrulha aleatória. O índice de Gini (0,405) confirma concentração espacial: o ganho mede priorização de risco, não deteção garantida.",
     ),
     (
         "Contraste droga isolada vs SAD completo. O backtest usando apenas o campo de droga temporal (top 20 % = 232 células) atinge 0.0 % no holdout (baseline 20.3 %), enquanto o mapa multi-ameaça atinge 85.5 %. Isto demonstra que a integração de pesca/poluição/imigração não é decorativa, é o que permite ao SAD priorizar zonas onde as apreensões recentes efetivamente ocorrem.",
@@ -183,7 +187,7 @@ METRICS_REPLACEMENTS: list[tuple[str, str]] = [
     ),
     (
         "Sensibilidade ao limiar (Figura 25). Variar o limiar a 0,45 / 0,50 / 0,55 altera o n.º de células alto risco de 328 / 300 / 256 e o ganho SAD para 2,01× / 2,07× / 2,15×; a ordem de grandeza da frota (9–11 AR5) e o par MCLP Porto + Portimão mantêm-se.",
-        "Sensibilidade ao limiar (Figura 25). Variar o limiar a 0,45 / 0,50 / 0,55 altera o n.º de células alto risco de 304 / 263 / 218 e o ganho SAD para 2,08× / 2,17× / 2,27×; a ordem de grandeza da frota (9 AR5) e o par MCLP Porto + Portimão mantêm-se.",
+        "Sensibilidade ao limiar (Figura 25). Variar o limiar a 0,45 / 0,50 / 0,55 altera o n.º de células alto risco de 312 / 274 / 227 e o ganho SAD para 2,05× / 2,13× / 2,23×; a ordem de grandeza da frota (9 AR5) e o par MCLP Porto + Portimão mantêm-se.",
     ),
     (
         "Q4 — Frota e bases? Porto + Portimão respondem ao MCLP (cobertura mínima); 9–11 AR5 para 24 h assumem rede costeira distribuída (Tabela 6); índice difuso como majorante prudencial (~27 AR5).",
@@ -208,7 +212,12 @@ METRICS_REPLACEMENTS: list[tuple[str, str]] = [
 ]
 
 GLOBAL_TEXT_REPLACEMENTS: list[tuple[str, str]] = [
-    ("263 células de alto risco", "274 células de alto risco"),
+    ("263 células", "274 células"),
+    ("(263,", "(274,"),
+    ("of which 263 are", "of which 274 are"),
+    ("49,3 %", "50,4 %"),
+    ("22,8 %", "23,7 %"),
+    ("134 células ≥", "170 células ≥"),
     ("300 células de alto risco", "274 células de alto risco"),
     ("19 das 300 células", "19 das 274 células"),
     ("682 células contra as 300", "682 células contra as 274"),
