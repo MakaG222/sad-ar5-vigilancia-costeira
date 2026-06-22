@@ -1,0 +1,130 @@
+{
+  "backtest_temporal": {
+    "ano_corte": 2022,
+    "n_holdout": 55,
+    "n_celulas_alto_risco_train": 423,
+    "frac_celulas_alto_risco": 0.3659,
+    "taxa_acerto_limiar": 0.8545,
+    "taxa_acerto_top20": 0.8545,
+    "baseline_aleatorio_limiar": 0.3662,
+    "baseline_top20": 0.2,
+    "ganho_relativo_limiar": 2.33,
+    "risco_medio_holdout": 0.7234,
+    "risco_medio_global": 0.3786,
+    "anos_holdout": [
+      2023,
+      2024
+    ]
+  },
+  "backtest_somente_droga": {
+    "n_holdout": 55,
+    "n_celulas_top20": 232,
+    "taxa_acerto_top20": 0.0,
+    "taxa_acerto_limiar_05": 0.0,
+    "baseline_top20": 0.2032,
+    "ganho_relativo_top20": 0.0,
+    "nota": "Ranking fixo das 231 células de maior intensidade droga (treino ≤2022)."
+  },
+  "baseline_patrulha": {
+    "n_celulas_patrulha": 300,
+    "captura_sad": 0.5358,
+    "captura_aleatorio_media": 0.26,
+    "captura_aleatorio_std": 0.0087,
+    "captura_uniforme_costeira": 0.3247,
+    "ganho_sad_vs_aleatorio": 2.06,
+    "ganho_sad_vs_uniforme": 1.65,
+    "ganho_ic95_bootstrap": [
+      1.93,
+      2.22
+    ],
+    "pct_risco_total_capturado_sad": 53.6
+  },
+  "validacao_imigracao": {
+    "n_eventos": 20,
+    "taxa_zona_alto_risco_imigracao": 0.7,
+    "r_imigracao_medio_eventos": 0.68,
+    "ambito": "Portugal Continental — desembarques marítimos SEF/Frontex/CP"
+  },
+  "validacao_imigracao_holdout": {
+    "ano_corte": 2022,
+    "n_treino": 12,
+    "n_teste": 8,
+    "limiar_imigracao_treino": 0.01,
+    "taxa_acerto_holdout": 1.0,
+    "r_imigracao_medio_teste": 0.676,
+    "nota": "KDE só com desembarques ≤ ano_corte; limiar = percentil 75 do campo treinado."
+  },
+  "sensibilidade_limiar": {
+    "limiares": [
+      {
+        "limiar": 0.45,
+        "n_celulas_alto_risco": 328,
+        "pct_grelha": 28.4,
+        "captura_sad_pct": 57.0,
+        "captura_aleatorio_pct": 28.4,
+        "ganho_vs_aleatorio": 2.01
+      },
+      {
+        "limiar": 0.5,
+        "n_celulas_alto_risco": 300,
+        "pct_grelha": 26.0,
+        "captura_sad_pct": 53.6,
+        "captura_aleatorio_pct": 25.9,
+        "ganho_vs_aleatorio": 2.07
+      },
+      {
+        "limiar": 0.55,
+        "n_celulas_alto_risco": 256,
+        "pct_grelha": 22.1,
+        "captura_sad_pct": 47.6,
+        "captura_aleatorio_pct": 22.1,
+        "ganho_vs_aleatorio": 2.15
+      }
+    ],
+    "referencia": 0.5
+  },
+  "decomposicao_ganho": {
+    "n_celulas_patrulha": 300,
+    "frac_celulas_patrolhadas": 0.2595,
+    "frac_risco_em_top_n": 0.5358,
+    "captura_sad": 0.5358,
+    "captura_aleatorio": 0.26,
+    "ganho_observado": 2.06,
+    "ganho_teorico_se_risco_uniforme": 2.06,
+    "indice_gini_risco": 0.4,
+    "interpretacao": "O ganho reflecte sobretudo a concentração espacial do risco (Gini elevado): patrulhar as mesmas N células por ranking captura mais massa de risco que uma selecção aleatória com N células."
+  },
+  "nota_mapas_risco": {
+    "n_alto_risco_operacional": 300,
+    "n_alto_risco_backtest_treino": 423,
+    "limiar": 0.5,
+    "nota": "O mapa operacional (300 células) usa todas as fontes e pesos finais; o backtest treina só a droga até 2022 e inclui camadas estáticas — daí mais células acima do limiar no treino temporal (~423)."
+  },
+  "resposta_objetivo": {
+    "Q1_onde": {
+      "resposta": "Sul/SW (Algarve), corredor Lisboa–Setúbal e NW/Peniche; imigração reforçada no Algarve (desembarques PT); corredores AIS a O de Lisboa.",
+      "zonas_patrulha": [
+        "Algarve",
+        "Setúbal–Lisboa",
+        "NW/Peniche"
+      ]
+    },
+    "Q2_quantos": {
+      "resposta": "9 AR5 faixa costeira (24 h); 11 AR5 área total de alto risco.",
+      "frota_total": 11,
+      "frota_costeira": 9,
+      "n_simultaneos": 3
+    },
+    "Q3_bases": {
+      "resposta": "2 bases: Porto (Sá Carneiro), Portimão.",
+      "bases": [
+        "Porto (Sá Carneiro)",
+        "Portimão"
+      ],
+      "frac_risco": 1.0
+    }
+  },
+  "n_incidentes_iom": 0,
+  "n_desembarques_pt": 20,
+  "n_apreensoes_maritimas_recentes": 187
+}

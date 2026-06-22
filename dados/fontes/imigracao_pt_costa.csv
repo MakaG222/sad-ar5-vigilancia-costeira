@@ -1,0 +1,21 @@
+ano,lat,lon,n_pessoas,distrito,rota,fonte,notas
+2019,36.98,-7.92,42,Faro,Atlântico Ocidental,SEF/ACM agregado,Desembarques marítimos irregulars — costa Algarve (PT continental)
+2019,37.05,-8.45,18,Faro,Atlântico Ocidental,SEF/ACM agregado,Vila do Bispo / Sagres
+2020,37.02,-7.88,35,Faro,Atlântico Ocidental,SEF/ACM agregado,Algarve central
+2020,37.12,-8.02,22,Faro,Atlântico Ocidental,Frontex ARA 2021,Embarcações pequenas — rota WA
+2021,36.95,-7.75,58,Faro,Atlântico Ocidental,SEF/ACM agregado,Pico 2021 — Algarve oriental
+2021,37.08,-8.35,31,Faro,Atlântico Ocidental,SEF/ACM agregado,Lagos / Portimão offshore
+2022,37.00,-7.85,47,Faro,Atlântico Ocidental,Frontex ARA 2023,Travessias marítimas PT continental
+2022,38.12,-8.75,12,Setúbal,Atlântico Ocidental,SEF/ACM agregado,Desembarque costa Setúbal
+2023,36.92,-7.68,89,Faro,Atlântico Ocidental,SEF/ACM 2023,Reforço rota atlântica pós-Canárias
+2023,37.04,-8.28,54,Faro,Atlântico Ocidental,SEF/ACM 2023,Algarve ocidental
+2023,37.15,-8.55,28,Faro,Atlântico Ocidental,CP comunicado,Interceção ao largo Cabo S. Vicente (destino PT)
+2024,36.97,-7.82,76,Faro,Atlântico Ocidental,SEF/ACM 2024,Costa Algarve
+2024,37.06,-8.40,41,Faro,Atlântico Ocidental,SEF/ACM 2024,Corredor marítimo SW
+2024,38.05,-8.82,19,Setúbal,Atlântico Ocidental,SEF/ACM 2024,Sines / costa alentejana
+2019,37.92,-8.78,8,Setúbal,Mediterrâneo,Frontex ARA 2020,Embarcações ao largo Tróia (PT)
+2020,38.45,-9.05,6,Lisboa,Mediterrâneo,SEF/ACM agregado,Ao largo costa caparica (água territorial PT)
+2021,37.88,-8.90,14,Setúbal,Atlântico Ocidental,SEF/ACM agregado,Entrada marítima baixa Setúbal
+2022,36.88,-7.55,33,Faro,Atlântico Ocidental,IOM/Frontex,Travessia longa — aproximação Algarve E
+2023,37.20,-8.60,25,Faro,Atlântico Ocidental,CP/Frontex,Operação conjunta costa SW
+2024,38.00,-8.95,11,Setúbal,Atlântico Ocidental,SEF/ACM 2024,Faixa costeira Alentejo

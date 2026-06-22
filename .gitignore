@@ -1,0 +1,16 @@
+.DS_Store
+*.pyc
+__pycache__/
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.venv/
+*.log
+.env
+.run/
+
+plataforma/api/.venv/
+plataforma/web/node_modules/
+plataforma/web/dist/
+plataforma/.run/
+plataforma/.env

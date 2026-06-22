@@ -1,0 +1,72 @@
+{
+  "metodo": "AHP (Saaty)",
+  "ambito": "Portugal Continental — vigilância costeira AR5",
+  "matriz": [
+    [
+      1.0,
+      1.5,
+      2.0,
+      2.0
+    ],
+    [
+      0.6666666666666666,
+      1.0,
+      1.25,
+      1.25
+    ],
+    [
+      0.5,
+      0.8,
+      1.0,
+      1.0
+    ],
+    [
+      0.5,
+      0.8,
+      1.0,
+      1.0
+    ]
+  ],
+  "pesos_ahp": {
+    "droga": 0.3757,
+    "pesca": 0.2425,
+    "poluicao": 0.1909,
+    "imigracao": 0.1909
+  },
+  "pesos_adotados": {
+    "droga": 0.35,
+    "pesca": 0.25,
+    "poluicao": 0.2,
+    "imigracao": 0.2
+  },
+  "consistency_ratio": 0.0002,
+  "consistente": true,
+  "sensibilidade_pesos_pm10pct": {
+    "droga": {
+      "n_alto_mais_10pct": 276,
+      "n_alto_menos_10pct": 297,
+      "delta_celulas_mais": -9,
+      "delta_celulas_menos": 12
+    },
+    "pesca": {
+      "n_alto_mais_10pct": 294,
+      "n_alto_menos_10pct": 282,
+      "delta_celulas_mais": 9,
+      "delta_celulas_menos": -3
+    },
+    "poluicao": {
+      "n_alto_mais_10pct": 289,
+      "n_alto_menos_10pct": 280,
+      "delta_celulas_mais": 4,
+      "delta_celulas_menos": -5
+    },
+    "imigracao": {
+      "n_alto_mais_10pct": 284,
+      "n_alto_menos_10pct": 289,
+      "delta_celulas_mais": -1,
+      "delta_celulas_menos": 4
+    },
+    "n_alto_referencia": 285
+  },
+  "nota": "Pesos adotados ≈ AHP (diferença máx. 0,02); robustez confirmada por sensibilidade ±10%."
+}

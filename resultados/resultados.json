@@ -1,0 +1,687 @@
+{
+  "meta": {
+    "n_celulas": 1156,
+    "limiar_alto_risco": 0.5,
+    "risco_total": 390.2787314628855,
+    "AR5": {
+      "autonomia_h": 16.0,
+      "autonomia_max_h": 20.0,
+      "velocidade_cruzeiro_kmh": 100.0,
+      "teto_servico_m": 3600.0,
+      "mtow_kg": 180.0,
+      "payload_kg": 50.0,
+      "envergadura_m": 7.3,
+      "alcance_rlos_km": 230.0,
+      "alcance_satcom": "ilimitado",
+      "sortie_ida_km": 1500.0,
+      "sortie_ida_volta_km": 750.0,
+      "sensores": "EO/IR giro-estabilizado (zoom 30x), AIS, EPIRB, SIGINT"
+    },
+    "pesos": {
+      "droga": 0.35,
+      "pesca": 0.25,
+      "poluicao": 0.2,
+      "imigracao": 0.2
+    }
+  },
+  "cenarios": {
+    "A_conservador_vento": {
+      "calmo (4 m/s)": {
+        "vento_ms": 4.0,
+        "fator": 1.0,
+        "raio_km": 90.0,
+        "set_cover": {
+          "bases_sel": [
+            4,
+            6,
+            9,
+            10,
+            11
+          ],
+          "n_bases": 5,
+          "n_alvo": 300,
+          "n_cobrivel": 264,
+          "n_nao_cobrivel": 36,
+          "limiar": 0.5
+        },
+        "frota": {
+          "n_bases": 5,
+          "transito_h": 1.8,
+          "t_on_h": 13.2,
+          "sorties_dia_por_base": 1.82,
+          "drones_por_base": 3,
+          "drones_simultaneos": 5,
+          "frota_total": 17
+        },
+        "bases_nomes": [
+          "Santa Cruz",
+          "Cascais (Tires)",
+          "Sines",
+          "Portimão",
+          "Faro"
+        ]
+      },
+      "moderado (12 m/s)": {
+        "vento_ms": 12.0,
+        "fator": 0.85,
+        "raio_km": 76.5,
+        "set_cover": {
+          "bases_sel": [
+            4,
+            6,
+            9,
+            10,
+            11
+          ],
+          "n_bases": 5,
+          "n_alvo": 300,
+          "n_cobrivel": 237,
+          "n_nao_cobrivel": 63,
+          "limiar": 0.5
+        },
+        "frota": {
+          "n_bases": 5,
+          "transito_h": 1.53,
+          "t_on_h": 13.47,
+          "sorties_dia_por_base": 1.78,
+          "drones_por_base": 3,
+          "drones_simultaneos": 5,
+          "frota_total": 17
+        },
+        "bases_nomes": [
+          "Santa Cruz",
+          "Cascais (Tires)",
+          "Sines",
+          "Portimão",
+          "Faro"
+        ]
+      },
+      "forte (18 m/s)": {
+        "vento_ms": 18.0,
+        "fator": 0.7,
+        "raio_km": 62.99999999999999,
+        "set_cover": {
+          "bases_sel": [
+            4,
+            6,
+            9,
+            10,
+            11
+          ],
+          "n_bases": 5,
+          "n_alvo": 300,
+          "n_cobrivel": 191,
+          "n_nao_cobrivel": 109,
+          "limiar": 0.5
+        },
+        "frota": {
+          "n_bases": 5,
+          "transito_h": 1.26,
+          "t_on_h": 13.74,
+          "sorties_dia_por_base": 1.75,
+          "drones_por_base": 3,
+          "drones_simultaneos": 5,
+          "frota_total": 17
+        },
+        "bases_nomes": [
+          "Santa Cruz",
+          "Cascais (Tires)",
+          "Sines",
+          "Portimão",
+          "Faro"
+        ]
+      }
+    },
+    "B_alcance_AR5": {
+      "R_reach_km": 650.0,
+      "reach_set_cover": {
+        "bases_sel": [
+          9
+        ],
+        "n_bases": 1,
+        "n_alvo": 300,
+        "n_cobrivel": 300,
+        "n_nao_cobrivel": 0,
+        "limiar": 0.5
+      },
+      "R_long_km": 450.0,
+      "k_recomendado": 12,
+      "frac_risco_recomendado": 0.9999999999999989,
+      "bases_recomendadas": [
+        "Porto (Sá Carneiro)",
+        "Aveiro (S. Jacinto)",
+        "Braga",
+        "Monte Real (BA5)",
+        "Santa Cruz",
+        "Sintra (BA1)",
+        "Cascais (Tires)",
+        "Lisboa (H. Delgado)",
+        "Montijo (BA6)",
+        "Sines",
+        "Portimão",
+        "Faro"
+      ],
+      "frota_persistencia_total": {
+        "area_alto_risco_km2": 28494.0,
+        "swath_km": 30.0,
+        "revisita_h": 3.0,
+        "n_simultaneos": 4,
+        "dist_media_km": 55.9,
+        "dist_max_km": 115.2,
+        "t_on_h": 13.88,
+        "multiplicador_rotacao": 2.47,
+        "disponibilidade": 0.7,
+        "frota_total": 11
+      },
+      "frota_persistencia_costeira": {
+        "area_alto_risco_km2": 25075.0,
+        "swath_km": 30.0,
+        "revisita_h": 3.0,
+        "n_simultaneos": 3,
+        "dist_media_km": 49.9,
+        "dist_max_km": 89.7,
+        "t_on_h": 14.0,
+        "multiplicador_rotacao": 2.45,
+        "disponibilidade": 0.7,
+        "frota_total": 9
+      },
+      "n_alto_risco": 300,
+      "area_celula_km2": 95.0
+    }
+  },
+  "frota_vs_k": [
+    {
+      "k": 1,
+      "frac_risco": 0.9999999999999989,
+      "frota_total": 12,
+      "n_sim": 4,
+      "dist_media_km": 120.1,
+      "t_on_h": 12.6,
+      "bases": [
+        "Montijo (BA6)"
+      ]
+    },
+    {
+      "k": 2,
+      "frac_risco": 0.9999999999999989,
+      "frota_total": 13,
+      "n_sim": 4,
+      "dist_media_km": 138.8,
+      "t_on_h": 12.22,
+      "bases": [
+        "Porto (Sá Carneiro)",
+        "Portimão"
+      ]
+    },
+    {
+      "k": 3,
+      "frac_risco": 0.9999999999999989,
+      "frota_total": 13,
+      "n_sim": 4,
+      "dist_media_km": 138.8,
+      "t_on_h": 12.22,
+      "bases": [
+        "Porto (Sá Carneiro)",
+        "Portimão"
+      ]
+    },
+    {
+      "k": 4,
+      "frac_risco": 0.9999999999999989,
+      "frota_total": 13,
+      "n_sim": 4,
+      "dist_media_km": 138.8,
+      "t_on_h": 12.22,
+      "bases": [
+        "Porto (Sá Carneiro)",
+        "Portimão"
+      ]
+    },
+    {
+      "k": 5,
+      "frac_risco": 0.9999999999999989,
+      "frota_total": 13,
+      "n_sim": 4,
+      "dist_media_km": 138.8,
+      "t_on_h": 12.22,
+      "bases": [
+        "Porto (Sá Carneiro)",
+        "Portimão"
+      ]
+    },
+    {
+      "k": 6,
+      "frac_risco": 0.9999999999999989,
+      "frota_total": 13,
+      "n_sim": 4,
+      "dist_media_km": 138.8,
+      "t_on_h": 12.22,
+      "bases": [
+        "Porto (Sá Carneiro)",
+        "Portimão"
+      ]
+    },
+    {
+      "k": 7,
+      "frac_risco": 0.9999999999999989,
+      "frota_total": 13,
+      "n_sim": 4,
+      "dist_media_km": 138.8,
+      "t_on_h": 12.22,
+      "bases": [
+        "Porto (Sá Carneiro)",
+        "Portimão"
+      ]
+    },
+    {
+      "k": 8,
+      "frac_risco": 0.9999999999999989,
+      "frota_total": 13,
+      "n_sim": 4,
+      "dist_media_km": 138.8,
+      "t_on_h": 12.22,
+      "bases": [
+        "Porto (Sá Carneiro)",
+        "Portimão"
+      ]
+    },
+    {
+      "k": 9,
+      "frac_risco": 0.9999999999999989,
+      "frota_total": 13,
+      "n_sim": 4,
+      "dist_media_km": 138.8,
+      "t_on_h": 12.22,
+      "bases": [
+        "Porto (Sá Carneiro)",
+        "Portimão"
+      ]
+    },
+    {
+      "k": 10,
+      "frac_risco": 0.9999999999999989,
+      "frota_total": 13,
+      "n_sim": 4,
+      "dist_media_km": 138.8,
+      "t_on_h": 12.22,
+      "bases": [
+        "Porto (Sá Carneiro)",
+        "Portimão"
+      ]
+    },
+    {
+      "k": 11,
+      "frac_risco": 0.9999999999999989,
+      "frota_total": 13,
+      "n_sim": 4,
+      "dist_media_km": 138.8,
+      "t_on_h": 12.22,
+      "bases": [
+        "Porto (Sá Carneiro)",
+        "Portimão"
+      ]
+    },
+    {
+      "k": 12,
+      "frac_risco": 0.9999999999999989,
+      "frota_total": 11,
+      "n_sim": 4,
+      "dist_media_km": 55.9,
+      "t_on_h": 13.88,
+      "bases": [
+        "Porto (Sá Carneiro)",
+        "Aveiro (S. Jacinto)",
+        "Braga",
+        "Monte Real (BA5)",
+        "Santa Cruz",
+        "Sintra (BA1)",
+        "Cascais (Tires)",
+        "Lisboa (H. Delgado)",
+        "Montijo (BA6)",
+        "Sines",
+        "Portimão",
+        "Faro"
+      ]
+    }
+  ],
+  "tradeoff": {
+    "R90": [
+      {
+        "k": 1,
+        "bases_sel": [
+          6
+        ],
+        "risco_coberto": 101.54450688217231,
+        "frac_risco": 0.26018457757498614
+      },
+      {
+        "k": 2,
+        "bases_sel": [
+          6,
+          10
+        ],
+        "risco_coberto": 164.00214075896687,
+        "frac_risco": 0.4202179815032095
+      },
+      {
+        "k": 3,
+        "bases_sel": [
+          4,
+          9,
+          10
+        ],
+        "risco_coberto": 192.56208123580274,
+        "frac_risco": 0.49339629785620254
+      },
+      {
+        "k": 4,
+        "bases_sel": [
+          1,
+          4,
+          9,
+          10
+        ],
+        "risco_coberto": 217.46730251982464,
+        "frac_risco": 0.5572102320428527
+      },
+      {
+        "k": 5,
+        "bases_sel": [
+          0,
+          3,
+          6,
+          9,
+          10
+        ],
+        "risco_coberto": 229.67989653127407,
+        "frac_risco": 0.5885022114076335
+      },
+      {
+        "k": 6,
+        "bases_sel": [
+          1,
+          2,
+          4,
+          6,
+          9,
+          10
+        ],
+        "risco_coberto": 239.8935984725902,
+        "frac_risco": 0.6146724869515557
+      },
+      {
+        "k": 7,
+        "bases_sel": [
+          1,
+          2,
+          4,
+          6,
+          9,
+          10,
+          11
+        ],
+        "risco_coberto": 245.40606984526187,
+        "frac_risco": 0.6287969342459527
+      },
+      {
+        "k": 8,
+        "bases_sel": [
+          1,
+          2,
+          3,
+          4,
+          6,
+          9,
+          10,
+          11
+        ],
+        "risco_coberto": 249.15156031520684,
+        "frac_risco": 0.6383938970522673
+      },
+      {
+        "k": 9,
+        "bases_sel": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          6,
+          9,
+          10,
+          11
+        ],
+        "risco_coberto": 251.99900201146215,
+        "frac_risco": 0.645689815242793
+      },
+      {
+        "k": 10,
+        "bases_sel": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          6,
+          9,
+          10,
+          11
+        ],
+        "risco_coberto": 251.99900201146215,
+        "frac_risco": 0.645689815242793
+      },
+      {
+        "k": 11,
+        "bases_sel": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          6,
+          9,
+          10,
+          11
+        ],
+        "risco_coberto": 251.99900201146215,
+        "frac_risco": 0.645689815242793
+      },
+      {
+        "k": 12,
+        "bases_sel": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11
+        ],
+        "risco_coberto": 251.99900201146215,
+        "frac_risco": 0.645689815242793
+      }
+    ],
+    "R_long": [
+      {
+        "k": 1,
+        "bases_sel": [
+          8
+        ],
+        "risco_coberto": 390.27873146288505,
+        "frac_risco": 0.9999999999999989
+      },
+      {
+        "k": 2,
+        "bases_sel": [
+          0,
+          10
+        ],
+        "risco_coberto": 390.27873146288505,
+        "frac_risco": 0.9999999999999989
+      },
+      {
+        "k": 3,
+        "bases_sel": [
+          0,
+          10
+        ],
+        "risco_coberto": 390.27873146288505,
+        "frac_risco": 0.9999999999999989
+      },
+      {
+        "k": 4,
+        "bases_sel": [
+          0,
+          10
+        ],
+        "risco_coberto": 390.27873146288505,
+        "frac_risco": 0.9999999999999989
+      },
+      {
+        "k": 5,
+        "bases_sel": [
+          0,
+          10
+        ],
+        "risco_coberto": 390.27873146288505,
+        "frac_risco": 0.9999999999999989
+      },
+      {
+        "k": 6,
+        "bases_sel": [
+          0,
+          10
+        ],
+        "risco_coberto": 390.27873146288505,
+        "frac_risco": 0.9999999999999989
+      },
+      {
+        "k": 7,
+        "bases_sel": [
+          0,
+          10
+        ],
+        "risco_coberto": 390.27873146288505,
+        "frac_risco": 0.9999999999999989
+      },
+      {
+        "k": 8,
+        "bases_sel": [
+          0,
+          10
+        ],
+        "risco_coberto": 390.27873146288505,
+        "frac_risco": 0.9999999999999989
+      },
+      {
+        "k": 9,
+        "bases_sel": [
+          0,
+          10
+        ],
+        "risco_coberto": 390.27873146288505,
+        "frac_risco": 0.9999999999999989
+      },
+      {
+        "k": 10,
+        "bases_sel": [
+          0,
+          10
+        ],
+        "risco_coberto": 390.27873146288505,
+        "frac_risco": 0.9999999999999989
+      },
+      {
+        "k": 11,
+        "bases_sel": [
+          0,
+          10
+        ],
+        "risco_coberto": 390.27873146288505,
+        "frac_risco": 0.9999999999999989
+      },
+      {
+        "k": 12,
+        "bases_sel": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11
+        ],
+        "risco_coberto": 390.27873146288505,
+        "frac_risco": 0.9999999999999989
+      }
+    ],
+    "R90_km": 90.0,
+    "R_long_km": 450.0
+  },
+  "sensibilidade": {
+    "Largura útil do sensor (km)": [
+      {
+        "valor": 20,
+        "frota_total": 14
+      },
+      {
+        "valor": 30,
+        "frota_total": 11
+      },
+      {
+        "valor": 40,
+        "frota_total": 9
+      },
+      {
+        "valor": 50,
+        "frota_total": 6
+      }
+    ],
+    "Tempo de revisita (h)": [
+      {
+        "valor": 2,
+        "frota_total": 14
+      },
+      {
+        "valor": 3,
+        "frota_total": 11
+      },
+      {
+        "valor": 4,
+        "frota_total": 9
+      },
+      {
+        "valor": 6,
+        "frota_total": 6
+      }
+    ],
+    "Disponibilidade da frota": [
+      {
+        "valor": 0.6,
+        "frota_total": 13
+      },
+      {
+        "valor": 0.7,
+        "frota_total": 11
+      },
+      {
+        "valor": 0.8,
+        "frota_total": 10
+      },
+      {
+        "valor": 0.9,
+        "frota_total": 9
+      }
+    ]
+  }
+}
