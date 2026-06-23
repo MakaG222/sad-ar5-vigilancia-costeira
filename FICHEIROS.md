@@ -32,7 +32,12 @@ O repositório contém a **plataforma operacional** e o **núcleo analítico**; 
 | `.env.example` | Variáveis opcionais (AIS, demo fixa, CORS, portas) |
 | `ARCHITECTURE.md` | Diagrama técnico, endpoints e fluxo de dados |
 | `APRESENTACAO.md` | Roteiro de demonstração (~5 min) |
-| `docs/screenshot.png` | Captura da interface para o README |
+| `docs/screenshot.png` | Vista geral da interface |
+| `docs/mapa-risco.png` | Mapa de risco e respostas SAD |
+| `docs/plano-24h.png` | Plano operacional 24 h |
+| `docs/alertas.png` | Painel de alertas |
+| `docs/validacao-ciencia.png` | Backtest e baseline |
+| `docs/dimensionamento-frota.png` | Dimensionamento de frota |
 
 ### `plataforma/api/` — backend FastAPI
 

@@ -6,7 +6,7 @@ Use esta lista no dia da apresentação ou na véspera.
 
 - [ ] Python 3.10+ e Node 18+ instalados **ou** Docker Desktop
 - [ ] Repositório clonado: `git clone https://github.com/MakaG222/sad-ar5-vigilancia-costeira.git`
-- [ ] Branch/tag actual: `v1.0-defesa` (ou `main` actualizado)
+- [ ] Branch/tag actual: **`v1.0-final`** (ou `main` actualizado)
 
 ## Opção A — Docker (recomendado)
 

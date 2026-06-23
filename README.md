@@ -1,9 +1,10 @@
 # SAD AR5 — Plataforma operacional
 
 Protótipo web quasi-tempo-real para apoio à vigilância costeira com o UAV TEKEVER AR5:
-mapa de risco, meteo, AIS, rotas de patrulha, plano 24 h, dimensionamento de frota, alertas e **painel de validação científica** (backtest, baseline, sensibilidade AHP).
+mapa de risco, meteo, AIS, rotas de patrulha, plano 24 h, dimensionamento de frota, alertas e painel de validação científica (backtest, baseline, sensibilidade AHP).
 
-**Repositório:** https://github.com/MakaG222/sad-ar5-vigilancia-costeira
+**Repositório:** https://github.com/MakaG222/sad-ar5-vigilancia-costeira  
+**Entrega final:** tag [`v1.0-final`](https://github.com/MakaG222/sad-ar5-vigilancia-costeira/releases/tag/v1.0-final)
 
 ![CI](https://github.com/MakaG222/sad-ar5-vigilancia-costeira/actions/workflows/ci.yml/badge.svg)
 
@@ -11,82 +12,62 @@ mapa de risco, meteo, AIS, rotas de patrulha, plano 24 h, dimensionamento de fro
 
 ---
 
-## Estrutura do repositório
+## Relatório académico
 
-O projeto divide-se em quatro zonas: a **plataforma** (API + interface), o **núcleo geoespacial** (`src/`), os **dados** de entrada e os **resultados** pré-calculados que a API carrega em runtime.
+O **relatório escrito (Word/PDF) não está neste repositório**. Este GitHub contém apenas a **plataforma executável** e o **núcleo analítico** (`src/`, `dados/`, `resultados/`).
 
-```
-sad-ar5-vigilancia-costeira/
-│
-├── plataforma/                 # Aplicação executável (arrancar daqui)
-│   ├── api/                    # Backend FastAPI (porta 8080)
-│   │   ├── main.py             # Ponto de entrada da API
-│   │   ├── requirements.txt    # Dependências Python da API
-│   │   ├── services/           # Módulos: risco, rotas, meteo, AIS, alertas, …
-│   │   ├── worker.py           # Tarefas periódicas (meteo, AIS, RSS)
-│   │   └── smoke_test.py       # Teste rápido dos endpoints
-│   ├── web/                    # Frontend React + Vite (porta 5173)
-│   │   ├── src/App.jsx         # Interface principal (mapa Leaflet)
-│   │   └── package.json        # Dependências Node.js
-│   ├── setup-mac.sh            # Instalação única — macOS
-│   ├── setup-win.ps1           # Instalação única — Windows
-│   ├── start-mac.sh            # Arranque — macOS
-│   ├── start-win.ps1           # Arranque — Windows
-│   ├── stop-mac.sh             # Paragem — macOS
-│   ├── stop-win.ps1            # Paragem — Windows
-│   ├── Dockerfile              # Imagem Docker (API + web build)
-│   ├── docker-compose.yml      # Arranque com um comando
-│   ├── start-docker.sh         # Build + run Docker
-│   ├── stop-docker.sh          # Parar contentor
-│   ├── .env.example            # Variáveis opcionais (copiar para .env)
-│   ├── docs/screenshot.png     # Captura da interface (README)
-│   ├── APRESENTACAO.md         # Roteiro de demonstração (~5 min)
-│   └── README.md               # Detalhe adicional da plataforma
-│
-├── src/                        # Núcleo analítico (importado pela API)
-│   ├── config.py               # Parâmetros AR5, bases, pesos, grelha
-│   ├── geo.py                  # Operações geoespaciais
-│   ├── risco.py                # Índice multi-ameaça por célula
-│   ├── otimizacao.py           # MCLP e dimensionamento de frota
-│   ├── rotas_maritimas.py      # Cálculo de rotas marítimas
-│   ├── corredores_operacionais.py
-│   └── apreensoes_mapa.py      # Camada de apreensões
-│
-├── dados/
-│   ├── fontes/                 # Dados brutos (EMODnet, IOM, imigração, …)
-│   └── processados/
-│       └── intensidades_reais.csv   # Grelha costeira processada (1 156 células)
-│
-├── resultados/                 # JSON pré-calculados consumidos pela API
-│   ├── resultados.json         # Respostas Q1–Q3, sensibilidade, frota
-│   ├── validacao.json          # Backtest, baseline, ganho 2,13×
-│   ├── camadas_mapa.json       # Incidentes, apreensões, geometrias
-│   └── ahp_pesos.json          # Pesos AHP das ameaças
-│
-├── requirements.txt            # Dependências Python do núcleo (src/)
-└── README.md                   # Este ficheiro
-```
-
-**Fluxo em runtime:** o utilizador abre o frontend (`plataforma/web`); este comunica com a API (`plataforma/api`); a API importa módulos de `src/` e lê ficheiros de `dados/` e `resultados/`.
-
-> O relatório académico (Word/PDF) **não** faz parte deste repositório.
+O relatório é entregue em separado (ficheiro local ou plataforma da Escola Naval). Os ficheiros `*.docx` e `*.pdf` na raiz estão listados em [`.gitignore`](.gitignore) de forma intencional — não serão versionados aqui.
 
 ---
 
-## Pré-requisitos
+## Perguntas SAD — respostas finais
 
-| Ferramenta | macOS | Windows |
-|------------|-------|---------|
-| Python | 3.10+ (`brew install python`) | 3.10+ ([python.org](https://www.python.org/downloads/) — marcar *Add to PATH*) |
-| Node.js | 18+ (`brew install node`) | 18+ ([nodejs.org](https://nodejs.org/)) |
-| npm | Incluído com Node | Incluído com Node |
-| Docker (opcional) | [Docker Desktop](https://www.docker.com/products/docker-desktop/) | Idem |
+| Pergunta | Resposta |
+|----------|----------|
+| **Q1 — Onde patrulhar?** | Sul/SW (Algarve), corredor Lisboa–Setúbal e NW/Peniche; imigração reforçada no Algarve; corredores AIS a O de Lisboa. |
+| **Q2 — Quantos AR5?** | **9 AR5** para vigilância persistente 24 h na faixa costeira (3 simultâneos), com bases em Santa Cruz, Cascais, Sines, Portimão e Faro. |
+| **Q3 — Onde colocar bases?** | **MCLP (k=2): Porto (Sá Carneiro) + Portimão** — cobrem 100 % do risco alto com o mínimo de instalações. |
+
+Fonte canónica: [`resultados/validacao.json`](resultados/validacao.json) → `resposta_objetivo`.  
+Nota metodológica: Q3 é a **localização mínima** (MCLP); Q2 usa a **rede costeira distribuída** para o dimensionamento de frota. Com apenas Porto + Portimão seriam necessários **10 AR5**.
 
 ---
 
-## Arranque — Docker (recomendado)
+## Capturas da plataforma
 
-Um único comando — **sem instalar Python nem Node** no sistema anfitrião:
+### Mapa de risco e respostas SAD
+
+![Mapa de risco SAD com zonas de patrulha](plataforma/docs/mapa-risco.png)
+
+### Plano 24 h (6 sectores)
+
+![Plano operacional 24 h com sectores e rotas](plataforma/docs/plano-24h.png)
+
+### Alertas (meteo, RSS, cobertura)
+
+![Painel de alertas operacionais](plataforma/docs/alertas.png)
+
+### Validação científica (backtest e baseline)
+
+![Painel Ciência — backtest e comparador SAD](plataforma/docs/validacao-ciencia.png)
+
+### Dimensionamento de frota
+
+![Resumo de frota AR5 e métricas Q1–Q3](plataforma/docs/dimensionamento-frota.png)
+
+---
+
+## Limitações
+
+- **AIS e meteo** podem operar em modo *demo* ou *fallback* local quando não há ligação à Internet ou chave AISStream (`AISSTREAM_API_KEY`). O modo determinístico (`DEMO_DETERMINISTICO=1`, activo por omissão no Docker) fixa navios e meteo para apresentações reprodutíveis.
+- O **modelo de risco** depende da qualidade e resolução dos dados históricos (EMODnet, UNODC, IOM, desembarques PT). Camadas de pesca e poluição são estáticas no backtest temporal por ausência de série anual nas fontes abertas.
+- O índice SAD é **apoio à decisão**, não previsão absoluta de incidentes: indica *onde* concentrar esforço de patrulha com base em padrões passados e proxies geoespaciais, sujeito a incerteza operacional e evolução do fenómeno.
+
+---
+
+## Arranque rápido
+
+### Docker (recomendado)
 
 ```bash
 git clone https://github.com/MakaG222/sad-ar5-vigilancia-costeira.git
@@ -95,81 +76,77 @@ chmod +x start-docker.sh stop-docker.sh
 ./start-docker.sh
 ```
 
-→ **http://localhost:8080** (interface + API no mesmo contentor)
+→ **http://localhost:8080**
 
-Parar: `./stop-docker.sh` · Logs: `docker compose logs -f`
+Parar: `./stop-docker.sh`
 
-Variáveis opcionais: copiar `.env.example` → `.env` (ex. `AISSTREAM_API_KEY`, `DEMO_DETERMINISTICO=1` para demo fixa na defesa).
+### macOS / Windows (desenvolvimento)
+
+Ver secções detalhadas abaixo ou [`plataforma/README.md`](plataforma/README.md).
+
+### Verificação antes da demonstração
+
+```bash
+cd plataforma/api
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
+python smoke_test.py        # 28/28 OK
+python ../../scripts/verificar_integridade.py
+```
+
+---
+
+## Estrutura do repositório
+
+```
+sad-ar5-vigilancia-costeira/
+├── plataforma/          # API FastAPI + frontend React (arrancar daqui)
+├── src/                 # Núcleo analítico (risco, MCLP, rotas)
+├── dados/               # Fontes de entrada e intensidades processadas
+├── resultados/          # JSON pré-calculados (validação, frota, mapa)
+├── scripts/             # Integridade e manifest
+├── FICHEIROS.md         # Guia detalhado de cada pasta
+└── README.md            # Este ficheiro
+```
+
+**Fluxo em runtime:** o frontend (`plataforma/web`) comunica com a API (`plataforma/api`); a API importa `src/` e lê `dados/` e `resultados/`.
+
+---
+
+## Pré-requisitos
+
+| Ferramenta | macOS | Windows |
+|------------|-------|---------|
+| Python | 3.10+ | 3.10+ |
+| Node.js | 18+ | 18+ |
+| Docker (opcional) | Docker Desktop | Docker Desktop |
 
 ---
 
 ## Arranque — macOS
 
-Abra o **Terminal**, clone o repositório (se ainda não o fez) e entre na pasta `plataforma`:
-
 ```bash
 git clone https://github.com/MakaG222/sad-ar5-vigilancia-costeira.git
 cd sad-ar5-vigilancia-costeira/plataforma
-```
-
-**1. Instalação** (só na primeira vez — cria o ambiente Python e instala pacotes npm):
-
-```bash
 chmod +x setup-mac.sh start-mac.sh stop-mac.sh
-./setup-mac.sh
+./setup-mac.sh    # primeira vez
+./start-mac.sh    # → http://localhost:5173
 ```
 
-**2. Arranque** da aplicação (API + interface):
-
-```bash
-./start-mac.sh
-```
-
-O script abre automaticamente o browser em **http://localhost:5173**.  
-Documentação interativa da API: **http://127.0.0.1:8080/docs**
-
-**3. Paragem:**
-
-```bash
-./stop-mac.sh
-```
-
-Logs em `plataforma/.run/api.log` e `plataforma/.run/web.log`.
+API: **http://127.0.0.1:8080/docs** · Parar: `./stop-mac.sh`
 
 ---
 
 ## Arranque — Windows
 
-Abra o **PowerShell**, clone o repositório e entre na pasta `plataforma`:
-
 ```powershell
 git clone https://github.com/MakaG222/sad-ar5-vigilancia-costeira.git
 cd sad-ar5-vigilancia-costeira\plataforma
-```
-
-**1. Instalação** (só na primeira vez):
-
-```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 .\setup-win.ps1
+.\start-win.ps1   # → http://localhost:5173
 ```
 
-**2. Arranque** da aplicação:
-
-```powershell
-.\start-win.ps1
-```
-
-O browser abre em **http://localhost:5173**.  
-API: **http://127.0.0.1:8080/docs**
-
-**3. Paragem:**
-
-```powershell
-.\stop-win.ps1
-```
-
-Logs em `plataforma\.run\api.log` e `plataforma\.run\web.log`.
+Parar: `.\stop-win.ps1`
 
 ---
 
@@ -177,11 +154,12 @@ Logs em `plataforma\.run\api.log` e `plataforma\.run\web.log`.
 
 | Endereço | Descrição |
 |----------|-----------|
-| http://localhost:8080 | **Docker** — interface + API |
+| http://localhost:8080 | Docker — interface + API |
 | http://localhost:5173 | Desenvolvimento local — interface (Vite) |
-| http://127.0.0.1:8080/docs | API Swagger (endpoints REST) |
-| http://127.0.0.1:8080/api/health | Health check (Docker / monitorização) |
-| http://127.0.0.1:8080/api/estado | Estado operacional do sistema |
+| http://127.0.0.1:8080/docs | API Swagger |
+| http://127.0.0.1:8080/api/health | Health check |
+
+Variáveis opcionais: copiar `plataforma/.env.example` → `plataforma/.env`.
 
 ---
 
@@ -189,39 +167,17 @@ Logs em `plataforma\.run\api.log` e `plataforma\.run\web.log`.
 
 | Sintoma | Solução |
 |---------|---------|
-| Porta 8080 ou 5173 ocupada | Correr `./stop-mac.sh` ou `.\stop-win.ps1` e voltar a arrancar |
-| `python3` / `node` não encontrado | Instalar pré-requisitos (tabela acima) |
+| Porta 8080 ou 5173 ocupada | `./stop-mac.sh` ou `.\stop-win.ps1` |
+| Meteo/AIS em modo demo | Normal sem Internet; ver secção [Limitações](#limitações) |
 | Erro na primeira execução | Voltar a correr `setup-mac.sh` ou `setup-win.ps1` |
-| Meteo/AIS em modo demo | Normal sem ligação à Internet; a plataforma usa dados locais de fallback |
-
----
-
-## Verificação rápida (smoke test)
-
-Antes de uma demonstração ou após alterações à API:
-
-```bash
-cd plataforma/api
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
-python smoke_test.py
-```
-
-Deve terminar com **28/28 OK**. Inclui verificação de que o plano 24 h com MCLP automático cobre Porto e Portimão.
-
-Testes unitários com cobertura mínima 50%:
-
-```bash
-pytest tests/ -q --cov=services --cov=../../src --cov-fail-under=50
-python ../../scripts/verificar_integridade.py
-```
 
 ---
 
 ## Documentação adicional
 
-- [`FICHEIROS.md`](FICHEIROS.md) — guia da estrutura e função de cada pasta
+- [`FICHEIROS.md`](FICHEIROS.md) — guia da estrutura do repositório
 - [`CHANGELOG.md`](CHANGELOG.md) — histórico de versões
 - [`CHECKLIST_DEFESA.md`](CHECKLIST_DEFESA.md) — verificação pré-apresentação
+- [`resultados/README.md`](resultados/README.md) — artefactos JSON
 - [`plataforma/ARCHITECTURE.md`](plataforma/ARCHITECTURE.md) — diagrama e endpoints
-- [`plataforma/README.md`](plataforma/README.md) — arranque manual (dois terminais) e lista de funcionalidades
 - [`plataforma/APRESENTACAO.md`](plataforma/APRESENTACAO.md) — roteiro de demonstração (~5 min)

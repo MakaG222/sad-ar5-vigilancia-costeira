@@ -1,5 +1,16 @@
 # Changelog — SAD AR5 Plataforma
 
+## [1.0-final] — 2026-06-23 — entrega CT302
+
+### Adicionado
+- Release final com ZIP do código-fonte
+- Secção **Perguntas SAD**, **Limitações** e capturas reais no README
+- `resultados/README.md` e clarificação explícita: relatório académico fora do Git
+
+### Alterado
+- Mensagens de commit e nomenclatura `percentil_20` (sem linguagem informal)
+- Documentação alinhada para revisão pelo docente
+
 ## [1.3.0] — 2026-06-23
 
 ### Adicionado
