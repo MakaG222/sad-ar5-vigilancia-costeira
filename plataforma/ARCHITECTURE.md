@@ -59,6 +59,10 @@ flowchart TB
 | GET | `/api/estado` | `store.py` | Estado em memória |
 | GET | `/api/risco/celulas` | `risco_mapa.py` | Grelha `src/` |
 | GET | `/api/sad/respostas` | `sad_respostas.py` | `validacao.json` |
+| GET | `/api/ciencia/backtest` | `ciencia.py` | Backtest temporal (`validacao.json`) |
+| GET | `/api/ciencia/baseline` | `ciencia.py` | Comparador SAD vs aleatório vs uniforme |
+| GET | `/api/ciencia/ahp` | `ciencia.py` | Pesos AHP (`ahp_pesos.json`) |
+| GET | `/api/ciencia/sensibilidade-pesos` | `ciencia.py` | Recálculo de células alto risco |
 | GET | `/api/frota/dimensionar` | `frota.py` | Grelha + `validacao.json` |
 | POST | `/api/rotas/sortie` | `patrulha_costeira.py` | OR-Tools TSP |
 | POST | `/api/rotas/plano24h` | `patrulha_costeira.py` | 6 sectores costeiros |

@@ -203,6 +203,19 @@ select, input {
   border: none;
 }
 .autonomy-hint { margin: 2px 0 8px; line-height: 1.4; }
+.ciencia-panel h2 { margin-top: 0; }
+.baseline-bars { margin: 8px 0; }
+.baseline-row { display: flex; align-items: center; gap: 6px; margin: 4px 0; font-size: 0.78rem; }
+.baseline-label { width: 88px; flex-shrink: 0; }
+.baseline-track { flex: 1; height: 8px; background: #2c3e50; border-radius: 4px; overflow: hidden; }
+.baseline-fill { height: 100%; background: #7f8c8d; border-radius: 4px; }
+.baseline-fill.sad { background: #e67e22; }
+.baseline-val { width: 36px; text-align: right; }
+.peso-slider { display: grid; grid-template-columns: 72px 1fr 36px; gap: 6px; align-items: center; margin: 6px 0; font-size: 0.78rem; }
+.peso-slider input[type=range] { width: 100%; }
+.stat.muted { color: #95a5a6; font-size: 0.72rem; }
+.stat .up { color: #e74c3c; }
+.stat .down { color: #2ecc71; }
 .map-legend { max-height: 72vh; overflow-y: auto; pointer-events: auto; }
 @keyframes slideIn {
   from { transform: translateX(100%); opacity: 0; }

@@ -1,5 +1,19 @@
 # Changelog — SAD AR5 Plataforma
 
+## [1.3.0] — 2026-06-23
+
+### Adicionado
+- Painel **Ciência** na UI: backtest temporal, comparador SAD vs aleatório vs uniforme, sliders AHP
+- Endpoints `/api/ciencia/*` e recálculo de risco com pesos alternativos (`src/risco.aplicar_pesos`)
+- Testes E2E Playwright, testes de alertas e validação científica
+- `FICHEIROS.md` — guia da estrutura do repositório
+- Rate limiting nas rotas de patrulha (`slowapi`), CORS configurável
+- Git LFS para rasters `.tif`, script `regenerar_intensidades.py`
+
+### Alterado
+- Cobertura mínima de testes: 50%
+- Refactor frontend: `PainelCiencia`, `hooks/useToast`
+
 ## [1.2.0] — 2026-06-23
 
 ### Adicionado

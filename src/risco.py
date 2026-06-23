@@ -166,6 +166,30 @@ def calcular_risco(pts: list[dict], xlsx_path: str) -> np.ndarray:
     return risco
 
 
+def aplicar_pesos(pts: list[dict], pesos: dict[str, float], limiar: float = 0.5) -> dict:
+    """Recalcula risco global com pesos AHP alternativos (campos r_* já na grelha)."""
+    chaves = ("droga", "pesca", "poluicao", "imigracao")
+    w = {k: max(0.0, float(pesos.get(k, 0))) for k in chaves}
+    total = sum(w.values()) or 1.0
+    w = {k: v / total for k, v in w.items()}
+
+    riscos = np.zeros(len(pts))
+    for i, p in enumerate(pts):
+        riscos[i] = sum(w[k] * p.get(f"r_{k}", 0.0) for k in chaves)
+    mx = float(riscos.max()) if len(riscos) else 0.0
+    if mx > 0:
+        riscos = riscos / mx
+
+    alto = int((riscos >= limiar).sum())
+    return {
+        "pesos": w,
+        "n_alto_risco": alto,
+        "risco_medio": round(float(riscos.mean()), 4) if len(riscos) else 0.0,
+        "risco_max": round(float(riscos.max()), 4) if len(riscos) else 0.0,
+        "limiar": limiar,
+    }
+
+
 if __name__ == "__main__":
     from geo import gerar_procura
     pts = gerar_procura()

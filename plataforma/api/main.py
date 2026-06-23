@@ -7,14 +7,13 @@ Arranque:
     uvicorn main:app --reload --port 8080
 """
 from __future__ import annotations
-
 import asyncio
 import os
 import sys
 import time
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -23,28 +22,27 @@ from pydantic import BaseModel, Field
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 sys.path.insert(0, os.path.join(ROOT, "src"))
 
-from services import demo_mode, ws_hub
-from services.ais import modo_ais
-from services.alertas import registar_incidente_manual
-from services.bases import listar_bases
-from services.camadas_mapa import (
-    apreensoes_maritimas,
-    aquecer_apreensoes,
-    incidentes_iom,
-    resumo_camadas,
-)
-from services.cenarios import listar_cenarios, obter_cenario
-from services.exportar import exportar_plano_missao, exportar_risco_geojson, exportar_validacao
-from services.frota import dimensionar
-from services.grelha_cache import aquecer_grelha
-from services.offline_fallback import ipma_fallback, meteo_fallback, rss_fallback
-from services.risco_mapa import carregar_celulas, get_celulas, resumo_risco
-from services.rotas import rota_plano_24h, rota_reativa, rota_sortie
-from services.sad_respostas import carregar_respostas
-from services.zonas_cluster import clusters_risco, invalidar_cache_clusters
-from services.zonas_patrulha import listar_tipos, zonas_por_tipo
 from store import estado
 from worker import worker_loop
+from services.rotas import rota_sortie, rota_plano_24h, rota_reativa
+from services.frota import dimensionar
+from services.alertas import registar_incidente_manual
+from services import ws_hub
+from services.bases import listar_bases
+from services.zonas_patrulha import zonas_por_tipo, listar_tipos
+from services.zonas_cluster import clusters_risco, invalidar_cache_clusters
+from services.cenarios import listar_cenarios, obter_cenario
+from services.sad_respostas import carregar_respostas
+from services.camadas_mapa import incidentes_iom, apreensoes_maritimas, resumo_camadas, aquecer_apreensoes
+from services.grelha_cache import aquecer_grelha
+from services.risco_mapa import carregar_celulas, get_celulas, resumo_risco
+from services.offline_fallback import meteo_fallback, ipma_fallback, rss_fallback
+from services.exportar import exportar_risco_geojson, exportar_validacao, exportar_plano_missao
+from services.ais import modo_ais
+from services import demo_mode
+from services.ciencia import (
+    ahp_pesos, backtest_temporal, baseline_patrulha, sensibilidade_pesos,
+)
 
 _stop = asyncio.Event()
 _started_at = time.time()
@@ -88,15 +86,30 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="SAD AR5 — Plataforma Operacional",
     description="Meteo, AIS, rotas, frota e alertas — costa portuguesa",
-    version="0.4.0",
+    version="1.3.0",
     lifespan=lifespan,
 )
+
+_cors_raw = os.environ.get("CORS_ORIGINS", "*").strip()
+_cors_origins = ["*"] if _cors_raw == "*" else [o.strip() for o in _cors_raw.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_cors_origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+try:
+    from slowapi import Limiter, _rate_limit_exceeded_handler
+    from slowapi.errors import RateLimitExceeded
+    from slowapi.util import get_remote_address
+
+    limiter = Limiter(key_func=get_remote_address, default_limits=["200/minute"])
+    app.state.limiter = limiter
+    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+except ImportError:  # pragma: no cover
+    limiter = None
 
 
 class RegiaoReq(BaseModel):
@@ -349,6 +362,39 @@ def get_sad_respostas():
     return carregar_respostas()
 
 
+@app.get("/api/ciencia/backtest")
+def get_ciencia_backtest():
+    return backtest_temporal()
+
+
+@app.get("/api/ciencia/baseline")
+def get_ciencia_baseline():
+    return baseline_patrulha()
+
+
+@app.get("/api/ciencia/ahp")
+def get_ciencia_ahp():
+    return ahp_pesos()
+
+
+@app.get("/api/ciencia/sensibilidade-pesos")
+def get_ciencia_sensibilidade(
+    droga: float | None = None,
+    pesca: float | None = None,
+    poluicao: float | None = None,
+    imigracao: float | None = None,
+):
+    return sensibilidade_pesos(droga, pesca, poluicao, imigracao)
+
+
+def _route_limit(rule: str):
+    def deco(fn):
+        if limiter is not None:
+            return limiter.limit(rule)(fn)
+        return fn
+    return deco
+
+
 def _regiao_req(req) -> dict | None:
     if req.regiao:
         return req.regiao.model_dump(exclude_none=True)
@@ -473,7 +519,8 @@ async def simular_alerta(req: SimularReq):
 
 
 @app.post("/api/rotas/sortie")
-def post_rota_sortie(req: RotaSortieReq):
+@_route_limit("40/minute")
+def post_rota_sortie(request: Request, req: RotaSortieReq):
     if req.cenario_id:
         out = executar_cenario(req.cenario_id, ExecutarCenarioReq(vento_ms=req.vento_ms, base=req.base))
         return out.get("rota", out)
@@ -487,7 +534,8 @@ def post_rota_sortie(req: RotaSortieReq):
 
 
 @app.post("/api/rotas/plano24h")
-def post_rota_24h(req: Rota24Req):
+@_route_limit("20/minute")
+def post_rota_24h(request: Request, req: Rota24Req):
     if req.cenario_id:
         c = obter_cenario(req.cenario_id)
         base_cen = req.base if c and c.get("base") else None
@@ -504,7 +552,8 @@ def post_rota_24h(req: Rota24Req):
 
 
 @app.post("/api/rotas/reativo")
-def post_rota_reativo(req: RotaReativaReq):
+@_route_limit("40/minute")
+def post_rota_reativo(request: Request, req: RotaReativaReq):
     return rota_reativa(
         req.lon, req.lat, req.vento_ms, req.base, req.lon_lanc, req.lat_lanc, req.t_on_h,
         **_kw_meteo(req),

@@ -1,7 +1,7 @@
 # SAD AR5 — Plataforma operacional
 
 Protótipo web quasi-tempo-real para apoio à vigilância costeira com o UAV TEKEVER AR5:
-mapa de risco, meteo, AIS, rotas de patrulha, plano 24 h, dimensionamento de frota e alertas.
+mapa de risco, meteo, AIS, rotas de patrulha, plano 24 h, dimensionamento de frota, alertas e **painel de validação científica** (backtest, baseline, sensibilidade AHP).
 
 **Repositório:** https://github.com/MakaG222/sad-ar5-vigilancia-costeira
 
@@ -206,12 +206,12 @@ source .venv/bin/activate   # Windows: .venv\Scripts\activate
 python smoke_test.py
 ```
 
-Deve terminar com **24/24 OK**. Inclui verificação de que o plano 24 h com MCLP automático cobre Porto e Portimão.
+Deve terminar com **28/28 OK**. Inclui verificação de que o plano 24 h com MCLP automático cobre Porto e Portimão.
 
-Testes unitários com cobertura mínima 30%:
+Testes unitários com cobertura mínima 50%:
 
 ```bash
-pytest tests/ -q --cov=services --cov=../../src --cov-fail-under=30
+pytest tests/ -q --cov=services --cov=../../src --cov-fail-under=50
 python ../../scripts/verificar_integridade.py
 ```
 
@@ -219,6 +219,7 @@ python ../../scripts/verificar_integridade.py
 
 ## Documentação adicional
 
+- [`FICHEIROS.md`](FICHEIROS.md) — guia da estrutura e função de cada pasta
 - [`CHANGELOG.md`](CHANGELOG.md) — histórico de versões
 - [`CHECKLIST_DEFESA.md`](CHECKLIST_DEFESA.md) — verificação pré-apresentação
 - [`plataforma/ARCHITECTURE.md`](plataforma/ARCHITECTURE.md) — diagrama e endpoints

@@ -14,6 +14,7 @@ import { isBaseMclp, iconBase, ventoDaBase, corRisco, rotuloRisco } from "./util
 import { MapClickHandler, MapResize } from "./components/MapControls.jsx";
 import StatusStrip from "./components/StatusStrip.jsx";
 import MapLegend from "./components/MapLegend.jsx";
+import PainelCiencia from "./components/PainelCiencia.jsx";
 
 export default function App() {
   const [estado, setEstado] = useState(null);
@@ -538,6 +539,7 @@ export default function App() {
           {[
             ["operacao", "Operação"],
             ["camadas", "Camadas"],
+            ["ciencia", "Ciência"],
             ["mais", "Mais"],
           ].map(([id, lbl]) => (
             <button
@@ -763,6 +765,8 @@ export default function App() {
             </div>
           </>
         )}
+
+        {hudTab === "ciencia" && <PainelCiencia />}
 
         {hudTab === "mais" && (
           <>

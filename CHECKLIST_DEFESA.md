@@ -28,7 +28,7 @@ python smoke_test.py    # esperado: TUDO OK — 24 verificações
 pytest tests/ -q        # esperado: todos passam
 ```
 
-- [ ] Smoke test: **24/24 OK**
+- [ ] Smoke test: **28/28 OK**
 - [ ] Pytest: **0 falhas**
 
 ## Arranque local (sem Docker)

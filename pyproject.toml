@@ -21,6 +21,6 @@ source = ["plataforma/api/services", "src"]
 omit = ["*/tests/*", "*/__pycache__/*"]
 
 [tool.coverage.report]
-fail_under = 30
+fail_under = 50
 show_missing = false
 skip_empty = true
