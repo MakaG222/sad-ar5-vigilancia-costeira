@@ -1,0 +1,4 @@
+cenário,R km,bases,frota 24h,fora alcance
+calmo (4 m/s),90.0,5,17,36
+moderado (12 m/s),76.5,5,17,63
+forte (18 m/s),62.99999999999999,5,17,109

@@ -37,15 +37,20 @@ Pipeline analítico completo: apreensões UNODC → AHP → risco multi-ameaça 
 | 2 | Pesos AHP das ameaças |
 | 3 | Grelha marítima e índice de risco |
 | 4 | Otimização — cobertura, MCLP, frota 24 h |
-| 5 | Validação — backtest temporal e baseline |
-| 6 | Respostas SAD e exportação |
+| 5 | Validação — backtest, baseline, imigração, sensibilidade |
+| 6 | Data Mining — clustering, classificação ML, fuzzy, PCA |
+| 7 | Fontes EMODnet / intensidades reais |
+| 8 | Pipeline SAD completo (`main.py` + `validacao.py`) |
+| 9 | Respostas SAD Q1–Q3 e exportação |
+| 10 | Galeria de todas as figuras |
+| 11 | Plataforma web — capturas de ecrã |
 
 > **Colab:** faz upload da pasta `dados/` (ou do ZIP do repositório) e corre *Runtime → Run all*.
 """))
 
 cells.append(md("## 0. Setup — instalação e imports"))
 cells.append(code("""# Descomente no Colab ou na 1.ª execução local:
-# !pip install -q numpy pandas matplotlib seaborn openpyxl pulp scikit-learn shapely
+# !pip install -q numpy pandas matplotlib seaborn openpyxl pulp scikit-learn shapely imbalanced-learn
 
 import csv
 import json
@@ -92,13 +97,16 @@ except ImportError:
       REPO = Path("/Users/miguelgaspar/Downloads/sad-ar5-vigilancia-costeira-clone")
   XLSX_PATH = XLSX_PATH or str(REPO / "dados/fontes/apreensoes_droga_PT.xlsx")
   CSV_INT = REPO / "dados/processados/intensidades_reais.csv"
+  PROC = REPO / "dados/processados"
   FIGDIR = REPO / "resultados/figuras"
+  DMFIG = REPO / "resultados/dm"
   OUTDIR = REPO / "resultados"
   SRC = REPO / "src"
   sys.path.insert(0, str(SRC))
   os.chdir(SRC)
 
 FIGDIR.mkdir(parents=True, exist_ok=True)
+DMFIG.mkdir(parents=True, exist_ok=True)
 LIMIAR = 0.5
 ANO_CORTE = 2022
 
@@ -202,6 +210,8 @@ sns.barplot(x=mar.values, y=mar.index, ax=axes[1,1], hue=mar.index, legend=False
 axes[1,1].set_title("(d) % marítimas por grupo")
 fig.suptitle("EDA — apreensões Portugal 2011–2024", fontsize=14)
 fig.tight_layout(); plt.show()
+fig.savefig(DMFIG/"eda_panorama.png", dpi=140)
+fig.savefig(DMFIG/"eda_boxplot_regiao.png", dpi=140)
 """))
 
 cells.append(md("### 1.4 Boxplots e região N/C/S"))
@@ -470,16 +480,18 @@ def dimensionar_frota(n_bases, raio_km):
     dpb = math.ceil(sorties/DISPONIBILIDADE)
     return {"frota_total": math.ceil(n_bases*dpb*(1+RESERVA_FROTA)), "t_on_h": round(t_on,2)}
 
-def dimensionar_persistencia(pts_alto, bases, bases_sel, area_celula):
+def dimensionar_persistencia(pts_alto, bases, bases_sel, area_celula,
+                             swath_km=SENSOR_SWATH_KM, revisita_h=TEMPO_REVISITA_H,
+                             disponibilidade=DISPONIBILIDADE):
     V, E = AR5["velocidade_cruzeiro_kmh"], AR5["autonomia_h"]
     area_hr = len(pts_alto)*area_celula
-    n_sim = max(1, math.ceil(area_hr/(V*SENSOR_SWATH_KM*TEMPO_REVISITA_H)))
+    n_sim = max(1, math.ceil(area_hr/(V*swath_km*revisita_h)))
     bx = np.array([bases[b]["x"] for b in bases_sel])
     by = np.array([bases[b]["y"] for b in bases_sel])
     ds = [np.sqrt((bx-p["x"])**2+(by-p["y"])**2).min() for p in pts_alto]
     d_med = float(np.mean(ds))
     t_on = max(E-2*d_med/V-RESERVA_H, 0.5)
-    M = (24/t_on)/DISPONIBILIDADE
+    M = (24/t_on)/disponibilidade
     frota = math.ceil(n_sim*M*(1+RESERVA_FROTA))
     return {"n_simultaneos":n_sim,"frota_total":frota,"dist_media_km":round(d_med,1),"t_on_h":round(t_on,2)}
 
@@ -517,7 +529,7 @@ df_cen = pd.DataFrame(rows_cen)
 display(df_cen)
 """))
 
-cells.append(md("### 4.5 Figuras de cobertura e trade-off (Fig. 03–05)"))
+cells.append(md("### 4.5 Figuras de cobertura (Fig. 03–04) e trade-off (Fig. 05)"))
 cells.append(code("""def circulo_lonlat(base, raio_km, n=120):
     ang = np.linspace(0, 2*np.pi, n)
     xs = base["x"]+raio_km*np.cos(ang); ys = base["y"]+raio_km*np.sin(ang)
@@ -525,9 +537,11 @@ cells.append(code("""def circulo_lonlat(base, raio_km, n=120):
 
 lon_a, lat_a = np.array(lon), np.array(lat)
 r_a = np.array(rv); alto = r_a >= LIMIAR
+bases_rec = rec["bases_sel"]
+
+# --- Fig 03 cobertura conservadora ---
 a = matriz_cobertura(pts, bases, R_calmo); sel = sc_calmo["bases_sel"]
 cob = a[sel].sum(axis=0)>0
-
 fig, ax = plt.subplots(figsize=(7.5,8.5))
 ax.scatter(lon_a[~alto], lat_a[~alto], c="#ddd", s=6, marker="s")
 ax.scatter(lon_a[alto&cob], lat_a[alto&cob], c="#1a9850", s=12, marker="s", label="Coberto")
@@ -541,7 +555,25 @@ ax.set_xlim(LON_MIN,LON_MAX); ax.set_ylim(LAT_MIN,LAT_MAX)
 ax.set_title(f"Fig. 03 — Cobertura conservadora R={R_calmo:.0f} km"); ax.legend(fontsize=8)
 fig.tight_layout(); plt.show(); fig.savefig(FIGDIR/"03_cobertura_conservador.png",dpi=140)
 
-# Fig 05
+# --- Fig 04 cobertura MCLP recomendado ---
+aL = matriz_cobertura(pts, bases, R_long)
+cobL = aL[bases_rec].sum(axis=0)>0 if bases_rec else np.zeros(len(pts), bool)
+fig, ax = plt.subplots(figsize=(7.5,8.5))
+ax.scatter(lon_a[~alto], lat_a[~alto], c="#ddd", s=6, marker="s")
+ax.scatter(lon_a[alto&cobL], lat_a[alto&cobL], c="#1a9850", s=12, marker="s", label="Coberto")
+ax.scatter(lon_a[alto&~cobL], lat_a[alto&~cobL], c="#d73027", s=12, marker="s", label="Não coberto")
+for b in bases_rec:
+    clon,clat = circulo_lonlat(bases[b], R_long)
+    ax.plot(clon,clat,color="navy",lw=1.2,alpha=0.8)
+    ax.plot(bases[b]["lon"],bases[b]["lat"],"^",color="navy",ms=10)
+    ax.annotate(bases[b]["nome"], (bases[b]["lon"],bases[b]["lat"]), fontsize=7, xytext=(3,3), textcoords="offset points")
+ax.plot(COSTA_LON,COSTA_LAT,color="#444",lw=1.5)
+ax.set_xlim(LON_MIN,LON_MAX); ax.set_ylim(LAT_MIN,LAT_MAX)
+ax.set_title(f"Fig. 04 — MCLP k={k_rec}, R={R_long:.0f} km ({100*rec['frac_risco']:.0f}% risco)")
+ax.legend(fontsize=8)
+fig.tight_layout(); plt.show(); fig.savefig(FIGDIR/"04_cobertura_alargado.png",dpi=140)
+
+# --- Fig 05 trade-off ---
 fig, ax = plt.subplots(figsize=(8,5.5))
 ax.plot([c["k"] for c in curva], [100*c["frac_risco"] for c in curva], "-o", label=f"R={R_long:.0f} km")
 ax.axhline(95,color="gray",ls="--"); ax.set_xlabel("Nº bases"); ax.set_ylabel("% risco coberto")
@@ -549,23 +581,46 @@ ax.set_title("Fig. 05 — Trade-off MCLP"); ax.legend(); ax.grid(alpha=0.3)
 fig.tight_layout(); plt.show(); fig.savefig(FIGDIR/"05_tradeoff.png",dpi=140)
 """))
 
-cells.append(md("### 4.6 Figuras de frota e sensibilidade (Fig. 06–08)"))
-cells.append(code("""# Fig 06
+cells.append(md("### 4.6 Sensibilidade da frota (Fig. 07) e cenários de vento (Fig. 06, 08)"))
+cells.append(code("""# Sensibilidade (swath, revisita, disponibilidade) — Fig. 07
+sens_frota = {"Largura sensor (km)": [], "Tempo revisita (h)": [], "Disponibilidade": []}
+for w in [20, 30, 40, 50]:
+    d = dimensionar_persistencia(pts_alto, bases, bases_rec, area_celula, swath_km=w)
+    sens_frota["Largura sensor (km)"].append({"valor": w, "frota_total": d["frota_total"]})
+for t in [2, 3, 4, 6]:
+    d = dimensionar_persistencia(pts_alto, bases, bases_rec, area_celula, revisita_h=t)
+    sens_frota["Tempo revisita (h)"].append({"valor": t, "frota_total": d["frota_total"]})
+for a in [0.6, 0.7, 0.8, 0.9]:
+    d = dimensionar_persistencia(pts_alto, bases, bases_rec, area_celula, disponibilidade=a)
+    sens_frota["Disponibilidade"].append({"valor": a, "frota_total": d["frota_total"]})
+
+fig, axes = plt.subplots(1, 3, figsize=(14, 4.5))
+for ax, (titulo, dados) in zip(axes, sens_frota.items()):
+    xs = [d["valor"] for d in dados]; ys = [d["frota_total"] for d in dados]
+    ax.plot(xs, ys, "-o", color="#d73027")
+    for x,y in zip(xs,ys): ax.text(x, y+0.2, str(y), ha="center", fontsize=9)
+    ax.set_title(titulo); ax.set_ylabel("Frota total"); ax.grid(alpha=0.3)
+fig.suptitle("Fig. 07 — Sensibilidade da frota (configuração recomendada)", fontsize=13)
+fig.tight_layout(); plt.show(); fig.savefig(FIGDIR/"07_sensibilidade.png", dpi=140)
+
+# Fig 06 — frota por vento
 fig, ax = plt.subplots(figsize=(8,5))
 x = np.arange(len(df_cen)); w=0.38
 ax.bar(x-w/2, df_cen["bases"], w, label="Bases", color="#4575b4")
 ax.bar(x+w/2, df_cen["frota 24h"], w, label="Frota 24h", color="#d73027")
 ax.set_xticks(x); ax.set_xticklabels(df_cen["cenário"], rotation=15, ha="right")
-ax.set_title("Fig. 06 — Frota por vento"); ax.legend()
+ax.set_title("Fig. 06 — Frota por cenário de vento"); ax.legend()
 fig.tight_layout(); plt.show(); fig.savefig(FIGDIR/"06_frota.png",dpi=140)
 
-# Fig 08
+# Fig 08 — frota vs k
 ks=[f["k"] for f in frota_vs_k]; ft=[f["frota_total"] for f in frota_vs_k]
 frp=[100*f["frac_risco"] for f in frota_vs_k]
 fig, ax1 = plt.subplots(figsize=(8.5,5.5))
-ax1.plot(ks,ft,"-o",color="#d73027"); ax1.axvline(k_rec,color="green",ls="--")
-ax2=ax1.twinx(); ax2.plot(ks,frp,"-s",color="#4575b4",alpha=0.7)
-ax1.set_title("Fig. 08 — Frota vs nº bases"); fig.tight_layout()
+ax1.plot(ks,ft,"-o",color="#d73027",label="Frota 24h")
+ax1.axvline(k_rec,color="green",ls="--",label=f"Ótimo k={k_rec}")
+ax2=ax1.twinx(); ax2.plot(ks,frp,"-s",color="#4575b4",alpha=0.7,label="Risco %")
+ax1.set_xlabel("Nº bases"); ax1.set_title("Fig. 08 — Frota vs nº de bases")
+ax1.legend(loc="upper right"); fig.tight_layout()
 plt.show(); fig.savefig(FIGDIR/"08_frota_vs_bases.png",dpi=140)
 """))
 
@@ -638,7 +693,47 @@ for b,v in zip(bars,vals2): ax.text(b.get_x()+b.get_width()/2, v+2, f"{v:.1f}%",
 fig.tight_layout(); plt.show(); fig.savefig(FIGDIR/"22_baseline_patrulha.png",dpi=150)
 """))
 
-cells.append(md("### 5.4 Métricas canónicas (plataforma / relatório)"))
+cells.append(md("### 5.4 Validação completa via `validacao.py` (Fig. 25, imigração, decomposição)"))
+cells.append(code("""from validacao import (
+    backtest_temporal, baseline_patrulha, sensibilidade_limiar, decomposicao_ganho,
+    validacao_imigracao, validacao_imigracao_holdout, backtest_somente_droga,
+    caixa_objetivo, fig_sensibilidade_limiar, fig_backtest, fig_baseline,
+)
+
+# Backtest e baseline canónicos (regeneram Fig. 21–22)
+bt_full = backtest_temporal(pts)
+bl_full = baseline_patrulha(pts)
+fig_backtest(bt_full); fig_baseline(bl_full)
+
+# Fig. 25 — sensibilidade ao limiar
+sens_lim = sensibilidade_limiar(pts)
+fig_sensibilidade_limiar(sens_lim)
+display(pd.DataFrame(sens_lim["limiares"]))
+from IPython.display import Image, display as ipy_display
+ipy_display(Image(filename=str(FIGDIR/"25_sensibilidade_limiar.png")))
+
+# Decomposição do ganho ~2×
+decomp = decomposicao_ganho(pts)
+print("Decomposição do ganho SAD:")
+display(pd.DataFrame([decomp]))
+
+# Backtest só droga + imigração
+bt_droga = backtest_somente_droga(pts)
+val_imig = validacao_imigracao(pts)
+val_imig_ho = validacao_imigracao_holdout(pts)
+print(f"Backtest só droga: acerto={bt_droga.get('taxa_acerto_limiar',0):.1%}")
+print(f"Imigração holdout: treino n={val_imig_ho.get('n_treino')} | teste n={val_imig_ho.get('n_teste')}")
+
+# Q1–Q3 (lê resultados.json se existir; senão calcula)
+resp_calc = caixa_objetivo()
+display(pd.DataFrame([
+    ("Q1 — Onde patrulhar?", resp_calc["Q1_onde"]["resposta"]),
+    ("Q2 — Quantos AR5?", resp_calc["Q2_quantos"]["resposta"]),
+    ("Q3 — Onde colocar bases?", resp_calc["Q3_bases"]["resposta"]),
+], columns=["Pergunta","Resposta (calculada)"]))
+"""))
+
+cells.append(md("### 5.5 Métricas canónicas (plataforma / relatório)"))
 cells.append(code("""val_path = OUTDIR / "validacao.json"
 if val_path.exists():
     with open(val_path, encoding="utf-8") as f:
@@ -657,8 +752,76 @@ else:
     print("(validacao.json não encontrado — usar valores calculados acima)")
 """))
 
-# --- SECTION 6 RESPOSTAS ---
-cells.append(md("## 6. Respostas SAD — Q1, Q2, Q3"))
+# --- SECTION 6 DATA MINING ---
+cells.append(md("## 6. Data Mining — clustering, classificação, fuzzy e PCA"))
+cells.append(md("""Pipeline CRISP-DM completo (`src/dm/`): EDA adicional, K-means/DBSCAN/hierárquico,
+classificação supervisionada (NB, k-NN, árvore, MLP com SMOTE+GridSearch), lógica difusa Mamdani,
+PCA e comparação risco difuso vs ponderado.
+
+> Requer `imbalanced-learn`. Gera `resultados/dm/*.png` e `dm_resultados.json`.
+"""))
+cells.append(code("""import dm.main_dm as dm_pipeline
+
+dm_pipeline.main()
+
+dm_json = DMFIG / "dm_resultados.json"
+if dm_json.exists():
+    with open(dm_json, encoding="utf-8") as f:
+        dm_res = json.load(f)
+    print("Modelo recomendado:", dm_res.get("modelo_recomendado"))
+    clf = dm_res.get("classificacao", {})
+    if clf:
+        display(pd.DataFrame([
+            {"modelo": k, **{kk: vv for kk, vv in v.items() if kk != "cm"}}
+            for k, v in clf.items()
+        ]))
+"""))
+
+cells.append(md("### 6.1 Galeria DM (todas as figuras)"))
+cells.append(code("""from IPython.display import Image, display as ipy_display
+
+dm_figs = sorted(DMFIG.glob("*.png"))
+print(f"{len(dm_figs)} figuras em {DMFIG}")
+for p in dm_figs:
+    print("—", p.name)
+    ipy_display(Image(filename=str(p), width=520))
+"""))
+
+# --- SECTION 7 EMODNET ---
+cells.append(md("## 7. Fontes EMODnet — intensidades reais"))
+cells.append(code("""int_csv = PROC / "intensidades_reais.csv"
+if int_csv.exists():
+    df_int = pd.read_csv(int_csv)
+    print(f"intensidades_reais.csv: {len(df_int)} células | colunas: {list(df_int.columns)}")
+    display(df_int.describe())
+else:
+    print("CSV não encontrado — a executar construir_dados_reais (requer rasterio + downloads EMODnet)...")
+    try:
+        from dm.construir_dados_reais import main as build_emodnet
+        build_emodnet()
+    except Exception as e:
+        print("Construção EMODnet indisponível neste ambiente:", e)
+        print("O notebook usa o CSV pré-calculado no repositório quando disponível.")
+"""))
+
+# --- SECTION 8 PIPELINE SAD ---
+cells.append(md("## 8. Pipeline SAD completo (`main.py` + `validacao.py`)"))
+cells.append(code("""import main as sad_main
+import validacao as sad_val
+
+print(">> main.py — otimização e JSON operacional")
+sad_main.main()
+print("\\n>> validacao.py — validação científica e camadas do mapa")
+val_out = sad_val.main()
+
+val_path = OUTDIR / "validacao.json"
+with open(val_path, encoding="utf-8") as f:
+    val = json.load(f)
+print("\\nvalidacao.json regenerado com", len(val), "blocos de métricas")
+"""))
+
+# --- SECTION 9 RESPOSTAS ---
+cells.append(md("## 9. Respostas SAD — Q1, Q2, Q3"))
 cells.append(code("""if val_path.exists():
     resp = val["resposta_objetivo"]
     display(pd.DataFrame([
@@ -668,7 +831,7 @@ cells.append(code("""if val_path.exists():
     ], columns=["Pergunta","Resposta"]))
 """))
 
-cells.append(md("## 7. Resumo final e exportação"))
+cells.append(md("## 10. Resumo final e exportação"))
 cells.append(code("""# Tabelas comparativas (estilo trabalho2 — prontas para o relatório)
 
 res_opt = pd.DataFrame(rows_cen)
@@ -695,11 +858,43 @@ print("\\nCSV guardados em", OUTDIR)
 print("\\nFiguras em", FIGDIR)
 """))
 
+cells.append(md("## 11. Galeria completa — todas as figuras do relatório"))
+cells.append(code("""from IPython.display import Image, display as ipy_display
+
+fig_sad = sorted(FIGDIR.glob("*.png"))
+print(f"Figuras SAD ({FIGDIR}): {len(fig_sad)}")
+for p in fig_sad:
+    print(p.name)
+    ipy_display(Image(filename=str(p), width=560))
+
+# Checklist cobertura relatório
+esperadas = [f"{i:02d}" for i in [1,2,3,4,5,6,7,8,21,22,24,25]]
+presentes = {p.stem.split("_")[0] for p in fig_sad}
+faltam = [e for e in esperadas if not any(p.name.startswith(e) for p in fig_sad)]
+print("\\nChecklist figuras relatório:", "OK" if not faltam else f"EM FALTA: {faltam}")
+"""))
+
 cells.append(md("""## Notas para o relatório
 
-- As figuras `01–08` e `21–25` correspondem às do relatório escrito.
-- A **plataforma web** lê `resultados/validacao.json` e `resultados/resultados.json` em runtime.
-- Para regenerar os JSON canónicos: `cd src && python main.py && python validacao.py`.
+- **Figuras 01–08, 21–22, 24–25** — otimização e validação (`resultados/figuras/`).
+- **Figuras DM** — clustering, classificação, fuzzy, PCA (`resultados/dm/`).
+- A **plataforma web** lê `resultados/validacao.json`, `resultados/resultados.json` e `camadas_mapa.json`.
+- Para regenerar só os JSON canónicos: `cd src && python main.py && python validacao.py`.
+- Para o módulo DM isolado: `cd src && python -m dm.main_dm`.
+"""))
+
+cells.append(md("## 12. Plataforma web — capturas de ecrã (UI)"))
+cells.append(code("""from IPython.display import Image, display as ipy_display
+
+PLAT_DOCS = REPO / "plataforma" / "docs"
+if PLAT_DOCS.exists():
+    shots = sorted(PLAT_DOCS.glob("*.png"))
+    print(f"Capturas da plataforma ({len(shots)} ficheiros):")
+    for p in shots:
+        print("—", p.name)
+        ipy_display(Image(filename=str(p), width=640))
+else:
+    print("Pasta plataforma/docs não encontrada — corre plataforma/web/scripts/capturar-docs.mjs")
 """))
 
 nb = {

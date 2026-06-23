@@ -2,7 +2,7 @@
   "meta": {
     "n_celulas": 1156,
     "limiar_alto_risco": 0.5,
-    "risco_total": 367.7528594907728,
+    "risco_total": 390.2787314628855,
     "AR5": {
       "autonomia_h": 16.0,
       "autonomia_max_h": 20.0,
@@ -39,9 +39,9 @@
             11
           ],
           "n_bases": 5,
-          "n_alvo": 274,
-          "n_cobrivel": 243,
-          "n_nao_cobrivel": 31,
+          "n_alvo": 300,
+          "n_cobrivel": 264,
+          "n_nao_cobrivel": 36,
           "limiar": 0.5
         },
         "frota": {
@@ -74,9 +74,9 @@
             11
           ],
           "n_bases": 5,
-          "n_alvo": 274,
-          "n_cobrivel": 216,
-          "n_nao_cobrivel": 58,
+          "n_alvo": 300,
+          "n_cobrivel": 237,
+          "n_nao_cobrivel": 63,
           "limiar": 0.5
         },
         "frota": {
@@ -109,9 +109,9 @@
             11
           ],
           "n_bases": 5,
-          "n_alvo": 274,
-          "n_cobrivel": 174,
-          "n_nao_cobrivel": 100,
+          "n_alvo": 300,
+          "n_cobrivel": 191,
+          "n_nao_cobrivel": 109,
           "limiar": 0.5
         },
         "frota": {
@@ -139,64 +139,75 @@
           9
         ],
         "n_bases": 1,
-        "n_alvo": 274,
-        "n_cobrivel": 274,
+        "n_alvo": 300,
+        "n_cobrivel": 300,
         "n_nao_cobrivel": 0,
         "limiar": 0.5
       },
       "R_long_km": 450.0,
-      "k_recomendado": 1,
-      "frac_risco_recomendado": 0.9999999999999999,
+      "k_recomendado": 12,
+      "frac_risco_recomendado": 0.9999999999999989,
       "bases_recomendadas": [
-        "Montijo (BA6)"
+        "Porto (Sá Carneiro)",
+        "Aveiro (S. Jacinto)",
+        "Braga",
+        "Monte Real (BA5)",
+        "Santa Cruz",
+        "Sintra (BA1)",
+        "Cascais (Tires)",
+        "Lisboa (H. Delgado)",
+        "Montijo (BA6)",
+        "Sines",
+        "Portimão",
+        "Faro"
       ],
       "frota_persistencia_total": {
-        "area_alto_risco_km2": 26025.0,
+        "area_alto_risco_km2": 28494.0,
         "swath_km": 30.0,
         "revisita_h": 3.0,
-        "n_simultaneos": 3,
-        "dist_media_km": 120.9,
-        "dist_max_km": 248.5,
-        "t_on_h": 12.58,
-        "multiplicador_rotacao": 2.72,
+        "n_simultaneos": 4,
+        "dist_media_km": 55.9,
+        "dist_max_km": 115.2,
+        "t_on_h": 13.88,
+        "multiplicador_rotacao": 2.47,
         "disponibilidade": 0.7,
-        "frota_total": 9
+        "frota_total": 11
       },
       "frota_persistencia_costeira": {
-        "area_alto_risco_km2": 23080.0,
+        "area_alto_risco_km2": 25075.0,
         "swath_km": 30.0,
         "revisita_h": 3.0,
         "n_simultaneos": 3,
-        "dist_media_km": 50.2,
+        "dist_media_km": 49.9,
         "dist_max_km": 89.7,
         "t_on_h": 14.0,
         "multiplicador_rotacao": 2.45,
         "disponibilidade": 0.7,
         "frota_total": 9
       },
-      "n_alto_risco": 274,
+      "n_alto_risco": 300,
       "area_celula_km2": 95.0
     }
   },
   "frota_vs_k": [
     {
       "k": 1,
-      "frac_risco": 0.9999999999999999,
-      "frota_total": 9,
-      "n_sim": 3,
-      "dist_media_km": 120.9,
-      "t_on_h": 12.58,
+      "frac_risco": 0.9999999999999989,
+      "frota_total": 12,
+      "n_sim": 4,
+      "dist_media_km": 120.1,
+      "t_on_h": 12.6,
       "bases": [
         "Montijo (BA6)"
       ]
     },
     {
       "k": 2,
-      "frac_risco": 0.9999999999999999,
-      "frota_total": 10,
-      "n_sim": 3,
-      "dist_media_km": 134.0,
-      "t_on_h": 12.32,
+      "frac_risco": 0.9999999999999989,
+      "frota_total": 13,
+      "n_sim": 4,
+      "dist_media_km": 138.8,
+      "t_on_h": 12.22,
       "bases": [
         "Porto (Sá Carneiro)",
         "Portimão"
@@ -204,11 +215,11 @@
     },
     {
       "k": 3,
-      "frac_risco": 0.9999999999999999,
-      "frota_total": 10,
-      "n_sim": 3,
-      "dist_media_km": 134.0,
-      "t_on_h": 12.32,
+      "frac_risco": 0.9999999999999989,
+      "frota_total": 13,
+      "n_sim": 4,
+      "dist_media_km": 138.8,
+      "t_on_h": 12.22,
       "bases": [
         "Porto (Sá Carneiro)",
         "Portimão"
@@ -216,11 +227,11 @@
     },
     {
       "k": 4,
-      "frac_risco": 0.9999999999999999,
-      "frota_total": 10,
-      "n_sim": 3,
-      "dist_media_km": 134.0,
-      "t_on_h": 12.32,
+      "frac_risco": 0.9999999999999989,
+      "frota_total": 13,
+      "n_sim": 4,
+      "dist_media_km": 138.8,
+      "t_on_h": 12.22,
       "bases": [
         "Porto (Sá Carneiro)",
         "Portimão"
@@ -228,11 +239,11 @@
     },
     {
       "k": 5,
-      "frac_risco": 0.9999999999999999,
-      "frota_total": 10,
-      "n_sim": 3,
-      "dist_media_km": 134.0,
-      "t_on_h": 12.32,
+      "frac_risco": 0.9999999999999989,
+      "frota_total": 13,
+      "n_sim": 4,
+      "dist_media_km": 138.8,
+      "t_on_h": 12.22,
       "bases": [
         "Porto (Sá Carneiro)",
         "Portimão"
@@ -240,11 +251,11 @@
     },
     {
       "k": 6,
-      "frac_risco": 0.9999999999999999,
-      "frota_total": 10,
-      "n_sim": 3,
-      "dist_media_km": 134.0,
-      "t_on_h": 12.32,
+      "frac_risco": 0.9999999999999989,
+      "frota_total": 13,
+      "n_sim": 4,
+      "dist_media_km": 138.8,
+      "t_on_h": 12.22,
       "bases": [
         "Porto (Sá Carneiro)",
         "Portimão"
@@ -252,11 +263,11 @@
     },
     {
       "k": 7,
-      "frac_risco": 0.9999999999999999,
-      "frota_total": 10,
-      "n_sim": 3,
-      "dist_media_km": 134.0,
-      "t_on_h": 12.32,
+      "frac_risco": 0.9999999999999989,
+      "frota_total": 13,
+      "n_sim": 4,
+      "dist_media_km": 138.8,
+      "t_on_h": 12.22,
       "bases": [
         "Porto (Sá Carneiro)",
         "Portimão"
@@ -264,11 +275,11 @@
     },
     {
       "k": 8,
-      "frac_risco": 0.9999999999999999,
-      "frota_total": 10,
-      "n_sim": 3,
-      "dist_media_km": 134.0,
-      "t_on_h": 12.32,
+      "frac_risco": 0.9999999999999989,
+      "frota_total": 13,
+      "n_sim": 4,
+      "dist_media_km": 138.8,
+      "t_on_h": 12.22,
       "bases": [
         "Porto (Sá Carneiro)",
         "Portimão"
@@ -276,11 +287,11 @@
     },
     {
       "k": 9,
-      "frac_risco": 0.9999999999999999,
-      "frota_total": 10,
-      "n_sim": 3,
-      "dist_media_km": 134.0,
-      "t_on_h": 12.32,
+      "frac_risco": 0.9999999999999989,
+      "frota_total": 13,
+      "n_sim": 4,
+      "dist_media_km": 138.8,
+      "t_on_h": 12.22,
       "bases": [
         "Porto (Sá Carneiro)",
         "Portimão"
@@ -288,11 +299,11 @@
     },
     {
       "k": 10,
-      "frac_risco": 0.9999999999999999,
-      "frota_total": 10,
-      "n_sim": 3,
-      "dist_media_km": 134.0,
-      "t_on_h": 12.32,
+      "frac_risco": 0.9999999999999989,
+      "frota_total": 13,
+      "n_sim": 4,
+      "dist_media_km": 138.8,
+      "t_on_h": 12.22,
       "bases": [
         "Porto (Sá Carneiro)",
         "Portimão"
@@ -300,11 +311,11 @@
     },
     {
       "k": 11,
-      "frac_risco": 0.9999999999999999,
-      "frota_total": 10,
-      "n_sim": 3,
-      "dist_media_km": 134.0,
-      "t_on_h": 12.32,
+      "frac_risco": 0.9999999999999989,
+      "frota_total": 13,
+      "n_sim": 4,
+      "dist_media_km": 138.8,
+      "t_on_h": 12.22,
       "bases": [
         "Porto (Sá Carneiro)",
         "Portimão"
@@ -312,11 +323,11 @@
     },
     {
       "k": 12,
-      "frac_risco": 0.9999999999999999,
-      "frota_total": 9,
-      "n_sim": 3,
-      "dist_media_km": 55.7,
-      "t_on_h": 13.89,
+      "frac_risco": 0.9999999999999989,
+      "frota_total": 11,
+      "n_sim": 4,
+      "dist_media_km": 55.9,
+      "t_on_h": 13.88,
       "bases": [
         "Porto (Sá Carneiro)",
         "Aveiro (S. Jacinto)",
@@ -340,8 +351,8 @@
         "bases_sel": [
           6
         ],
-        "risco_coberto": 91.84168786723116,
-        "frac_risco": 0.2497375220804654
+        "risco_coberto": 101.54450688217231,
+        "frac_risco": 0.26018457757498614
       },
       {
         "k": 2,
@@ -349,8 +360,8 @@
           6,
           10
         ],
-        "risco_coberto": 154.74678093492497,
-        "frac_risco": 0.42079015007307563
+        "risco_coberto": 164.00214075896687,
+        "frac_risco": 0.4202179815032095
       },
       {
         "k": 3,
@@ -359,31 +370,31 @@
           9,
           10
         ],
-        "risco_coberto": 181.7638670784269,
-        "frac_risco": 0.4942554826905092
+        "risco_coberto": 192.56208123580274,
+        "frac_risco": 0.49339629785620254
       },
       {
         "k": 4,
         "bases_sel": [
-          0,
+          1,
           4,
           9,
           10
         ],
-        "risco_coberto": 205.03219781041517,
-        "frac_risco": 0.5575271341039283
+        "risco_coberto": 217.46730251982464,
+        "frac_risco": 0.5572102320428527
       },
       {
         "k": 5,
         "bases_sel": [
           0,
-          4,
+          3,
           6,
           9,
           10
         ],
-        "risco_coberto": 215.52299366290063,
-        "frac_risco": 0.5860538894553674
+        "risco_coberto": 229.67989653127407,
+        "frac_risco": 0.5885022114076335
       },
       {
         "k": 6,
@@ -395,8 +406,8 @@
           9,
           10
         ],
-        "risco_coberto": 225.1955869414068,
-        "frac_risco": 0.6123557740740209
+        "risco_coberto": 239.8935984725902,
+        "frac_risco": 0.6146724869515557
       },
       {
         "k": 7,
@@ -409,13 +420,13 @@
           10,
           11
         ],
-        "risco_coberto": 231.0098039683637,
-        "frac_risco": 0.6281658945854096
+        "risco_coberto": 245.40606984526187,
+        "frac_risco": 0.6287969342459527
       },
       {
         "k": 8,
         "bases_sel": [
-          0,
+          1,
           2,
           3,
           4,
@@ -424,8 +435,8 @@
           10,
           11
         ],
-        "risco_coberto": 234.32321593073252,
-        "frac_risco": 0.6371757822772602
+        "risco_coberto": 249.15156031520684,
+        "frac_risco": 0.6383938970522673
       },
       {
         "k": 9,
@@ -440,8 +451,8 @@
           10,
           11
         ],
-        "risco_coberto": 237.05292583700455,
-        "frac_risco": 0.6445984571411671
+        "risco_coberto": 251.99900201146215,
+        "frac_risco": 0.645689815242793
       },
       {
         "k": 10,
@@ -456,8 +467,8 @@
           10,
           11
         ],
-        "risco_coberto": 237.05292583700455,
-        "frac_risco": 0.6445984571411671
+        "risco_coberto": 251.99900201146215,
+        "frac_risco": 0.645689815242793
       },
       {
         "k": 11,
@@ -472,8 +483,8 @@
           10,
           11
         ],
-        "risco_coberto": 237.05292583700455,
-        "frac_risco": 0.6445984571411671
+        "risco_coberto": 251.99900201146215,
+        "frac_risco": 0.645689815242793
       },
       {
         "k": 12,
@@ -491,8 +502,8 @@
           10,
           11
         ],
-        "risco_coberto": 237.05292583700455,
-        "frac_risco": 0.6445984571411671
+        "risco_coberto": 251.99900201146215,
+        "frac_risco": 0.645689815242793
       }
     ],
     "R_long": [
@@ -501,8 +512,8 @@
         "bases_sel": [
           8
         ],
-        "risco_coberto": 367.7528594907727,
-        "frac_risco": 0.9999999999999999
+        "risco_coberto": 390.27873146288505,
+        "frac_risco": 0.9999999999999989
       },
       {
         "k": 2,
@@ -510,8 +521,8 @@
           0,
           10
         ],
-        "risco_coberto": 367.7528594907727,
-        "frac_risco": 0.9999999999999999
+        "risco_coberto": 390.27873146288505,
+        "frac_risco": 0.9999999999999989
       },
       {
         "k": 3,
@@ -519,8 +530,8 @@
           0,
           10
         ],
-        "risco_coberto": 367.7528594907727,
-        "frac_risco": 0.9999999999999999
+        "risco_coberto": 390.27873146288505,
+        "frac_risco": 0.9999999999999989
       },
       {
         "k": 4,
@@ -528,8 +539,8 @@
           0,
           10
         ],
-        "risco_coberto": 367.7528594907727,
-        "frac_risco": 0.9999999999999999
+        "risco_coberto": 390.27873146288505,
+        "frac_risco": 0.9999999999999989
       },
       {
         "k": 5,
@@ -537,8 +548,8 @@
           0,
           10
         ],
-        "risco_coberto": 367.7528594907727,
-        "frac_risco": 0.9999999999999999
+        "risco_coberto": 390.27873146288505,
+        "frac_risco": 0.9999999999999989
       },
       {
         "k": 6,
@@ -546,8 +557,8 @@
           0,
           10
         ],
-        "risco_coberto": 367.7528594907727,
-        "frac_risco": 0.9999999999999999
+        "risco_coberto": 390.27873146288505,
+        "frac_risco": 0.9999999999999989
       },
       {
         "k": 7,
@@ -555,8 +566,8 @@
           0,
           10
         ],
-        "risco_coberto": 367.7528594907727,
-        "frac_risco": 0.9999999999999999
+        "risco_coberto": 390.27873146288505,
+        "frac_risco": 0.9999999999999989
       },
       {
         "k": 8,
@@ -564,8 +575,8 @@
           0,
           10
         ],
-        "risco_coberto": 367.7528594907727,
-        "frac_risco": 0.9999999999999999
+        "risco_coberto": 390.27873146288505,
+        "frac_risco": 0.9999999999999989
       },
       {
         "k": 9,
@@ -573,8 +584,8 @@
           0,
           10
         ],
-        "risco_coberto": 367.7528594907727,
-        "frac_risco": 0.9999999999999999
+        "risco_coberto": 390.27873146288505,
+        "frac_risco": 0.9999999999999989
       },
       {
         "k": 10,
@@ -582,8 +593,8 @@
           0,
           10
         ],
-        "risco_coberto": 367.7528594907727,
-        "frac_risco": 0.9999999999999999
+        "risco_coberto": 390.27873146288505,
+        "frac_risco": 0.9999999999999989
       },
       {
         "k": 11,
@@ -591,8 +602,8 @@
           0,
           10
         ],
-        "risco_coberto": 367.7528594907727,
-        "frac_risco": 0.9999999999999999
+        "risco_coberto": 390.27873146288505,
+        "frac_risco": 0.9999999999999989
       },
       {
         "k": 12,
@@ -610,8 +621,8 @@
           10,
           11
         ],
-        "risco_coberto": 367.7528594907727,
-        "frac_risco": 0.9999999999999999
+        "risco_coberto": 390.27873146288505,
+        "frac_risco": 0.9999999999999989
       }
     ],
     "R90_km": 90.0,
@@ -621,11 +632,11 @@
     "Largura útil do sensor (km)": [
       {
         "valor": 20,
-        "frota_total": 15
+        "frota_total": 14
       },
       {
         "valor": 30,
-        "frota_total": 9
+        "frota_total": 11
       },
       {
         "valor": 40,
@@ -639,11 +650,11 @@
     "Tempo de revisita (h)": [
       {
         "valor": 2,
-        "frota_total": 15
+        "frota_total": 14
       },
       {
         "valor": 3,
-        "frota_total": 9
+        "frota_total": 11
       },
       {
         "valor": 4,
@@ -657,19 +668,19 @@
     "Disponibilidade da frota": [
       {
         "valor": 0.6,
-        "frota_total": 11
+        "frota_total": 13
       },
       {
         "valor": 0.7,
-        "frota_total": 9
+        "frota_total": 11
       },
       {
         "valor": 0.8,
-        "frota_total": 8
+        "frota_total": 10
       },
       {
         "valor": 0.9,
-        "frota_total": 7
+        "frota_total": 9
       }
     ]
   }
