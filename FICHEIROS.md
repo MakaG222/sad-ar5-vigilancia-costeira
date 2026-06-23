@@ -16,7 +16,8 @@ O repositório contém a **plataforma operacional** e o **núcleo analítico**; 
 | `FICHEIROS.md` | Este guia |
 | `pyproject.toml` | Configuração de `ruff`, `pytest` e cobertura |
 | `.github/workflows/ci.yml` | Integração contínua (lint, testes, build, Docker) |
-| `requirements.txt` | Dependências Python do núcleo (`src/`) |
+| `requirements.txt` | Dependências Python do núcleo (`src/`) e notebook |
+| `notebooks/` | Notebook Jupyter do pipeline analítico |
 | `scripts/` | Utilitários de integridade e dados |
 
 ---
@@ -29,6 +30,7 @@ O repositório contém a **plataforma operacional** e o **núcleo analítico**; 
 | `docker-compose.yml` | Orquestração local com um comando |
 | `start-docker.sh` / `stop-docker.sh` | Arranque e paragem em Docker |
 | `setup-*.sh` / `start-*.sh` | Instalação e arranque nativos (macOS / Windows) |
+| `ARRANQUE-WINDOWS.md` | Guia Windows — ZIP sem Git, PowerShell vs CMD, Docker |
 | `.env.example` | Variáveis opcionais (AIS, demo fixa, CORS, portas) |
 | `ARCHITECTURE.md` | Diagrama técnico, endpoints e fluxo de dados |
 | `APRESENTACAO.md` | Roteiro de demonstração (~5 min) |
@@ -77,12 +79,22 @@ O repositório contém a **plataforma operacional** e o **núcleo analítico**; 
 
 ---
 
-## `src/` — núcleo analítico SAD
-
-Módulos Python importados pela API (não são uma aplicação autónoma).
+## `notebooks/` — análise reprodutível
 
 | Ficheiro | Descrição |
 |----------|-----------|
+| `analise_sad_ar5.ipynb` | EDA, AHP, grelha de risco, otimização, backtest e respostas SAD Q1–Q3 |
+
+---
+
+## `src/` — núcleo analítico SAD
+
+Módulos Python importados pela API e pelo notebook.
+
+| Ficheiro | Descrição |
+|----------|-----------|
+| `main.py` | Orquestra risco, MCLP, frota e exportação de figuras/JSON |
+| `validacao.py` | Backtest temporal, baseline patrulha → `validacao.json` |
 | `config.py` | Parâmetros AR5, bases, pesos AHP, limiares |
 | `geo.py` | Grelha marítima, costa, projeção |
 | `risco.py` | Índice multi-ameaça por célula |
@@ -90,6 +102,16 @@ Módulos Python importados pela API (não são uma aplicação autónoma).
 | `rotas_maritimas.py` | Rotas respeitando máscara de oceano |
 | `apreensoes_mapa.py` | Apreensões marítimas para o mapa |
 | `geocode.py` | Geocodificação de concelhos (apreensões) |
+
+### `src/dm/` — data mining e preparação
+
+| Módulo | Descrição |
+|--------|-----------|
+| `eda.py` | Análise exploratória das apreensões |
+| `ahp_pesos.py` | Matriz AHP e consistência (CR) |
+| `construir_dados_reais.py` | Intensidades a partir de rasters EMODnet |
+| `clustering.py` / `classificacao.py` | Agrupamento e classificação marítimo/terrestre |
+| `main_dm.py` | Pipeline DM completo |
 
 ---
 

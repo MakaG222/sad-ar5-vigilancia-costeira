@@ -6,3 +6,6 @@ shapely>=2.0
 pulp>=2.7
 openpyxl>=3.1
 scikit-learn>=1.4
+matplotlib>=3.8
+seaborn>=0.13
+# Notebook (opcional): pip install jupyter

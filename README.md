@@ -67,6 +67,9 @@ Nota metodológica: Q3 é a **localização mínima** (MCLP); Q2 usa a **rede co
 
 ## Arranque rápido
 
+> **Windows sem Git?** Não use o Prompt de Comandos (CMD) para os scripts `.ps1`.  
+> Guia completo: [`plataforma/ARRANQUE-WINDOWS.md`](plataforma/ARRANQUE-WINDOWS.md) — descarregar o [ZIP da release](https://github.com/MakaG222/sad-ar5-vigilancia-costeira/releases/download/v1.0-final/sad-ar5-v1.0-final.zip), abrir **PowerShell** e seguir os passos.
+
 ### Docker (recomendado)
 
 ```bash
@@ -103,6 +106,7 @@ sad-ar5-vigilancia-costeira/
 ├── src/                 # Núcleo analítico (risco, MCLP, rotas)
 ├── dados/               # Fontes de entrada e intensidades processadas
 ├── resultados/          # JSON pré-calculados (validação, frota, mapa)
+├── notebooks/           # Notebook Jupyter — pipeline analítico reprodutível
 ├── scripts/             # Integridade e manifest
 ├── FICHEIROS.md         # Guia detalhado de cada pasta
 └── README.md            # Este ficheiro
@@ -138,7 +142,10 @@ API: **http://127.0.0.1:8080/docs** · Parar: `./stop-mac.sh`
 
 ## Arranque — Windows
 
+**Pré-requisito:** [PowerShell](plataforma/ARRANQUE-WINDOWS.md) (não CMD). Sem Git, descarregue o ZIP da [release v1.0-final](https://github.com/MakaG222/sad-ar5-vigilancia-costeira/releases/tag/v1.0-final).
+
 ```powershell
+# Com Git instalado (https://git-scm.com/download/win):
 git clone https://github.com/MakaG222/sad-ar5-vigilancia-costeira.git
 cd sad-ar5-vigilancia-costeira\plataforma
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
@@ -146,7 +153,7 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 .\start-win.ps1   # → http://localhost:5173
 ```
 
-Parar: `.\stop-win.ps1`
+Parar: `.\stop-win.ps1` · Guia detalhado: [`plataforma/ARRANQUE-WINDOWS.md`](plataforma/ARRANQUE-WINDOWS.md)
 
 ---
 
@@ -173,8 +180,27 @@ Variáveis opcionais: copiar `plataforma/.env.example` → `plataforma/.env`.
 
 ---
 
+## Notebook — análise de dados
+
+Reprodução do pipeline científico (EDA, AHP, risco, MCLP, validação):
+
+```bash
+pip install -r requirements.txt jupyter matplotlib seaborn
+jupyter notebook notebooks/analise_sad_ar5.ipynb
+```
+
+Ou, em linha de comandos:
+
+```bash
+cd src && python main.py && python validacao.py
+```
+
+---
+
 ## Documentação adicional
 
+- [`notebooks/analise_sad_ar5.ipynb`](notebooks/analise_sad_ar5.ipynb) — análise reprodutível
+- [`plataforma/ARRANQUE-WINDOWS.md`](plataforma/ARRANQUE-WINDOWS.md) — arranque no Windows (ZIP, PowerShell, Docker)
 - [`FICHEIROS.md`](FICHEIROS.md) — guia da estrutura do repositório
 - [`CHANGELOG.md`](CHANGELOG.md) — histórico de versões
 - [`CHECKLIST_DEFESA.md`](CHECKLIST_DEFESA.md) — verificação pré-apresentação
