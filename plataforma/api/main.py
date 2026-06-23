@@ -7,6 +7,7 @@ Arranque:
     uvicorn main:app --reload --port 8080
 """
 from __future__ import annotations
+
 import asyncio
 import os
 import sys
@@ -22,27 +23,34 @@ from pydantic import BaseModel, Field
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 sys.path.insert(0, os.path.join(ROOT, "src"))
 
+from services import demo_mode, ws_hub
+from services.ais import modo_ais
+from services.alertas import registar_incidente_manual
+from services.bases import listar_bases
+from services.camadas_mapa import (
+    apreensoes_maritimas,
+    aquecer_apreensoes,
+    incidentes_iom,
+    resumo_camadas,
+)
+from services.cenarios import listar_cenarios, obter_cenario
+from services.ciencia import (
+    ahp_pesos,
+    backtest_temporal,
+    baseline_patrulha,
+    sensibilidade_pesos,
+)
+from services.exportar import exportar_plano_missao, exportar_risco_geojson, exportar_validacao
+from services.frota import dimensionar
+from services.grelha_cache import aquecer_grelha
+from services.offline_fallback import ipma_fallback, meteo_fallback, rss_fallback
+from services.risco_mapa import carregar_celulas, get_celulas, resumo_risco
+from services.rotas import rota_plano_24h, rota_reativa, rota_sortie
+from services.sad_respostas import carregar_respostas
+from services.zonas_cluster import clusters_risco, invalidar_cache_clusters
+from services.zonas_patrulha import listar_tipos, zonas_por_tipo
 from store import estado
 from worker import worker_loop
-from services.rotas import rota_sortie, rota_plano_24h, rota_reativa
-from services.frota import dimensionar
-from services.alertas import registar_incidente_manual
-from services import ws_hub
-from services.bases import listar_bases
-from services.zonas_patrulha import zonas_por_tipo, listar_tipos
-from services.zonas_cluster import clusters_risco, invalidar_cache_clusters
-from services.cenarios import listar_cenarios, obter_cenario
-from services.sad_respostas import carregar_respostas
-from services.camadas_mapa import incidentes_iom, apreensoes_maritimas, resumo_camadas, aquecer_apreensoes
-from services.grelha_cache import aquecer_grelha
-from services.risco_mapa import carregar_celulas, get_celulas, resumo_risco
-from services.offline_fallback import meteo_fallback, ipma_fallback, rss_fallback
-from services.exportar import exportar_risco_geojson, exportar_validacao, exportar_plano_missao
-from services.ais import modo_ais
-from services import demo_mode
-from services.ciencia import (
-    ahp_pesos, backtest_temporal, baseline_patrulha, sensibilidade_pesos,
-)
 
 _stop = asyncio.Event()
 _started_at = time.time()
