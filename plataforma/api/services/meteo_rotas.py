@@ -1,14 +1,23 @@
 """Meteorologia aplicada ao planeamento de rotas AR5."""
 from __future__ import annotations
+
 import math
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "..", "src"))
 
-from config import fator_vento, CENARIOS_VENTO, ASSIMETRIA_DOWN, ASSIMETRIA_UP, T_ON_SORTIE_H
+from config import (
+    AR5,
+    ASSIMETRIA_DOWN,
+    ASSIMETRIA_UP,
+    CENARIOS_VENTO,
+    RESERVA_H,
+    T_ON_MIN_H,
+    T_ON_SORTIE_H,
+    fator_vento,
+)
 from otimizacao import raio_por_autonomia
-from config import AR5, RESERVA_H, T_ON_MIN_H
 
 
 def _dist_km(p1: dict, p2: dict) -> float:

@@ -1,7 +1,7 @@
 """Camada de risco SAD para o mapa operacional."""
 from __future__ import annotations
 
-from services.grelha_cache import pts_grelha, pts_mar, aquecer_grelha
+from services.grelha_cache import aquecer_grelha, pts_grelha, pts_mar
 
 _celulas_cache: list[dict] | None = None
 

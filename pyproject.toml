@@ -1,0 +1,26 @@
+[project]
+name = "sad-ar5-plataforma"
+version = "1.2.0"
+requires-python = ">=3.10"
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+src = ["plataforma/api", "src", "scripts"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+ignore = ["E501", "E402"]
+
+[tool.pytest.ini_options]
+testpaths = ["plataforma/api/tests"]
+pythonpath = ["plataforma/api", "src"]
+
+[tool.coverage.run]
+source = ["plataforma/api/services", "src"]
+omit = ["*/tests/*", "*/__pycache__/*"]
+
+[tool.coverage.report]
+fail_under = 30
+show_missing = false
+skip_empty = true

@@ -1,5 +1,6 @@
 """Cenários pré-definidos de patrulha (alinhados com relatório SAD)."""
 from __future__ import annotations
+
 from copy import deepcopy
 
 # regiao: lat_min, lat_max, lon_min, lon_max (None = costa PT completa)

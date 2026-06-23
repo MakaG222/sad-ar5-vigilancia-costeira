@@ -20,3 +20,4 @@ plataforma/web/node_modules/
 plataforma/web/dist/
 plataforma/.run/
 plataforma/.env
+plataforma/api/.coverage

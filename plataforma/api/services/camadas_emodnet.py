@@ -1,5 +1,6 @@
 """Camada EMODnet / intensidade por ameaça (pipeline SAD)."""
 from __future__ import annotations
+
 import os
 import sys
 

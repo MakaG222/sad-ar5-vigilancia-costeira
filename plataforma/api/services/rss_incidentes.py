@@ -1,6 +1,8 @@
 """Feeds RSS / avisos operacionais (Portugal)."""
 from __future__ import annotations
+
 from datetime import datetime, timezone
+
 import feedparser
 import httpx
 

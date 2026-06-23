@@ -23,13 +23,19 @@ jobs:
       - name: Instalar dependências Python
         run: pip install -r plataforma/api/requirements.txt
 
+      - name: Lint Python (ruff)
+        run: ruff check plataforma/api/services plataforma/api/main.py scripts
+
+      - name: Integridade JSON
+        run: python scripts/verificar_integridade.py
+
       - name: Smoke test
         working-directory: plataforma/api
         run: python smoke_test.py
 
-      - name: Testes unitários
+      - name: Testes unitários + cobertura
         working-directory: plataforma/api
-        run: pytest tests/ -q
+        run: pytest tests/ -q --cov=services --cov=../../src --cov-report=term-missing:skip-covered --cov-fail-under=30
 
   web:
     name: Frontend — build

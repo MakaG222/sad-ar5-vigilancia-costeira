@@ -15,4 +15,5 @@ services:
         required: false
     environment:
       AISSTREAM_API_KEY: ${AISSTREAM_API_KEY:-}
+      DEMO_DETERMINISTICO: ${DEMO_DETERMINISTICO:-1}
     restart: unless-stopped

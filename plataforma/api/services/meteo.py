@@ -1,12 +1,14 @@
 """Meteorologia: Open-Meteo (atual + previsão) nos aeródromos candidatos."""
 from __future__ import annotations
-import sys
+
 import os
+import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "..", "src"))
 
 import httpx
-from config import AERODROMOS, fator_vento, RAIO_BASE_KM
+
+from config import AERODROMOS, RAIO_BASE_KM, fator_vento
 
 
 async def fetch_meteo_bases() -> tuple[list[dict], dict]:

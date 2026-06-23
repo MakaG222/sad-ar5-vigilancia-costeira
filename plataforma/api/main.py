@@ -7,6 +7,7 @@ Arranque:
     uvicorn main:app --reload --port 8080
 """
 from __future__ import annotations
+
 import asyncio
 import os
 import sys
@@ -15,30 +16,35 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, Response
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 sys.path.insert(0, os.path.join(ROOT, "src"))
 
+from services import demo_mode, ws_hub
+from services.ais import modo_ais
+from services.alertas import registar_incidente_manual
+from services.bases import listar_bases
+from services.camadas_mapa import (
+    apreensoes_maritimas,
+    aquecer_apreensoes,
+    incidentes_iom,
+    resumo_camadas,
+)
+from services.cenarios import listar_cenarios, obter_cenario
+from services.exportar import exportar_plano_missao, exportar_risco_geojson, exportar_validacao
+from services.frota import dimensionar
+from services.grelha_cache import aquecer_grelha
+from services.offline_fallback import ipma_fallback, meteo_fallback, rss_fallback
+from services.risco_mapa import carregar_celulas, get_celulas, resumo_risco
+from services.rotas import rota_plano_24h, rota_reativa, rota_sortie
+from services.sad_respostas import carregar_respostas
+from services.zonas_cluster import clusters_risco, invalidar_cache_clusters
+from services.zonas_patrulha import listar_tipos, zonas_por_tipo
 from store import estado
 from worker import worker_loop
-from services.rotas import rota_sortie, rota_plano_24h, rota_reativa
-from services.frota import dimensionar
-from services.alertas import registar_incidente_manual
-from services import ws_hub
-from services.bases import listar_bases
-from services.zonas_patrulha import zonas_por_tipo, listar_tipos
-from services.zonas_cluster import clusters_risco, invalidar_cache_clusters
-from services.cenarios import listar_cenarios, obter_cenario
-from services.sad_respostas import carregar_respostas
-from services.camadas_mapa import incidentes_iom, apreensoes_maritimas, resumo_camadas, aquecer_apreensoes
-from services.grelha_cache import aquecer_grelha
-from services.risco_mapa import carregar_celulas, get_celulas, resumo_risco
-from services.offline_fallback import meteo_fallback, ipma_fallback, rss_fallback
-from services.exportar import exportar_risco_geojson, exportar_validacao, exportar_plano_missao
-from services.ais import modo_ais
 
 _stop = asyncio.Event()
 _started_at = time.time()
@@ -53,10 +59,16 @@ async def lifespan(app: FastAPI):
     invalidar_cache_clusters()
 
     # Resposta imediata em /api/estado — apreensões Excel em background (arranque mais rápido)
-    estado.meteo_bases = meteo_fallback()
+    estado.meteo_bases = (
+        demo_mode.meteo_fallback_demo() if demo_mode.activo() else meteo_fallback()
+    )
     estado.avisos_ipma = ipma_fallback()
     estado.noticias_rss = rss_fallback()
     estado.risco_resumo = resumo_risco()
+    if demo_mode.activo():
+        fixos = demo_mode.carregar_navios_fixos()
+        if fixos:
+            estado.navios = fixos
 
     async def _warm_apr():
         await loop.run_in_executor(None, aquecer_apreensoes)
@@ -200,6 +212,7 @@ def health():
         "uptime_s": round(time.time() - _started_at, 1),
         "worker_ativo": not _stop.is_set(),
         "grelha_pronta": estado.risco_resumo is not None,
+        "demo_deterministico": demo_mode.activo(),
         "n_navios": len(estado.navios),
         "n_alertas": len(estado.alertas),
         "ais": ais,

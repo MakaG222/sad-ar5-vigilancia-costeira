@@ -16,7 +16,7 @@ cd sad-ar5-vigilancia-costeira/plataforma
 ```
 
 - [ ] Browser abre em http://localhost:8080
-- [ ] Health: http://localhost:8080/api/health → `"status": "ok"`
+- [ ] Health: http://localhost:8080/api/health → `"status": "ok"`, `"demo_deterministico": true` (Docker activa demo fixa por omissão)
 
 ## Instalação e testes automáticos (local)
 

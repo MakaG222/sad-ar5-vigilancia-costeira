@@ -1,8 +1,7 @@
 """Optimização de rotas com OR-Tools (TSP com retorno à base marítima)."""
 from __future__ import annotations
-import math
 
-from services.meteo_rotas import custo_leg_com_vento
+import math
 
 
 def _custo_leg(

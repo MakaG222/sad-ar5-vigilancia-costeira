@@ -1,11 +1,12 @@
 """Planificação de rotas: patrulha costeira completa (alinhada com SAD)."""
 from __future__ import annotations
+
 from services.patrulha_costeira import (
-    rota_sortie_costeira,
     rota_plano_24h_costeira,
     rota_reativa_costeira,
+    rota_sortie_costeira,
 )
-from services.validacao_rota import avaliar_rota, avaliar_plano_24h
+from services.validacao_rota import avaliar_plano_24h, avaliar_rota
 
 
 def _com_validacao(rota: dict, plano24h: bool = False) -> dict:

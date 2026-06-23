@@ -1,149 +1,19 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   MapContainer, TileLayer, Marker, Polyline, Popup, CircleMarker, Rectangle,
-  useMapEvents, useMap,
 } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-
-// Ponto de demonstração: mar aberto a O de Sesimbra (~26 km da costa)
-const API = "/api";
-const DEMO_LON = -9.50;
-const DEMO_LAT = 38.45;
-const PT_BOUNDS = [[36.85, -11.0], [42.2, -7.38]];
-const PT_LON = { lon_min: -11.0, lon_max: -7.38 };
-const PT_CENTER = [39.5, -9.0];
-const MAX_CELULAS_MAPA = 220;
-const COR_FORCA = { FAP: "#3498db", Marinha: "#1abc9c", Exercito: "#2ecc71", Civil: "#bdc3c7", Operacional: "#f39c12" };
-const LEGENDA_FORCAS = [
-  ["FAP", "FAP"], ["Marinha", "Marinha"], ["Exercito", "Exército"], ["Civil", "Civil"], ["Operacional", "Lançamento"],
-];
-
-const COR_EMODNET = {
-  droga: "#c0392b", pesca: "#27ae60", poluicao: "#2980b9",
-  imigracao: "#8e44ad", geral: "#e67e22", costeira: "#95a5a6",
-};
-
-/** Escala de risco SAD (baixo → alto) — alinhada com validação (limiar 0,5). */
-const ESCALA_RISCO = [
-  { min: 0.7, cor: "#c0392b", rotulo: "Muito alto (≥0,7)" },
-  { min: 0.5, cor: "#e67e22", rotulo: "Alto (0,5–0,7)" },
-  { min: 0.3, cor: "#f1c40f", rotulo: "Médio (0,3–0,5)" },
-  { min: 0, cor: "#3498db", rotulo: "Baixo (<0,3)" },
-];
-
-const CORES_SECTOR_24H = ["#e74c3c", "#9b59b6", "#1abc9c", "#e67e22", "#3498db", "#2ecc71"];
-
-/** Camadas leves para demo em sala (arranque rápido, mapa fluido). */
-const CAMADAS_APRESENTACAO = {
-  risco: false, foco: false, emodnet: false, navios: true, rota: true, sectores: true,
-  bases: true, corredor: true, clusters: true, iom: false, apreensoes: false, desembarques: false,
-  incidentes: true,
-};
-
-const CAMADAS_COMPLETO = {
-  risco: false, foco: true, emodnet: true, navios: true, rota: true, sectores: true,
-  bases: true, corredor: true, clusters: true, iom: true, apreensoes: true, desembarques: true,
-  incidentes: true,
-};
-
-function isBaseMclp(nome, mclpList) {
-  if (!nome || !mclpList?.length) return false;
-  const n = nome.toLowerCase();
-  return mclpList.some((m) => {
-    const chave = m.split("(")[0].trim().toLowerCase();
-    return n.includes(chave) || chave.includes(n.split("—")[0].trim().toLowerCase());
-  });
-}
-
-function iconBase(forca, activo = false, mclp = false) {
-  const cor = COR_FORCA[forca] || "#95a5a6";
-  const b = mclp ? "3px solid #f1c40f" : activo ? "3px solid #fff" : "1px solid #222";
-  const sz = mclp ? 18 : 14;
-  return L.divIcon({
-    className: "",
-    html: `<div style="background:${cor};width:${sz}px;height:${sz}px;border-radius:3px;border:${b};box-shadow:0 0 ${mclp ? 6 : 4}px #000"></div>`,
-    iconSize: [sz, sz], iconAnchor: [sz / 2, sz / 2],
-  });
-}
-
-async function get(path) {
-  const r = await fetch(`${API}${path}`);
-  if (!r.ok) throw new Error(await r.text());
-  return r.json();
-}
-
-async function getSafe(path, fallback = null) {
-  try {
-    return await get(path);
-  } catch {
-    return fallback;
-  }
-}
-
-async function post(path, body) {
-  const r = await fetch(`${API}${path}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  if (!r.ok) throw new Error(await r.text());
-  return r.json();
-}
-
-function corCondicao(c) {
-  if (c === "critica") return "#e74c3c";
-  if (c === "limitada") return "#e67e22";
-  if (c === "moderada") return "#f1c40f";
-  return "#2ecc71";
-}
-
-function ventoDaBase(nomeBase, meteoLista) {
-  if (!nomeBase || !meteoLista?.length) return null;
-  const m = meteoLista.find(
-    (mb) => mb.base === nomeBase || nomeBase.includes(mb.base?.slice(0, 8)) || mb.base?.includes(nomeBase.slice(0, 8)),
-  );
-  return m?.vento_ms ?? null;
-}
-function corRisco(r) {
-  for (const faixa of ESCALA_RISCO) {
-    if (r >= faixa.min) return faixa.cor;
-  }
-  return "#3498db";
-}
-
-function rotuloRisco(r) {
-  for (const faixa of ESCALA_RISCO) {
-    if (r >= faixa.min) return faixa.rotulo;
-  }
-  return ESCALA_RISCO[ESCALA_RISCO.length - 1].rotulo;
-}
-
-function MapClickHandler({ activo, onClick }) {
-  useMapEvents({
-    click(e) {
-      if (activo) onClick(e.latlng.lat, e.latlng.lng);
-    },
-  });
-  return null;
-}
-
-function MapResize() {
-  const map = useMap();
-  useEffect(() => {
-    const fix = () => map.invalidateSize({ animate: false });
-    fix();
-    const t1 = setTimeout(fix, 100);
-    const t2 = setTimeout(fix, 500);
-    window.addEventListener("resize", fix);
-    return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-      window.removeEventListener("resize", fix);
-    };
-  }, [map]);
-  return null;
-}
+import {
+  DEMO_LON, DEMO_LAT, PT_BOUNDS, PT_LON, PT_CENTER, MAX_CELULAS_MAPA,
+  COR_EMODNET, CORES_SECTOR_24H, CAMADAS_APRESENTACAO, CAMADAS_COMPLETO,
+  ESCALA_RISCO, LEGENDA_FORCAS, COR_FORCA,
+} from "./constants.js";
+import { get, getSafe, post } from "./api/client.js";
+import { isBaseMclp, iconBase, ventoDaBase, corRisco, rotuloRisco } from "./utils/mapUtils.js";
+import { MapClickHandler, MapResize } from "./components/MapControls.jsx";
+import StatusStrip from "./components/StatusStrip.jsx";
+import MapLegend from "./components/MapLegend.jsx";
 
 export default function App() {
   const [estado, setEstado] = useState(null);
@@ -633,29 +503,15 @@ export default function App() {
       <aside className="sidebar">
         <h1>SAD AR5 — Plataforma Operacional</h1>
 
-        <div className="status-strip">
-          {loading && (
-            <div className="pill loading-pill" title={loadingPhase || "A carregar"}>
-              {loadingPhase || "A carregar…"}
-            </div>
-          )}
-          <div className={`pill ${estado?.modo_demo ? "demo" : "live"}`}>
-            {estado?.modo_demo ? "Demo AIS" : "AIS live"}
-          </div>
-          <div className="pill">Navios <b>{estado?.n_navios ?? "—"}</b></div>
-          <div className="pill">Alto risco <b>{sadRespostas?.validacao?.n_celulas_patrulha ?? frota?.analise_sad?.n_celulas_patrulha ?? estado?.risco_resumo?.n_alto_risco ?? 274}</b></div>
-          <div className="pill">
-            Frota <b>{frota?.analise_sad?.frota_costeira_24h ?? sadRespostas?.Q2_quantos?.frota_costeira ?? 9}</b>/
-            <b>{frota?.analise_sad?.frota_total_alto_risco ?? sadRespostas?.Q2_quantos?.frota_total ?? 9}</b>
-          </div>
-          <div className="pill">Ganho <b>{sadRespostas?.validacao?.ganho_sad_vs_aleatorio ?? "2,13"}×</b></div>
-          {modoApresentacao && <div className="pill apresentacao">Apresentação</div>}
-          {fontesExternas !== "live" && (
-            <div className="pill offline" title="Meteo/IPMA/RSS em cache local">
-              {fontesExternas === "offline" ? "Offline OK" : "Rede parcial"}
-            </div>
-          )}
-        </div>
+        <StatusStrip
+          loading={loading}
+          loadingPhase={loadingPhase}
+          estado={estado}
+          sadRespostas={sadRespostas}
+          frota={frota}
+          modoApresentacao={modoApresentacao}
+          fontesExternas={fontesExternas}
+        />
 
         {modoApresentacao && (
           <div className="card apresentacao-banner">
@@ -1232,78 +1088,16 @@ export default function App() {
           ))}
         </MapContainer>
 
-        <div className="map-legend">
-          <div className="map-legend-title">Legenda</div>
-          <div className="legend-section-title">Escala de risco SAD</div>
-          {ESCALA_RISCO.map((faixa) => (
-            <div key={faixa.rotulo} className="legend-row">
-              <span className="legend-swatch" style={{ background: faixa.cor }} />
-              {faixa.rotulo}
-            </div>
-          ))}
-          <div className="legend-section-title">Camadas</div>
-          {LEGENDA_FORCAS.map(([k, lbl]) => (
-            <div key={k} className="legend-row">
-              <span className="legend-swatch" style={{ background: COR_FORCA[k] }} />
-              {lbl}
-            </div>
-          ))}
-          <div className="legend-row">
-            <span className="legend-swatch" style={{ background: "#9b59b6" }} />
-            IOM
-          </div>
-          <div className="legend-row">
-            <span className="legend-swatch" style={{ background: "#e74c3c" }} />
-            Apreensões
-          </div>
-          <div className="legend-row">
-            <span style={{ width: 14, display: "inline-block" }}>⚠️</span>
-            Incidente
-          </div>
-          <div className="legend-row">
-            <span className="legend-line" style={{ background: "#2ecc71" }} />
-            Corredor costeiro
-          </div>
-          <div className="legend-row">
-            <span className="legend-line" style={{ background: "#f39c12" }} />
-            Rota patrulha
-          </div>
-          <div className="legend-row">
-            <span style={{ color: "#1abc9c", fontWeight: "bold", width: 14, display: "inline-block" }}>M</span>
-            Entrada marítima
-          </div>
-          <div className="legend-row">
-            <span style={{ color: "#95a5a6", fontWeight: "bold", width: 14, display: "inline-block" }}>B</span>
-            Base (só se autonomia exigir)
-          </div>
-          <div className="legend-row">
-            <span className="legend-swatch legend-hollow" style={{ borderColor: COR_EMODNET[tipoPatrulha] || COR_EMODNET.geral }} />
-            EMODnet ({tipoPatrulha}) — anel
-          </div>
-          <div className="legend-row">
-            <span className="legend-swatch legend-dashed" style={{ background: "#e67e22" }} />
-            Foco patrulha
-          </div>
-          <div className="legend-row">
-            <span className="legend-swatch" style={{ background: "#5dade2" }} />
-            Desembarques (tracejado)
-          </div>
-          <div className="legend-row">
-            <span className="legend-swatch" style={{ background: "#f1c40f", border: "2px solid #fff" }} />
-            Base MCLP (Porto / Portimão)
-          </div>
-          {modo === "plano24h" && sectoresRotas.length > 0 && (
-            <>
-              <div className="legend-section-title">Sectores 24 h</div>
-              {sectoresRotas.slice(0, 6).map((s) => (
-                <div key={`leg-s${s.sector}`} className="legend-row">
-                  <span className="legend-line" style={{ background: CORES_SECTOR_24H[(s.sector - 1) % 6] }} />
-                  S{s.sector} — {s.base?.split("(")[0]?.trim() || s.base}
-                </div>
-              ))}
-            </>
-          )}
-        </div>
+        <MapLegend
+          ESCALA_RISCO={ESCALA_RISCO}
+          LEGENDA_FORCAS={LEGENDA_FORCAS}
+          COR_FORCA={COR_FORCA}
+          COR_EMODNET={COR_EMODNET}
+          tipoPatrulha={tipoPatrulha}
+          modo={modo}
+          sectoresRotas={sectoresRotas}
+          CORES_SECTOR_24H={CORES_SECTOR_24H}
+        />
       </main>
     </div>
   );

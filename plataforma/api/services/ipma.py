@@ -1,6 +1,8 @@
 """Avisos meteorológicos IPMA (Portugal)."""
 from __future__ import annotations
+
 from datetime import datetime, timezone
+
 import httpx
 
 WARNINGS_URL = "https://api.ipma.pt/open-data/forecast/warnings/warnings_www.json"

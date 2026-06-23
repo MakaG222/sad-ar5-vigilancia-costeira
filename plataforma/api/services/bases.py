@@ -1,13 +1,14 @@
 """Bases de lançamento AR5 (militares + aeródromos ≤20 km da costa)."""
 from __future__ import annotations
+
 import os
 import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "..", "src"))
 
+from config import AERODROMOS, BASES_MCLP_RECOMENDADAS, N_SECTORES_COSTA, RAIO_LANCAMENTO_COSTA_KM
 from geo import bases_lancamento
 from otimizacao import mclp, raio_por_autonomia
-from config import BASES_MCLP_RECOMENDADAS, RAIO_LANCAMENTO_COSTA_KM, N_SECTORES_COSTA, AERODROMOS
 from services.grelha_cache import pts_grelha
 
 

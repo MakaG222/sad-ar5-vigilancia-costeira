@@ -1,5 +1,6 @@
 """Camadas geográficas do relatório SAD (IOM, apreensões marítimas)."""
 from __future__ import annotations
+
 import json
 import os
 import sys

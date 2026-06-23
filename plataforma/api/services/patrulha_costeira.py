@@ -1,34 +1,48 @@
 """Patrulha costeira alinhada com o pipeline analítico SAD (grelha + MCLP)."""
 from __future__ import annotations
+
 import json
-import math
 import os
 import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "..", "src"))
 
 from config import (
-    AR5, RESERVA_H, N_SECTORES_COSTA, BASES_MCLP_RECOMENDADAS, AERODROMOS,
-    T_ON_MIN_H, T_ON_SORTIE_H, JANELA_SECTOR_H, N_ALVOS_SORTIE_PADRAO,
-    LIMIAR_RISCO_OPERACIONAL, SENSOR_SWATH_KM,
-)
-from geo import (
-    bases_lancamento, corredor_costeiro, sectores_costa,
-    inv_proj, proj,
-)
-from services.grelha_cache import pts_grelha, pts_mar
-from otimizacao import raio_por_autonomia, dimensionar_persistencia, mclp
-from rotas_maritimas import (
-    ponto_entrada_mar, ponto_entrada_mar_sector, expandir_rota_maritima, orbita_maritima,
-    snap_maritimo, distancia_km,
+    AERODROMOS,
+    AR5,
+    BASES_MCLP_RECOMENDADAS,
+    JANELA_SECTOR_H,
+    LIMIAR_RISCO_OPERACIONAL,
+    N_ALVOS_SORTIE_PADRAO,
+    N_SECTORES_COSTA,
+    RESERVA_H,
+    SENSOR_SWATH_KM,
+    T_ON_MIN_H,
+    T_ON_SORTIE_H,
 )
 from corredores_operacionais import bonus_corredor, nome_corredor
-
-from services.rotas_ortools import tsp_com_retorno
-from services.zonas_patrulha import zonas_por_tipo, TIPOS
-from services.zonas_cluster import clusters_risco, zona_mais_proxima, zona_por_regiao
+from geo import (
+    bases_lancamento,
+    corredor_costeiro,
+    inv_proj,
+    proj,
+    sectores_costa,
+)
+from otimizacao import dimensionar_persistencia, mclp, raio_por_autonomia
+from rotas_maritimas import (
+    distancia_km,
+    expandir_rota_maritima,
+    orbita_maritima,
+    ponto_entrada_mar,
+    ponto_entrada_mar_sector,
+    snap_maritimo,
+)
 from services.cenarios import regiao_from_dict
+from services.grelha_cache import pts_mar
 from services.meteo_rotas import resolver_vento
+from services.rotas_ortools import tsp_com_retorno
+from services.zonas_cluster import clusters_risco, zona_mais_proxima, zona_por_regiao
+from services.zonas_patrulha import TIPOS, zonas_por_tipo
 
 LIMIAR = LIMIAR_RISCO_OPERACIONAL
 

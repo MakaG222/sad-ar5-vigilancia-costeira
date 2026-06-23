@@ -1,13 +1,14 @@
 """Motor de alertas: meteo, risco, cobertura, incidentes."""
 from __future__ import annotations
+
 import os
 import random
 import sys
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "..", "src"))
 
-from geo import zona_maritima_pt, ponto_em_mar, ponto_em_mar_mapa
+from geo import ponto_em_mar, ponto_em_mar_mapa
 from services.grelha_cache import pts_grelha, pts_mar, pts_mar_mapa
 from store import estado
 

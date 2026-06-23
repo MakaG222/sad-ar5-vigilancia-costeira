@@ -1,5 +1,6 @@
 """Dimensionamento dinâmico de frota com meteo actual/previsão + validação SAD."""
 from __future__ import annotations
+
 import json
 import os
 import sys
@@ -7,12 +8,19 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "..", "src"))
 
 from config import (
-    fator_vento, AR5, RESERVA_H, TEMPO_REVISITA_H, T_ON_SORTIE_H, SENSOR_SWATH_KM,
-    T_ON_MIN_H, JANELA_SECTOR_H,
+    AR5,
+    JANELA_SECTOR_H,
+    RESERVA_H,
+    SENSOR_SWATH_KM,
+    T_ON_MIN_H,
+    T_ON_SORTIE_H,
+    TEMPO_REVISITA_H,
+    fator_vento,
 )
 from geo import bases_lancamento
-from otimizacao import raio_por_autonomia, dimensionar_persistencia, mclp
+from otimizacao import dimensionar_persistencia, mclp, raio_por_autonomia
 from services.grelha_cache import pts_grelha
+
 VALIDACAO = os.path.join(os.path.dirname(__file__), "..", "..", "..", "resultados", "validacao.json")
 LIMIAR = 0.5
 

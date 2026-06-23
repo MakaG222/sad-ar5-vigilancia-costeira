@@ -1,12 +1,12 @@
 """Deteção heurística de AIS spoofing e comportamento anómalo."""
 from __future__ import annotations
+
 import math
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "..", "src"))
 from geo import proj
-from store import estado
 
 
 def _dist_km(nav_a: dict, nav_b: dict) -> float:

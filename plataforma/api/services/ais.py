@@ -1,8 +1,8 @@
 """AIS: cache local + AISStream (se chave) ou embarcações simuladas em MAR."""
 from __future__ import annotations
+
 import asyncio
 import json
-import math
 import os
 import random
 import sys
@@ -11,8 +11,14 @@ from datetime import datetime, timezone
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "..", "src"))
 
 from geo import (
-    ponto_em_mar, gerar_procura, proj, LON_MIN, LON_MAX, LAT_MIN, LAT_MAX,
+    LAT_MAX,
+    LAT_MIN,
+    LON_MAX,
+    LON_MIN,
+    gerar_procura,
+    ponto_em_mar,
 )
+from services import demo_mode
 from store import estado
 
 AISSTREAM_KEY = os.environ.get("AISSTREAM_API_KEY", "")
@@ -20,10 +26,18 @@ AISSTREAM_KEY = os.environ.get("AISSTREAM_API_KEY", "")
 
 def modo_ais() -> dict:
     """Estado da fonte AIS: real (AISStream) ou demonstração offline."""
+    if demo_mode.activo():
+        return {
+            "modo_demo": True,
+            "fonte": "demo_fixo",
+            "deterministico": True,
+            "mensagem": "Modo demo determinístico — navios fixos (DEMO_DETERMINISTICO=1)",
+        }
     key = bool(AISSTREAM_KEY)
     return {
         "modo_demo": not key,
         "fonte": "aisstream" if key else "demo",
+        "deterministico": False,
         "mensagem": (
             "Modo demonstração — navios simulados em células marítimas SAD"
             if not key
@@ -136,6 +150,19 @@ def _mover_no_mar(lon: float, lat: float) -> tuple[float, float]:
 async def atualizar_ais() -> dict:
     info = modo_ais()
     async with estado.lock:
+        if demo_mode.activo():
+            fixos = demo_mode.carregar_navios_fixos()
+            if fixos:
+                estado.navios = fixos
+            elif not estado.navios:
+                estado.navios = gerar_navios_demo()
+            estado.ultimo_ais = datetime.now(timezone.utc).isoformat()
+            return {
+                "navios": len(estado.navios),
+                "fonte": "demo_fixo",
+                "modo_demo": True,
+                "mensagem": info["mensagem"],
+            }
         n_stream = await poll_aisstream_once() if AISSTREAM_KEY else 0
         if n_stream == 0:
             if not estado.navios:

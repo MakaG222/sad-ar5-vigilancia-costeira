@@ -17,8 +17,7 @@ from sklearn.preprocessing import StandardScaler
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "..", "src"))
 
 from config import LIMIAR_RISCO_OPERACIONAL, N_SECTORES_COSTA
-from geo import proj
-from geo import ponto_em_mar_mapa
+from geo import ponto_em_mar_mapa, proj
 from services.grelha_cache import pts_mar
 
 _CACHE: dict | None = None

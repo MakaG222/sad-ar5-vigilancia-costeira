@@ -99,7 +99,7 @@ chmod +x start-docker.sh stop-docker.sh
 
 Parar: `./stop-docker.sh` · Logs: `docker compose logs -f`
 
-Variáveis opcionais: copiar `.env.example` → `.env` (ex. `AISSTREAM_API_KEY`).
+Variáveis opcionais: copiar `.env.example` → `.env` (ex. `AISSTREAM_API_KEY`, `DEMO_DETERMINISTICO=1` para demo fixa na defesa).
 
 ---
 
@@ -208,16 +208,18 @@ python smoke_test.py
 
 Deve terminar com **24/24 OK**. Inclui verificação de que o plano 24 h com MCLP automático cobre Porto e Portimão.
 
-Testes unitários (MCLP, métricas canónicas, validação de rotas):
+Testes unitários com cobertura mínima 30%:
 
 ```bash
-pytest tests/ -q
+pytest tests/ -q --cov=services --cov=../../src --cov-fail-under=30
+python ../../scripts/verificar_integridade.py
 ```
 
 ---
 
 ## Documentação adicional
 
+- [`CHANGELOG.md`](CHANGELOG.md) — histórico de versões
 - [`CHECKLIST_DEFESA.md`](CHECKLIST_DEFESA.md) — verificação pré-apresentação
 - [`plataforma/ARCHITECTURE.md`](plataforma/ARCHITECTURE.md) — diagrama e endpoints
 - [`plataforma/README.md`](plataforma/README.md) — arranque manual (dois terminais) e lista de funcionalidades

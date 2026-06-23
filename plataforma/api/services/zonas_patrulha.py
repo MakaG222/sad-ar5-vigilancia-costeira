@@ -1,12 +1,13 @@
 """Zonas de patrulha por tipo de ameaça (alinhado com risco SAD)."""
 from __future__ import annotations
+
 import os
 import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "..", "src"))
 
-from config import PESOS_AMEACA, N_SECTORES_COSTA
-from geo import corredor_costeiro, sectores_costa, ponto_em_mar_mapa
+from config import N_SECTORES_COSTA, PESOS_AMEACA
+from geo import corredor_costeiro, ponto_em_mar_mapa, sectores_costa
 from services.grelha_cache import pts_mar
 
 TIPOS = {

@@ -1,5 +1,6 @@
 """Respostas SAD (Q1/Q2/Q3) do pipeline analítico."""
 from __future__ import annotations
+
 import json
 import os
 

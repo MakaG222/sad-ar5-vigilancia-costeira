@@ -1,6 +1,8 @@
 """Hub WebSocket — push de alertas e eventos em tempo real."""
 from __future__ import annotations
+
 import asyncio
+
 from fastapi import WebSocket
 
 _clientes: set[WebSocket] = set()
