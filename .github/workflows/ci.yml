@@ -34,8 +34,7 @@ jobs:
         run: python smoke_test.py
 
       - name: Testes unitários + cobertura
-        working-directory: plataforma/api
-        run: pytest tests/ -q --cov=services --cov=../../src --cov-report=term-missing:skip-covered --cov-fail-under=50
+        run: pytest plataforma/api/tests/ -q --cov=plataforma/api/services --cov=src --cov-report=term-missing:skip-covered --cov-fail-under=50
 
   web:
     name: Frontend — build

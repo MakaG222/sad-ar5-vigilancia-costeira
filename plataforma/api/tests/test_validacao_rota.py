@@ -14,7 +14,7 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from services.validacao_rota import avaliar_rota, avaliar_plano_24h
+from services.validacao_rota import avaliar_plano_24h, avaliar_rota
 
 
 def _rota_coerente() -> dict:

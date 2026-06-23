@@ -10,6 +10,8 @@ mapa de risco, meteo, AIS, rotas de patrulha, plano 24 h, dimensionamento de fro
 
 ![Interface da plataforma — mapa de risco, patrulha e alertas](plataforma/docs/screenshot.png)
 
+*Capturas em resolução 1440×900. Se alguma imagem aparecer cortada no browser, abra o ficheiro diretamente em `plataforma/docs/`.*
+
 ---
 
 ## Relatório académico
@@ -35,25 +37,35 @@ Nota metodológica: Q3 é a **localização mínima** (MCLP); Q2 usa a **rede co
 
 ## Capturas da plataforma
 
-### Mapa de risco e respostas SAD
+<p align="center">
+  <img src="plataforma/docs/mapa-risco.png" alt="Mapa de risco SAD — modo completo" width="900"/>
+</p>
 
-![Mapa de risco SAD com zonas de patrulha](plataforma/docs/mapa-risco.png)
+<p align="center"><em>Mapa de risco e respostas SAD (modo completo — todas as camadas)</em></p>
 
-### Plano 24 h (6 sectores)
+<p align="center">
+  <img src="plataforma/docs/plano-24h.png" alt="Plano operacional 24 h" width="900"/>
+</p>
 
-![Plano operacional 24 h com sectores e rotas](plataforma/docs/plano-24h.png)
+<p align="center"><em>Plano 24 h — 6 sectores com rotas calculadas</em></p>
 
-### Alertas (meteo, RSS, cobertura)
+<p align="center">
+  <img src="plataforma/docs/alertas.png" alt="Painel de alertas" width="900"/>
+</p>
 
-![Painel de alertas operacionais](plataforma/docs/alertas.png)
+<p align="center"><em>Alertas operacionais (meteo, RSS, cobertura)</em></p>
 
-### Validação científica (backtest e baseline)
+<p align="center">
+  <img src="plataforma/docs/validacao-ciencia.png" alt="Painel Ciência" width="900"/>
+</p>
 
-![Painel Ciência — backtest e comparador SAD](plataforma/docs/validacao-ciencia.png)
+<p align="center"><em>Validação científica — backtest e baseline patrulha</em></p>
 
-### Dimensionamento de frota
+<p align="center">
+  <img src="plataforma/docs/dimensionamento-frota.png" alt="Dimensionamento de frota" width="900"/>
+</p>
 
-![Resumo de frota AR5 e métricas Q1–Q3](plataforma/docs/dimensionamento-frota.png)
+<p align="center"><em>Dimensionamento de frota AR5 e métricas Q1–Q3</em></p>
 
 ---
 
@@ -85,7 +97,12 @@ Parar: `./stop-docker.sh`
 
 ### macOS / Windows (desenvolvimento)
 
-Ver secções detalhadas abaixo ou [`plataforma/README.md`](plataforma/README.md).
+| Sistema | Guia detalhado |
+|---------|----------------|
+| **macOS** | [`plataforma/ARRANQUE-MACOS.md`](plataforma/ARRANQUE-MACOS.md) |
+| **Windows** | [`plataforma/ARRANQUE-WINDOWS.md`](plataforma/ARRANQUE-WINDOWS.md) |
+
+Resumo rápido: `cd plataforma` → `./setup-mac.sh` + `./start-mac.sh` (Mac) ou `.\setup-win.ps1` + `.\start-win.ps1` (PowerShell no Windows).
 
 ### Verificação antes da demonstração
 
@@ -128,11 +145,13 @@ sad-ar5-vigilancia-costeira/
 
 ## Arranque — macOS
 
+Guia completo: [`plataforma/ARRANQUE-MACOS.md`](plataforma/ARRANQUE-MACOS.md)
+
 ```bash
 git clone https://github.com/MakaG222/sad-ar5-vigilancia-costeira.git
 cd sad-ar5-vigilancia-costeira/plataforma
 chmod +x setup-mac.sh start-mac.sh stop-mac.sh
-./setup-mac.sh    # primeira vez
+./setup-mac.sh    # primeira vez (~2 min)
 ./start-mac.sh    # → http://localhost:5173
 ```
 
@@ -200,6 +219,7 @@ cd src && python main.py && python validacao.py
 ## Documentação adicional
 
 - [`notebooks/analise_sad_ar5.ipynb`](notebooks/analise_sad_ar5.ipynb) — análise reprodutível
+- [`plataforma/ARRANQUE-MACOS.md`](plataforma/ARRANQUE-MACOS.md) — arranque no macOS
 - [`plataforma/ARRANQUE-WINDOWS.md`](plataforma/ARRANQUE-WINDOWS.md) — arranque no Windows (ZIP, PowerShell, Docker)
 - [`FICHEIROS.md`](FICHEIROS.md) — guia da estrutura do repositório
 - [`CHANGELOG.md`](CHANGELOG.md) — histórico de versões

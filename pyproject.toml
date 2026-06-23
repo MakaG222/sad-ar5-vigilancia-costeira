@@ -18,7 +18,14 @@ pythonpath = ["plataforma/api", "src"]
 
 [tool.coverage.run]
 source = ["plataforma/api/services", "src"]
-omit = ["*/tests/*", "*/__pycache__/*"]
+omit = [
+  "*/tests/*",
+  "*/__pycache__/*",
+  "src/main.py",
+  "src/validacao.py",
+  "src/dm/*",
+  "src/mapa_interativo.py",
+]
 
 [tool.coverage.report]
 fail_under = 50

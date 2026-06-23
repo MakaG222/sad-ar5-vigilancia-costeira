@@ -1,20 +1,25 @@
 """Worker de fundo: meteo + AIS + alertas (~2 min)."""
 from __future__ import annotations
+
 import asyncio
 import copy
 from datetime import datetime, timezone
 
-from store import estado
-from services.meteo import fetch_meteo_bases
+from services import ws_hub
 from services.ais import atualizar_ais
-from services.spoofing import verificar_todos
 from services.alertas import (
-    alertas_meteo, alertas_risco_navios, alertas_cobertura, alertas_ipma, alertas_rss,
+    alertas_cobertura,
+    alertas_ipma,
+    alertas_meteo,
+    alertas_risco_navios,
+    alertas_rss,
 )
+from services.ipma import fetch_avisos_ipma
+from services.meteo import fetch_meteo_bases
 from services.risco_mapa import carregar_celulas, resumo_risco
 from services.rss_incidentes import fetch_rss
-from services.ipma import fetch_avisos_ipma
-from services import ws_hub
+from services.spoofing import verificar_todos
+from store import estado
 
 INTERVALO_S = 120  # 2 min — quasi tempo real
 

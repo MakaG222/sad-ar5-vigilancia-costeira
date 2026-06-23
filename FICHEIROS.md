@@ -30,6 +30,7 @@ O repositório contém a **plataforma operacional** e o **núcleo analítico**; 
 | `docker-compose.yml` | Orquestração local com um comando |
 | `start-docker.sh` / `stop-docker.sh` | Arranque e paragem em Docker |
 | `setup-*.sh` / `start-*.sh` | Instalação e arranque nativos (macOS / Windows) |
+| `ARRANQUE-MACOS.md` | Guia macOS — ZIP, Homebrew, Docker, scripts nativos |
 | `ARRANQUE-WINDOWS.md` | Guia Windows — ZIP sem Git, PowerShell vs CMD, Docker |
 | `.env.example` | Variáveis opcionais (AIS, demo fixa, CORS, portas) |
 | `ARCHITECTURE.md` | Diagrama técnico, endpoints e fluxo de dados |

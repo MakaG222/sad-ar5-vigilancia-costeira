@@ -1,9 +1,9 @@
 """Estado partilhado em memória (MVP local). Substituível por Redis/SQLite."""
 from __future__ import annotations
+
 import asyncio
 from dataclasses import dataclass, field
-from datetime import datetime, timezone, timedelta
-from typing import Any
+from datetime import datetime, timedelta, timezone
 
 
 def _now() -> str:

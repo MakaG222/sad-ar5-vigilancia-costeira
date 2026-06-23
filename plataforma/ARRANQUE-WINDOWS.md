@@ -1,116 +1,107 @@
 # Arranque no Windows — guia passo a passo
 
-Os erros que aparecem no **Prompt de Comandos (CMD)** são normais se:
-
-1. **Git não está instalado** — `'git' is not recognized`
-2. Está a usar **CMD** em vez de **PowerShell** — `Set-ExecutionPolicy` e `.\setup-win.ps1` só funcionam no PowerShell
-3. A pasta do projeto **ainda não foi descarregada** — `cd sad-ar5-vigilancia-costeira` falha
+Este guia corrige os erros mais comuns (`git is not recognized`, `Set-ExecutionPolicy` não funciona, scripts `.ps1` não encontrados).
 
 ---
 
-## Opção A — Sem Git (mais simples)
+## Erros frequentes e causa
+
+| Mensagem | O que significa |
+|----------|-----------------|
+| `'git' is not recognized` | Git não está instalado |
+| `'Set-ExecutionPolicy' is not recognized` | Está no **CMD** em vez do **PowerShell** |
+| `'.\setup-win.ps1' is not recognized` | Pasta errada **ou** está no CMD |
+| `O sistema não conseguiu localizar o caminho` | O projeto ainda não foi descarregado |
+
+> **Importante:** os scripts `.ps1` só funcionam no **PowerShell** (`PS C:\...>`), não no Prompt de Comandos (`C:\...>`).
+
+---
+
+## O que vai precisar
+
+| Ferramenta | Para quê | Como instalar |
+|------------|----------|---------------|
+| **PowerShell** | Executar scripts de setup | Tecla Windows → escrever *PowerShell* → Enter |
+| **Python 3.10+** | API (backend) | [python.org](https://www.python.org/downloads/) — marque **Add python.exe to PATH** |
+| **Node.js 18+** | Interface web | [nodejs.org](https://nodejs.org/) |
+| **Git** (opcional) | Clonar repositório | [git-scm.com](https://git-scm.com/download/win) |
+| **Docker Desktop** (opcional) | Arranque sem Python/Node | [docker.com](https://www.docker.com/products/docker-desktop/) |
+
+---
+
+## Passo 1 — Obter o código
+
+### Opção A — ZIP (sem Git, mais simples)
 
 1. Abra no browser:  
    https://github.com/MakaG222/sad-ar5-vigilancia-costeira/releases/tag/v1.0-final
 
 2. Descarregue **`sad-ar5-v1.0-final.zip`**
 
-3. Clique com o botão direito no ZIP → **Extrair tudo** → por exemplo para  
+3. Clique direito → **Extrair tudo** → por exemplo:  
    `C:\Users\Utilizador\Downloads\sad-ar5-vigilancia-costeira`
 
-4. Continue na **Opção B** ou **Opção C** abaixo (a partir do passo «Abrir PowerShell»).
-
----
-
-## Opção B — Com Git instalado
-
-1. Instale Git: https://git-scm.com/download/win  
-   (durante a instalação, marque **«Git from the command line and also from 3rd-party software»**)
-
-2. Feche e reabra o terminal.
-
-3. No **PowerShell** (não CMD):
+### Opção B — Git
 
 ```powershell
 cd $HOME\Downloads
 git clone https://github.com/MakaG222/sad-ar5-vigilancia-costeira.git
-cd sad-ar5-vigilancia-costeira\plataforma
 ```
 
 ---
 
-## Abrir o PowerShell (obrigatório para os scripts `.ps1`)
+## Passo 2 — Abrir o PowerShell na pasta certa
 
-- Tecla **Windows**, escreva **PowerShell**, Enter  
-  **ou**
-- Botão direito no menu Iniciar → **Terminal (Admin)** / **Windows PowerShell**
-
-Confirme que o prompt mostra algo como `PS C:\Users\...>` — **não** `C:\Users\...>`.
-
----
-
-## Opção C — Docker (recomendado se tiver Docker Desktop)
-
-Não precisa de Python nem Node no PC — só Docker.
-
-1. Instale [Docker Desktop](https://www.docker.com/products/docker-desktop/)
-2. Abra **PowerShell** na pasta `plataforma`:
+1. Tecla **Windows** → escreva **PowerShell** → Enter  
+2. Confirme que o prompt mostra `PS C:\...>` (não `C:\...>`)  
+3. Navegue até à pasta `plataforma`:
 
 ```powershell
 cd C:\Users\Utilizador\Downloads\sad-ar5-vigilancia-costeira\plataforma
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-.\start-docker.sh
 ```
 
-Se `.\start-docker.sh` não funcionar no Windows, use:
+(Ajuste o caminho se extraiu noutro sítio.)
+
+---
+
+## Passo 3 — Escolher modo de arranque
+
+### Opção 1 — Docker (recomendado se tiver Docker Desktop)
 
 ```powershell
 docker compose up --build -d
 ```
 
-→ Abra **http://localhost:8080**
+→ **http://localhost:8080**
 
----
+Parar: `docker compose down`
 
-## Opção D — Python + Node (desenvolvimento)
+### Opção 2 — Nativo (Python + Node)
 
-**Pré-requisitos:** Python 3.10+ e Node.js 18+  
-- Python: https://www.python.org/downloads/ — marque **«Add python.exe to PATH»**  
-- Node: https://nodejs.org/
-
-Na pasta `plataforma`, em **PowerShell**:
+**Primeira vez:**
 
 ```powershell
-cd C:\Users\Utilizador\Downloads\sad-ar5-vigilancia-costeira\plataforma
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 .\setup-win.ps1
+```
+
+O script cria `.venv` em `api\`, instala dependências Python e `npm install` no frontend.
+
+**Cada utilização:**
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 .\start-win.ps1
 ```
 
-→ Browser em **http://localhost:5173** (interface)  
-→ API em **http://127.0.0.1:8080/docs**
+→ Interface: **http://localhost:5173**  
+→ API: **http://127.0.0.1:8080/docs**
 
-Parar:
-
-```powershell
-.\stop-win.ps1
-```
+Parar: `.\stop-win.ps1`
 
 ---
 
-## Resolução de problemas
-
-| Mensagem | Causa | Solução |
-|----------|-------|---------|
-| `'git' is not recognized` | Git não instalado | Opção A (ZIP) ou instalar Git |
-| `Set-ExecutionPolicy` não reconhecido | Está no CMD | Abrir **PowerShell** |
-| `setup-win.ps1` não reconhecido | Pasta errada ou CMD | `cd` até `...\plataforma` no PowerShell |
-| `python` não encontrado | Python não no PATH | Reinstalar Python com «Add to PATH» |
-| Porta 8080 ocupada | Serviço anterior | `.\stop-win.ps1` e voltar a arrancar |
-
----
-
-## Verificação rápida
+## Passo 4 — Verificar
 
 ```powershell
 cd C:\Users\Utilizador\Downloads\sad-ar5-vigilancia-costeira\plataforma\api
@@ -119,3 +110,40 @@ python smoke_test.py
 ```
 
 Deve terminar com **28/28 OK**.
+
+---
+
+## Resolução de problemas
+
+| Sintoma | Solução |
+|---------|---------|
+| `python` não encontrado | Reinstalar Python com «Add to PATH»; fechar e reabrir PowerShell |
+| `npm` não encontrado | Instalar Node.js; reiniciar PowerShell |
+| Porta 8080 ocupada | `.\stop-win.ps1` e voltar a arrancar |
+| Erro de execução de scripts | `Set-ExecutionPolicy -Scope Process Bypass` no **PowerShell** |
+| Interface abre mas mapa vazio | Verificar se a API responde em http://127.0.0.1:8080/api/health |
+
+---
+
+## Estrutura
+
+```
+plataforma\
+├── api\           ← FastAPI (porta 8080)
+├── web\           ← React/Vite (porta 5173)
+├── setup-win.ps1  ← Instalação (1.ª vez)
+├── start-win.ps1  ← Arranque
+└── stop-win.ps1   ← Paragem
+```
+
+A API usa os dados em `..\src\`, `..\dados\` e `..\resultados\` — a plataforma funciona sem reexecutar o notebook.
+
+---
+
+## Notebook de análise (opcional)
+
+```powershell
+cd C:\Users\Utilizador\Downloads\sad-ar5-vigilancia-costeira
+pip install -r requirements.txt jupyter
+jupyter notebook notebooks\analise_sad_ar5.ipynb
+```
