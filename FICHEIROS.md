@@ -84,7 +84,7 @@ O repositório contém a **plataforma operacional** e o **núcleo analítico**; 
 
 | Ficheiro | Descrição |
 |----------|-----------|
-| `analise_sad_ar5.ipynb` | EDA, AHP, grelha de risco, otimização, backtest e respostas SAD Q1–Q3 |
+| `analise_sad_ar5.ipynb` | Pipeline completo: código-fonte de cada módulo `src/`, execução passo a passo, figuras 01–08 e 21–25, JSON da plataforma |
 
 ---
 
