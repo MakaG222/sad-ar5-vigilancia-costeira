@@ -2,9 +2,9 @@
   "gerado_em": "2026-06-23",
   "nota": "Checksums SHA-256 dos JSON canónicos.",
   "sha256": {
-    "resultados/validacao.json": "365d8a7d530b029952dbe2703876da01a61a4566c9e2db7ea603adf482935a88",
+    "resultados/validacao.json": "5282cf35553f5575a25a33ba1a7578467f9fd0ff0f773dc3fb41a7307aebfa6b",
     "resultados/resultados.json": "d92aa1b573f56de1ebbef13cac1f28981c7168fd1c3e4dcdba1e40ae35000e9e",
-    "resultados/camadas_mapa.json": "6f7ddf6a15710e8673dbde5cbdf5d2e38eeb6b6f24cae587e1d349688cb38260",
+    "resultados/camadas_mapa.json": "126eea616b4d7afbee0229c4ff6b7d85e8068b5f2531275d451d63e2f80db08f",
     "resultados/demo_navios.json": "ee0450115855ca856ccb710ae720d2defa6b91fbf276a5d6ac50608e65f0d8b1",
     "resultados/ahp_pesos.json": "34182014a6b52bfa6f88c7fa2ef42fc4421793f04aced04e69f483651e6bfef1"
   }

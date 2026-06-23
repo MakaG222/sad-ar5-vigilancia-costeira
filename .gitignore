@@ -1,3 +1,6 @@
+# Ficheiros ignorados pelo Git — SAD AR5 Plataforma
+# (ambientes locais, caches, relatório académico fora do repositório)
+
 .DS_Store
 *.pyc
 __pycache__/

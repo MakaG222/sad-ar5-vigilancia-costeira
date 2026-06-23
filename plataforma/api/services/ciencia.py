@@ -29,7 +29,7 @@ def backtest_temporal() -> dict:
         "ano_corte": bt.get("ano_corte", 2022),
         "n_holdout": bt.get("n_holdout"),
         "taxa_acerto_limiar": bt.get("taxa_acerto_limiar"),
-        "taxa_acerto_top20": bt.get("taxa_acerto_top20"),
+        "taxa_acerto_percentil_20": bt.get("taxa_acerto_percentil_20", bt.get("taxa_acerto_top20")),
         "ganho_relativo_limiar": bt.get("ganho_relativo_limiar"),
         "baseline_aleatorio_limiar": bt.get("baseline_aleatorio_limiar"),
         "risco_medio_holdout": bt.get("risco_medio_holdout"),

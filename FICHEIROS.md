@@ -113,6 +113,7 @@ Consumidos pela API em runtime (não requerem reexecutar o pipeline completo).
 | `camadas_mapa.json` | Geometrias IOM, apreensões, metadados |
 | `demo_navios.json` | Posições AIS fixas (modo demo) |
 | `manifest.json` | Checksums SHA-256 (integridade) |
+| `README.md` | Descrição dos artefactos e métricas de referência |
 
 ---
 
