@@ -5,6 +5,10 @@ mapa de risco, meteo, AIS, rotas de patrulha, plano 24 h, dimensionamento de fro
 
 **Repositório:** https://github.com/MakaG222/sad-ar5-vigilancia-costeira
 
+![CI](https://github.com/MakaG222/sad-ar5-vigilancia-costeira/actions/workflows/ci.yml/badge.svg)
+
+![Interface da plataforma — mapa de risco, patrulha e alertas](plataforma/docs/screenshot.png)
+
 ---
 
 ## Estrutura do repositório
@@ -31,6 +35,7 @@ sad-ar5-vigilancia-costeira/
 │   ├── stop-mac.sh             # Paragem — macOS
 │   ├── stop-win.ps1            # Paragem — Windows
 │   ├── .env.example            # Variáveis opcionais (copiar para .env)
+│   ├── docs/screenshot.png     # Captura da interface (README)
 │   ├── APRESENTACAO.md         # Roteiro de demonstração (~5 min)
 │   └── README.md               # Detalhe adicional da plataforma
 │
@@ -165,7 +170,29 @@ Logs em `plataforma\.run\api.log` e `plataforma\.run\web.log`.
 
 ---
 
+## Verificação rápida (smoke test)
+
+Antes de uma demonstração ou após alterações à API:
+
+```bash
+cd plataforma/api
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
+python smoke_test.py
+```
+
+Deve terminar com **23/23 OK**. Inclui verificação de que o plano 24 h com MCLP automático cobre Porto e Portimão.
+
+Testes unitários (MCLP, métricas canónicas, validação de rotas):
+
+```bash
+pytest tests/ -q
+```
+
+---
+
 ## Documentação adicional
 
+- [`CHECKLIST_DEFESA.md`](CHECKLIST_DEFESA.md) — verificação pré-apresentação
+- [`plataforma/ARCHITECTURE.md`](plataforma/ARCHITECTURE.md) — diagrama e endpoints
 - [`plataforma/README.md`](plataforma/README.md) — arranque manual (dois terminais) e lista de funcionalidades
 - [`plataforma/APRESENTACAO.md`](plataforma/APRESENTACAO.md) — roteiro de demonstração (~5 min)

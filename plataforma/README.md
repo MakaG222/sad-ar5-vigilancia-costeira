@@ -71,4 +71,4 @@ npm run dev
 - Meteo live, avisos IPMA, RSS, AIS (ou modo demo)
 - Exportação de plano de missão (GeoJSON/CSV)
 
-Para instalação detalhada, cenários de demo e resolução de problemas, ver as secções acima neste ficheiro.
+Ver também [`APRESENTACAO.md`](APRESENTACAO.md) (roteiro de demo) e [`../README.md`](../README.md) (estrutura do repo e smoke test).

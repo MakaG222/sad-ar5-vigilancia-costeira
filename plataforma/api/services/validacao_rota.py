@@ -1,5 +1,5 @@
 """
-Validação de qualidade de rotas (Fase 2/4 do PLANO_PATRULHAS).
+Validação de qualidade de rotas (métricas de cobertura e risco).
 
 Avalia, de forma aditiva e sem alterar o planeador, se uma rota "faz sentido"
 operacionalmente: coerência espacial (waypoints na zona/região), continuidade

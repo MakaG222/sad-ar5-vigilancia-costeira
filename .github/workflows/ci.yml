@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  api:
+    name: API — smoke + pytest
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: plataforma/api/requirements.txt
+
+      - name: Instalar dependências Python
+        run: pip install -r plataforma/api/requirements.txt
+
+      - name: Smoke test
+        working-directory: plataforma/api
+        run: python smoke_test.py
+
+      - name: Testes unitários
+        working-directory: plataforma/api
+        run: pytest tests/ -q
+
+  web:
+    name: Frontend — build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: plataforma/web/package-lock.json
+
+      - name: Instalar e compilar
+        working-directory: plataforma/web
+        run: |
+          npm ci
+          npm run build

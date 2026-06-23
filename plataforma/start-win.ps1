@@ -40,7 +40,7 @@ $ApiProc = Start-Process -FilePath $ApiStart -ArgumentList "-m", "uvicorn", "mai
 $ApiProc.Id | Set-Content (Join-Path $Run "api.pid")
 Write-Host "    API PID $($ApiProc.Id) · log $ApiLog"
 
-$max = 60
+$max = 90
 $ok = $false
 for ($i = 0; $i -lt $max; $i++) {
     try {
