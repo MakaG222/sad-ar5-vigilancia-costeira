@@ -19,6 +19,7 @@ import main
 
 
 GET_OK = [
+    "/api/health",
     "/api/estado",
     "/api/risco/celulas?limiar=0.0",
     "/api/risco/celulas?limiar=0.15",

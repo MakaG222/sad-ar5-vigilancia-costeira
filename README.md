@@ -34,6 +34,10 @@ sad-ar5-vigilancia-costeira/
 │   ├── start-win.ps1           # Arranque — Windows
 │   ├── stop-mac.sh             # Paragem — macOS
 │   ├── stop-win.ps1            # Paragem — Windows
+│   ├── Dockerfile              # Imagem Docker (API + web build)
+│   ├── docker-compose.yml      # Arranque com um comando
+│   ├── start-docker.sh         # Build + run Docker
+│   ├── stop-docker.sh          # Parar contentor
 │   ├── .env.example            # Variáveis opcionais (copiar para .env)
 │   ├── docs/screenshot.png     # Captura da interface (README)
 │   ├── APRESENTACAO.md         # Roteiro de demonstração (~5 min)
@@ -76,6 +80,26 @@ sad-ar5-vigilancia-costeira/
 | Python | 3.10+ (`brew install python`) | 3.10+ ([python.org](https://www.python.org/downloads/) — marcar *Add to PATH*) |
 | Node.js | 18+ (`brew install node`) | 18+ ([nodejs.org](https://nodejs.org/)) |
 | npm | Incluído com Node | Incluído com Node |
+| Docker (opcional) | [Docker Desktop](https://www.docker.com/products/docker-desktop/) | Idem |
+
+---
+
+## Arranque — Docker (recomendado)
+
+Um único comando — **sem instalar Python nem Node** no sistema anfitrião:
+
+```bash
+git clone https://github.com/MakaG222/sad-ar5-vigilancia-costeira.git
+cd sad-ar5-vigilancia-costeira/plataforma
+chmod +x start-docker.sh stop-docker.sh
+./start-docker.sh
+```
+
+→ **http://localhost:8080** (interface + API no mesmo contentor)
+
+Parar: `./stop-docker.sh` · Logs: `docker compose logs -f`
+
+Variáveis opcionais: copiar `.env.example` → `.env` (ex. `AISSTREAM_API_KEY`).
 
 ---
 
@@ -153,9 +177,11 @@ Logs em `plataforma\.run\api.log` e `plataforma\.run\web.log`.
 
 | Endereço | Descrição |
 |----------|-----------|
-| http://localhost:5173 | Interface web (mapa, rotas, alertas) |
+| http://localhost:8080 | **Docker** — interface + API |
+| http://localhost:5173 | Desenvolvimento local — interface (Vite) |
 | http://127.0.0.1:8080/docs | API Swagger (endpoints REST) |
-| http://127.0.0.1:8080/api/estado | Estado do sistema (health check) |
+| http://127.0.0.1:8080/api/health | Health check (Docker / monitorização) |
+| http://127.0.0.1:8080/api/estado | Estado operacional do sistema |
 
 ---
 
@@ -180,7 +206,7 @@ source .venv/bin/activate   # Windows: .venv\Scripts\activate
 python smoke_test.py
 ```
 
-Deve terminar com **23/23 OK**. Inclui verificação de que o plano 24 h com MCLP automático cobre Porto e Portimão.
+Deve terminar com **24/24 OK**. Inclui verificação de que o plano 24 h com MCLP automático cobre Porto e Portimão.
 
 Testes unitários (MCLP, métricas canónicas, validação de rotas):
 

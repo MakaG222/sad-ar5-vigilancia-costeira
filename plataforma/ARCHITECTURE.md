@@ -55,6 +55,7 @@ flowchart TB
 
 | Método | Rota | Módulo | Dados |
 |--------|------|--------|-------|
+| GET | `/api/health` | `main.py` | Health check (Docker) |
 | GET | `/api/estado` | `store.py` | Estado em memória |
 | GET | `/api/risco/celulas` | `risco_mapa.py` | Grelha `src/` |
 | GET | `/api/sad/respostas` | `sad_respostas.py` | `validacao.json` |
@@ -77,6 +78,7 @@ Valores de referência em `resultados/validacao.json`, expostos na UI via `/api/
 
 ## Modos de operação
 
+- **Docker:** `docker compose up` — interface + API em http://localhost:8080
 - **Online:** meteo Open-Meteo, IPMA, RSS, AISStream (se `AISSTREAM_API_KEY`).
 - **Demo / offline:** navios simulados, cache local, `validacao.json` e camadas em `resultados/`.
 - **Apresentação:** mapa leve (modo activo por defeito na UI).

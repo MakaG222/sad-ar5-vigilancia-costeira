@@ -6,7 +6,14 @@ Interface web quasi-tempo-real: meteo, AIS, mapa de risco, rotas de patrulha, pl
 
 ---
 
-## macOS
+## Docker (recomendado)
+
+```bash
+chmod +x start-docker.sh stop-docker.sh
+./start-docker.sh
+```
+
+→ http://localhost:8080 · Parar: `./stop-docker.sh`
 
 ```bash
 chmod +x setup-mac.sh start-mac.sh stop-mac.sh
@@ -57,8 +64,10 @@ npm run dev
 
 | Endereço | Descrição |
 |----------|-----------|
-| http://localhost:5173 | Interface |
+| http://localhost:8080 | Interface + API (Docker) |
+| http://localhost:5173 | Interface (desenvolvimento local) |
 | http://127.0.0.1:8080/docs | API Swagger |
+| http://127.0.0.1:8080/api/health | Health check |
 
 ---
 

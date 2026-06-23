@@ -1,0 +1,18 @@
+# Arranque: cd plataforma && docker compose up --build
+# Interface + API: http://localhost:8080
+
+services:
+  sad-ar5:
+    build:
+      context: ..
+      dockerfile: plataforma/Dockerfile
+    image: sad-ar5:latest
+    container_name: sad-ar5
+    ports:
+      - "${API_PORT:-8080}:8080"
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      AISSTREAM_API_KEY: ${AISSTREAM_API_KEY:-}
+    restart: unless-stopped

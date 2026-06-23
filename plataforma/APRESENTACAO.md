@@ -10,6 +10,17 @@ Versão optimizada para **defesa do projecto** e demo em sala.
 
 ## Arranque
 
+**Docker (recomendado):**
+
+```bash
+cd plataforma
+./start-docker.sh
+```
+
+Abrir: http://localhost:8080
+
+**Local (macOS):**
+
 ```bash
 cd plataforma
 ./setup-mac.sh    # 1.ª vez
@@ -35,5 +46,6 @@ O indicador **Offline OK** aparece no topo quando meteo/IPMA/RSS estão em cache
 ## Parar
 
 ```bash
-./stop-mac.sh
+./stop-docker.sh    # Docker
+./stop-mac.sh       # local
 ```

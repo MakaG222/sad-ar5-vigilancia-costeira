@@ -10,6 +10,7 @@ from __future__ import annotations
 import asyncio
 import os
 import sys
+import time
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
@@ -40,6 +41,7 @@ from services.exportar import exportar_risco_geojson, exportar_validacao, export
 from services.ais import modo_ais
 
 _stop = asyncio.Event()
+_started_at = time.time()
 
 
 @asynccontextmanager
@@ -186,6 +188,22 @@ def _base_plano24h(base: str | None, k_bases: int = 2, lon_lanc: float | None = 
     if k_bases >= 2 and lon_lanc is None and lat_lanc is None:
         return None
     return base
+
+
+@app.get("/api/health")
+def health():
+    """Health check para Docker e monitorização."""
+    ais = modo_ais()
+    return {
+        "status": "ok",
+        "version": app.version,
+        "uptime_s": round(time.time() - _started_at, 1),
+        "worker_ativo": not _stop.is_set(),
+        "grelha_pronta": estado.risco_resumo is not None,
+        "n_navios": len(estado.navios),
+        "n_alertas": len(estado.alertas),
+        "ais": ais,
+    }
 
 
 @app.get("/api/estado")

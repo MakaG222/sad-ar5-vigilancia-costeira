@@ -48,3 +48,20 @@ jobs:
         run: |
           npm ci
           npm run build
+
+  docker:
+    name: Docker — build imagem
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: plataforma/Dockerfile
+          push: false
+          tags: sad-ar5:ci
