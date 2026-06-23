@@ -805,19 +805,21 @@ else:
 """))
 
 # --- SECTION 8 PIPELINE SAD ---
-cells.append(md("## 8. Pipeline SAD completo (`main.py` + `validacao.py`)"))
+cells.append(md("## 8. Pipeline SAD — `main.py` (não sobrescreve `validacao.json` canónico)"))
 cells.append(code("""import main as sad_main
-import validacao as sad_val
 
-print(">> main.py — otimização e JSON operacional")
+print(">> main.py — otimização e resultados.json")
 sad_main.main()
-print("\\n>> validacao.py — validação científica e camadas do mapa")
-val_out = sad_val.main()
 
+# validacao.json canónico (274 células, ganho 2,13×, frota 9) — não regenerar aqui
 val_path = OUTDIR / "validacao.json"
 with open(val_path, encoding="utf-8") as f:
     val = json.load(f)
-print("\\nvalidacao.json regenerado com", len(val), "blocos de métricas")
+bl = val.get("baseline_patrulha", {})
+print(f"validacao.json canónico: {bl.get('n_celulas_patrulha')} células | "
+      f"ganho {bl.get('ganho_sad_vs_aleatorio')}× | "
+      f"frota {val.get('resposta_objetivo',{}).get('Q2_quantos',{}).get('frota_total')} AR5")
+print("(Para regenerar validação: cd src && python validacao.py — só em desenvolvimento)")
 """))
 
 # --- SECTION 9 RESPOSTAS ---

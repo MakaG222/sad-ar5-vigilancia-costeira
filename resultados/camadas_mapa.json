@@ -1406,43 +1406,104 @@
   "validacao": {
     "backtest_temporal": {
       "ano_corte": 2022,
-      "n_holdout": 55,
-      "n_celulas_alto_risco_train": 423,
-      "frac_celulas_alto_risco": 0.3659,
-      "taxa_acerto_limiar": 0.8545,
-      "taxa_acerto_top20": 0.8545,
-      "baseline_aleatorio_limiar": 0.3662,
-      "baseline_top20": 0.2,
-      "ganho_relativo_limiar": 2.33,
-      "risco_medio_holdout": 0.7234,
-      "risco_medio_global": 0.3786,
+      "n_holdout": 54,
+      "n_celulas_alto_risco_train": 170,
+      "frac_celulas_alto_risco": 0.1471,
+      "taxa_acerto_limiar": 0.8519,
+      "taxa_acerto_percentil_20": 0.8704,
+      "baseline_aleatorio_limiar": 0.1465,
+      "baseline_percentil_20": 0.2,
+      "ganho_relativo_limiar": 5.81,
+      "risco_medio_holdout": 0.7622,
+      "risco_medio_global": 0.2594,
       "anos_holdout": [
         2023,
         2024
       ]
     },
+    "backtest_comparativo": {
+      "ano_corte": 2022,
+      "meta_rigoroso": {
+        "ano_max": 2022,
+        "camadas_temporais": [
+          "droga",
+          "imigracao_pt",
+          "imigracao_iom"
+        ],
+        "camadas_estaticas": [
+          "pesca (EMODnet)",
+          "poluicao (EMODnet)"
+        ],
+        "nota": "Pesca e poluição não têm dimensão anual nas fontes abertas usadas; mantêm-se fixas enquanto droga e imigração são filtradas no treino."
+      },
+      "modelo_droga_apenas": {
+        "n_holdout": 54,
+        "n_celulas_percentil_20": 232,
+        "taxa_acerto_percentil_20": 0.9444,
+        "taxa_acerto_limiar_05": 0.7593,
+        "baseline_percentil_20": 0.2,
+        "ganho_relativo_percentil_20": 4.72,
+        "nota": "Ranking fixo das 231 células de maior intensidade droga (treino ≤2022)."
+      },
+      "modelo_multi_ameaca_parcial": {
+        "n_holdout": 54,
+        "n_celulas_alto_risco_train": 170,
+        "frac_celulas_alto_risco": 0.1471,
+        "taxa_acerto_limiar": 0.8519,
+        "taxa_acerto_percentil_20": 0.8704,
+        "baseline_aleatorio_limiar": 0.1465,
+        "baseline_percentil_20": 0.2,
+        "ganho_relativo_limiar": 5.81,
+        "risco_medio_holdout": 0.7622,
+        "risco_medio_global": 0.2594,
+        "anos_holdout": [
+          2023,
+          2024
+        ],
+        "rotulo": "Droga temporal + imigração estática (CSV produção)"
+      },
+      "modelo_multi_ameaca_rigoroso": {
+        "n_holdout": 54,
+        "n_celulas_alto_risco_train": 155,
+        "frac_celulas_alto_risco": 0.1341,
+        "taxa_acerto_limiar": 0.8519,
+        "taxa_acerto_percentil_20": 0.8704,
+        "baseline_aleatorio_limiar": 0.134,
+        "baseline_percentil_20": 0.2,
+        "ganho_relativo_limiar": 6.36,
+        "risco_medio_holdout": 0.7605,
+        "risco_medio_global": 0.2572,
+        "anos_holdout": [
+          2023,
+          2024
+        ],
+        "rotulo": "Droga + imigração temporal + pesca/poluição estáticas"
+      },
+      "n_eventos_geocodificados_treino_droga": 177,
+      "interpretacao": "A variante rigorosa filtra droga e imigração até 2022; pesca/poluição permanecem estáticas por ausência de série temporal nas fontes EMODnet."
+    },
     "backtest_somente_droga": {
-      "n_holdout": 55,
-      "n_celulas_top20": 232,
-      "taxa_acerto_top20": 0.0,
-      "taxa_acerto_limiar_05": 0.0,
-      "baseline_top20": 0.2032,
-      "ganho_relativo_top20": 0.0,
+      "n_holdout": 54,
+      "n_celulas_percentil_20": 232,
+      "taxa_acerto_percentil_20": 0.9444,
+      "taxa_acerto_limiar_05": 0.7593,
+      "baseline_percentil_20": 0.2,
+      "ganho_relativo_percentil_20": 4.72,
       "nota": "Ranking fixo das 231 células de maior intensidade droga (treino ≤2022)."
     },
     "baseline_patrulha": {
-      "n_celulas_patrulha": 300,
-      "captura_sad": 0.5358,
-      "captura_aleatorio_media": 0.26,
-      "captura_aleatorio_std": 0.0087,
-      "captura_uniforme_costeira": 0.3247,
-      "ganho_sad_vs_aleatorio": 2.06,
-      "ganho_sad_vs_uniforme": 1.65,
+      "n_celulas_patrulha": 274,
+      "captura_sad": 0.5042,
+      "captura_aleatorio_media": 0.2369,
+      "captura_aleatorio_std": 0.0093,
+      "captura_uniforme_costeira": 0.2437,
+      "ganho_sad_vs_aleatorio": 2.13,
+      "ganho_sad_vs_uniforme": 2.07,
       "ganho_ic95_bootstrap": [
-        1.93,
-        2.22
+        1.97,
+        2.31
       ],
-      "pct_risco_total_capturado_sad": 53.6
+      "pct_risco_total_capturado_sad": 50.4
     },
     "validacao_imigracao": {
       "n_eventos": 20,
@@ -1463,47 +1524,47 @@
       "limiares": [
         {
           "limiar": 0.45,
-          "n_celulas_alto_risco": 328,
-          "pct_grelha": 28.4,
-          "captura_sad_pct": 57.0,
-          "captura_aleatorio_pct": 28.4,
-          "ganho_vs_aleatorio": 2.01
+          "n_celulas_alto_risco": 312,
+          "pct_grelha": 27.0,
+          "captura_sad_pct": 55.3,
+          "captura_aleatorio_pct": 27.0,
+          "ganho_vs_aleatorio": 2.05
         },
         {
           "limiar": 0.5,
-          "n_celulas_alto_risco": 300,
-          "pct_grelha": 26.0,
-          "captura_sad_pct": 53.6,
-          "captura_aleatorio_pct": 25.9,
-          "ganho_vs_aleatorio": 2.07
+          "n_celulas_alto_risco": 274,
+          "pct_grelha": 23.7,
+          "captura_sad_pct": 50.4,
+          "captura_aleatorio_pct": 23.7,
+          "ganho_vs_aleatorio": 2.13
         },
         {
           "limiar": 0.55,
-          "n_celulas_alto_risco": 256,
-          "pct_grelha": 22.1,
-          "captura_sad_pct": 47.6,
-          "captura_aleatorio_pct": 22.1,
-          "ganho_vs_aleatorio": 2.15
+          "n_celulas_alto_risco": 227,
+          "pct_grelha": 19.6,
+          "captura_sad_pct": 43.7,
+          "captura_aleatorio_pct": 19.6,
+          "ganho_vs_aleatorio": 2.23
         }
       ],
       "referencia": 0.5
     },
     "decomposicao_ganho": {
-      "n_celulas_patrulha": 300,
-      "frac_celulas_patrolhadas": 0.2595,
-      "frac_risco_em_top_n": 0.5358,
-      "captura_sad": 0.5358,
-      "captura_aleatorio": 0.26,
-      "ganho_observado": 2.06,
-      "ganho_teorico_se_risco_uniforme": 2.06,
-      "indice_gini_risco": 0.4,
+      "n_celulas_patrulha": 274,
+      "frac_celulas_patrolhadas": 0.237,
+      "frac_risco_em_top_n": 0.5042,
+      "captura_sad": 0.5042,
+      "captura_aleatorio": 0.2369,
+      "ganho_observado": 2.13,
+      "ganho_teorico_se_risco_uniforme": 2.13,
+      "indice_gini_risco": 0.405,
       "interpretacao": "O ganho reflecte sobretudo a concentração espacial do risco (Gini elevado): patrulhar as mesmas N células por ranking captura mais massa de risco que uma selecção aleatória com N células."
     },
     "nota_mapas_risco": {
-      "n_alto_risco_operacional": 300,
-      "n_alto_risco_backtest_treino": 423,
+      "n_alto_risco_operacional": 274,
+      "n_alto_risco_backtest_treino": 170,
       "limiar": 0.5,
-      "nota": "O mapa operacional (300 células) usa todas as fontes e pesos finais; o backtest treina só a droga até 2022 e inclui camadas estáticas — daí mais células acima do limiar no treino temporal (~423)."
+      "nota": "O mapa operacional usa todas as fontes e pesos AHP; o backtest treina droga e imigração até 2022 com pesca/poluição estáticas — daí diferença no n.º de células alto risco entre mapas operacional e de treino."
     },
     "resposta_objetivo": {
       "Q1_onde": {
@@ -1515,22 +1576,36 @@
         ]
       },
       "Q2_quantos": {
-        "resposta": "9 AR5 faixa costeira (24 h); 11 AR5 área total de alto risco.",
-        "frota_total": 11,
+        "resposta": "9 AR5 faixa costeira (24 h); 9 AR5 área total de alto risco.",
+        "frota_total": 9,
         "frota_costeira": 9,
-        "n_simultaneos": 3
+        "n_simultaneos_costeira": 3,
+        "n_simultaneos_total": 3,
+        "bases_dimensionamento_costeira": [
+          "Santa Cruz",
+          "Cascais (Tires)",
+          "Sines",
+          "Portimão",
+          "Faro"
+        ],
+        "bases_dimensionamento_total": [
+          "Montijo (BA6)"
+        ],
+        "nota": "A frota 9 AR5 assume bases distribuídas; com apenas Porto+Portimão (MCLP k=2) seriam necessários 10 AR5."
       },
       "Q3_bases": {
-        "resposta": "2 bases: Porto (Sá Carneiro), Portimão.",
-        "bases": [
+        "resposta": "MCLP (k=2): Porto (Sá Carneiro), Portimão — cobrem 100 % do risco com o mínimo de instalações.",
+        "bases_mclp": [
           "Porto (Sá Carneiro)",
           "Portimão"
         ],
-        "frac_risco": 1.0
+        "frac_risco_mclp": 1.0,
+        "frota_se_apenas_estas_bases": 10,
+        "nota": "Q3 responde à localização mínima (MCLP); Q2 usa rede costeira completa para o dimensionamento de frota."
       }
     },
     "n_incidentes_iom": 0,
     "n_desembarques_pt": 20,
-    "n_apreensoes_maritimas_recentes": 177
+    "n_apreensoes_maritimas_recentes": 169
   }
 }

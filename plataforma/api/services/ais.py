@@ -1,8 +1,8 @@
 """AIS: cache local + AISStream (se chave) ou embarcações simuladas em MAR."""
 from __future__ import annotations
+
 import asyncio
 import json
-import math
 import os
 import random
 import sys
@@ -11,10 +11,15 @@ from datetime import datetime, timezone
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "..", "src"))
 
 from geo import (
-    ponto_em_mar, gerar_procura, proj, LON_MIN, LON_MAX, LAT_MIN, LAT_MAX,
+    LAT_MAX,
+    LAT_MIN,
+    LON_MAX,
+    LON_MIN,
+    gerar_procura,
+    ponto_em_mar,
 )
-from store import estado
 from services import demo_mode
+from store import estado
 
 AISSTREAM_KEY = os.environ.get("AISSTREAM_API_KEY", "")
 

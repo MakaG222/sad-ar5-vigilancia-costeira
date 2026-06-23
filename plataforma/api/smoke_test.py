@@ -17,7 +17,6 @@ from fastapi.testclient import TestClient
 
 import main
 
-
 GET_OK = [
     "/api/health",
     "/api/estado",

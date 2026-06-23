@@ -1,8 +1,7 @@
 """Testes MCLP e bases de lançamento."""
 from __future__ import annotations
 
-from config import BASES_MCLP_RECOMENDADAS, T_ON_SORTIE_H
-from geo import bases_lancamento
+from config import BASES_MCLP_RECOMENDADAS
 from otimizacao import mclp, raio_por_autonomia
 from services.bases import listar_bases
 from services.grelha_cache import pts_grelha

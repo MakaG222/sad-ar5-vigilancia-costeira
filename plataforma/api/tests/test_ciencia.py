@@ -2,7 +2,10 @@
 from __future__ import annotations
 
 from services.ciencia import (
-    ahp_pesos, backtest_temporal, baseline_patrulha, sensibilidade_pesos,
+    ahp_pesos,
+    backtest_temporal,
+    baseline_patrulha,
+    sensibilidade_pesos,
 )
 
 

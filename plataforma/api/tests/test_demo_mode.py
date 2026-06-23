@@ -1,8 +1,6 @@
 """Testes do modo demo determinístico."""
 from __future__ import annotations
 
-import pytest
-
 from services import demo_mode
 
 
