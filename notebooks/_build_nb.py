@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Gera notebooks/analise_sad_ar5.ipynb no estilo de trabalho2.ipynb."""
+"""Gera notebooks/notebook_final.ipynb no estilo de trabalho2.ipynb."""
 from __future__ import annotations
 
 import json
 from pathlib import Path
 
-OUT = Path(__file__).parent / "analise_sad_ar5.ipynb"
+OUT = Path(__file__).parent / "notebook_final.ipynb"
 
 
 def md(text: str) -> dict:

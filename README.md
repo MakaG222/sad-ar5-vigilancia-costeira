@@ -205,7 +205,7 @@ Reprodução do pipeline científico (EDA, AHP, risco, MCLP, validação):
 
 ```bash
 pip install -r requirements.txt jupyter matplotlib seaborn
-jupyter notebook notebooks/analise_sad_ar5.ipynb
+jupyter notebook notebooks/notebook_final.ipynb
 ```
 
 Ou, em linha de comandos:
@@ -218,7 +218,7 @@ cd src && python main.py && python validacao.py
 
 ## Documentação adicional
 
-- [`notebooks/analise_sad_ar5.ipynb`](notebooks/analise_sad_ar5.ipynb) — análise reprodutível
+- [`notebooks/notebook_final.ipynb`](notebooks/notebook_final.ipynb) — análise reprodutível
 - [`plataforma/ARRANQUE-MACOS.md`](plataforma/ARRANQUE-MACOS.md) — arranque no macOS
 - [`plataforma/ARRANQUE-WINDOWS.md`](plataforma/ARRANQUE-WINDOWS.md) — arranque no Windows (ZIP, PowerShell, Docker)
 - [`FICHEIROS.md`](FICHEIROS.md) — guia da estrutura do repositório

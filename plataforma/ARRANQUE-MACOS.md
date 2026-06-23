@@ -136,5 +136,5 @@ Para reproduzir as figuras e métricas do relatório:
 ```bash
 cd ~/Downloads/sad-ar5-vigilancia-costeira
 pip install -r requirements.txt jupyter
-jupyter notebook notebooks/analise_sad_ar5.ipynb
+jupyter notebook notebooks/notebook_final.ipynb
 ```

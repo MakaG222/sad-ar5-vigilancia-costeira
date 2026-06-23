@@ -127,4 +127,4 @@ Gera PNG em `plataforma/docs/` (1440×900).
 - Meteo live, avisos IPMA, RSS, AIS (ou modo demo)
 - Exportação de plano de missão (GeoJSON/CSV)
 
-Ver também [`APRESENTACAO.md`](APRESENTACAO.md) e [`../notebooks/analise_sad_ar5.ipynb`](../notebooks/analise_sad_ar5.ipynb).
+Ver também [`APRESENTACAO.md`](APRESENTACAO.md) e [`../notebooks/notebook_final.ipynb`](../notebooks/notebook_final.ipynb).
