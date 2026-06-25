@@ -4,12 +4,12 @@ $Run = Join-Path $Root ".run"
 
 function Stop-PidFile($file, $name) {
     if (-not (Test-Path $file)) { return }
-    $pid = Get-Content $file -ErrorAction SilentlyContinue
-    if ($pid) {
-        $proc = Get-Process -Id $pid -ErrorAction SilentlyContinue
+    $savedPid = Get-Content $file -ErrorAction SilentlyContinue
+    if ($savedPid) {
+        $proc = Get-Process -Id $savedPid -ErrorAction SilentlyContinue
         if ($proc) {
-            Stop-Process -Id $pid -Force -ErrorAction SilentlyContinue
-            Write-Host "    $name parado (PID $pid)"
+            Stop-Process -Id $savedPid -Force -ErrorAction SilentlyContinue
+            Write-Host "    $name parado (PID $savedPid)"
         }
     }
     Remove-Item $file -Force -ErrorAction SilentlyContinue
