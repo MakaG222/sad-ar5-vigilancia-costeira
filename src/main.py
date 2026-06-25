@@ -23,6 +23,8 @@ from config import (AERODROMOS, AR5, CENARIOS_VENTO, PESOS_AMEACA, RAIO_BASE_KM,
                     T_ON_MIN_H)
 from geo import gerar_procura, bases_proj, COSTA_LONLAT, proj, inv_proj, _KX, _KY
 from geo import LON_MIN, LON_MAX, LAT_MIN, LAT_MAX
+from geo import costa_linestring, terra_polygon, zona_maritima_pt
+from shapely.geometry import Point
 from risco import calcular_risco
 from otimizacao import (set_cover, curva_tradeoff, dimensionar_frota,
                         raio_efetivo, raio_por_autonomia, matriz_cobertura,
@@ -37,9 +39,50 @@ LIMIAR = 0.5  # limiar de "alto risco"
 COSTA_LON = [c[0] for c in COSTA_LONLAT]
 COSTA_LAT = [c[1] for c in COSTA_LONLAT]
 
-# Fig. 01 — margem extra a sul para o Algarve (sem alterar a grelha de dados)
-FIG01_LAT_MIN = 36.50
+# Fig. 01 — enquadramento (sem alterar a grelha analítica)
+FIG01_LAT_MIN = 36.82
 FIG01_LAT_MAX = 42.25
+
+
+def _pts_viz_fig01(pts: list[dict]) -> list[dict]:
+    """Células costeiras extra (0,5–8 km) só para visualização; risco do vizinho mais próximo.
+
+    Ignora o polígono de terra para pontos a ≤3 km da costa (artefacto do contorno
+    simplificado, sobretudo no Algarve)."""
+    base_keys = {(round(p["lon"], 2), round(p["lat"], 2)) for p in pts}
+    blon = np.array([p["lon"] for p in pts])
+    blat = np.array([p["lat"] for p in pts])
+    br = np.array([p["risco"] for p in pts])
+    out = list(pts)
+
+    costa = costa_linestring()
+    terra = terra_polygon()
+    passo = 0.04
+    lons = np.arange(LON_MIN, LON_MAX + passo * 0.5, passo)
+    lats = np.arange(LAT_MIN, LAT_MAX + passo * 0.5, passo)
+
+    for lon in lons:
+        for lat in lats:
+            if not zona_maritima_pt(lon, lat):
+                continue
+            key = (round(lon, 2), round(lat, 2))
+            if key in base_keys:
+                continue
+            x, y = proj(lon, lat)
+            p = Point(x, y)
+            d = p.distance(costa)
+            if not (0.15 <= d <= 12.0):
+                continue
+            if terra.contains(p) and d > 3.0:
+                continue
+            j = int(np.argmin((blon - lon) ** 2 + (blat - lat) ** 2))
+            out.append({
+                "lon": float(lon), "lat": float(lat),
+                "x": x, "y": y, "dist_costa_km": float(d),
+                "risco": float(br[j]),
+            })
+            base_keys.add(key)
+    return out
 
 
 def circulo_lonlat(base, raio_km, n=120):
@@ -60,11 +103,12 @@ def _base_map(ax):
 
 # ---------------------------------------------------------------------------
 def fig_risco(pts):
-    lon = [p["lon"] for p in pts]; lat = [p["lat"] for p in pts]
-    r = [p["risco"] for p in pts]
+    viz = _pts_viz_fig01(pts)
+    lon = [p["lon"] for p in viz]; lat = [p["lat"] for p in viz]
+    r = [p["risco"] for p in viz]
     fig, ax = plt.subplots(figsize=(7, 8))
-    sc = ax.scatter(lon, lat, c=r, cmap="YlOrRd", s=14, marker="s",
-                    vmin=0, vmax=1, zorder=2)
+    sc = ax.scatter(lon, lat, c=r, cmap="YlOrRd", s=20, marker="s",
+                    vmin=0, vmax=1, zorder=2, linewidths=0)
     for nome, blon, blat, reg in AERODROMOS:
         ax.plot(blon, blat, "^", color="navy", ms=8, zorder=4)
     _base_map(ax)

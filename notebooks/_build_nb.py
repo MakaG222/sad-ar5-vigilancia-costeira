@@ -378,11 +378,34 @@ display(pd.DataFrame(rows))
 
 cells.append(md("### 3.5 Mapa de risco agregado (Fig. 01)"))
 cells.append(code("""COSTA_LON = [c[0] for c in COSTA_LONLAT]; COSTA_LAT = [c[1] for c in COSTA_LONLAT]
-lon = [p["lon"] for p in pts]; lat = [p["lat"] for p in pts]; rv = [p["risco"] for p in pts]
-FIG01_LAT_MIN, FIG01_LAT_MAX = 36.50, 42.25
+FIG01_LAT_MIN, FIG01_LAT_MAX = 36.82, 42.25
+
+def _pts_viz_fig01(pts):
+    from shapely.geometry import Point
+    from geo import costa_linestring, terra_polygon, zona_maritima_pt, proj
+    base_keys = {(round(p["lon"], 2), round(p["lat"], 2)) for p in pts}
+    blon = np.array([p["lon"] for p in pts]); blat = np.array([p["lat"] for p in pts])
+    br = np.array([p["risco"] for p in pts]); out = list(pts)
+    costa, terra, passo = costa_linestring(), terra_polygon(), 0.04
+    for lon in np.arange(LON_MIN, LON_MAX + passo*0.5, passo):
+        for lat in np.arange(LAT_MIN, LAT_MAX + passo*0.5, passo):
+            if not zona_maritima_pt(lon, lat): continue
+            key = (round(lon, 2), round(lat, 2))
+            if key in base_keys: continue
+            x, y = proj(lon, lat); p = Point(x, y); d = p.distance(costa)
+            if not (0.15 <= d <= 12.0): continue
+            if terra.contains(p) and d > 3.0: continue
+            j = int(np.argmin((blon - lon)**2 + (blat - lat)**2))
+            out.append({"lon": float(lon), "lat": float(lat), "x": x, "y": y,
+                        "dist_costa_km": float(d), "risco": float(br[j])})
+            base_keys.add(key)
+    return out
+
+viz = _pts_viz_fig01(pts)
+lon = [p["lon"] for p in viz]; lat = [p["lat"] for p in viz]; rv = [p["risco"] for p in viz]
 
 fig, ax = plt.subplots(figsize=(7, 8))
-sc = ax.scatter(lon, lat, c=rv, cmap="YlOrRd", s=14, marker="s", vmin=0, vmax=1)
+sc = ax.scatter(lon, lat, c=rv, cmap="YlOrRd", s=20, marker="s", vmin=0, vmax=1, linewidths=0)
 for nome, blon, blat, reg in AERODROMOS:
     ax.plot(blon, blat, "^", color="navy", ms=8)
 ax.plot(COSTA_LON, COSTA_LAT, color="#444", lw=1.5)
