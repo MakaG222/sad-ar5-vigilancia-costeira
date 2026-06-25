@@ -6,12 +6,14 @@ Este guia corrige os erros mais comuns (`git is not recognized`, `Set-ExecutionP
 
 ## Forma mais simples (recomendada)
 
-1. Descarregue o ZIP completo da [release v1.0-final](https://github.com/MakaG222/sad-ar5-vigilancia-costeira/releases/tag/v1.0-final)
-2. Extraia a pasta (deve conter `plataforma\`, `dados\`, `resultados\`, `src\`)
-3. Abra a pasta `plataforma`
-4. **Duplo-clique em `INICIAR.bat`**
+**So precisa de Python 3.10+** — Node.js **nao e obrigatorio** (o frontend ja vem compilado em `web\dist`).
 
-Na primeira vez o setup demora alguns minutos (Python + npm). Depois abre o browser em http://localhost:5173
+1. Descarregue o ZIP completo da [release v1.0-final](https://github.com/MakaG222/sad-ar5-vigilancia-costeira/releases/tag/v1.0-final) **ou** faca `git pull` no repositorio
+2. Extraia a pasta (deve conter `plataforma\`, `dados\`, `resultados\`, `src\`)
+3. Instale [Python 3](https://www.python.org/downloads/) — marque **Add python.exe to PATH**
+4. Abra a pasta `plataforma` e **duplo-clique em `INICIAR.bat`**
+
+Na primeira vez o setup demora alguns minutos (pip install). Depois abre o browser em **http://localhost:8080**
 
 ---
 
@@ -37,7 +39,7 @@ Na primeira vez o setup demora alguns minutos (Python + npm). Depois abre o brow
 |------------|----------|---------------|
 | **PowerShell** | Executar scripts de setup | Tecla Windows → escrever *PowerShell* → Enter |
 | **Python 3.10+** | API (backend) | [python.org](https://www.python.org/downloads/) — marque **Add python.exe to PATH** |
-| **Node.js 18+** | Interface web | [nodejs.org](https://nodejs.org/) |
+| **Node.js 18+** | Interface web (opcional) | [nodejs.org](https://nodejs.org/) — so necessario para desenvolvimento |
 | **Git** (opcional) | Clonar repositório | [git-scm.com](https://git-scm.com/download/win) |
 | **Docker Desktop** (opcional) | Arranque sem Python/Node | [docker.com](https://www.docker.com/products/docker-desktop/) |
 
@@ -111,8 +113,7 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 .\start-win.ps1
 ```
 
-→ Interface: **http://localhost:5173**  
-→ API: **http://127.0.0.1:8080/docs**
+→ Interface: **http://localhost:5173** (com Node) ou **http://localhost:8080** (sem Node, modo producao)
 
 Parar: `.\stop-win.ps1`
 

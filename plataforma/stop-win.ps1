@@ -46,4 +46,4 @@ Stop-PidFile (Join-Path $Run "api.pid") "API"
 Stop-PidFile (Join-Path $Run "web.pid") "Web"
 foreach ($port in @(8080, 5173)) { Stop-Port $port }
 
-Write-Host "==> Serviços parados."
+Write-Host "==> Servicos parados."

@@ -1,27 +1,28 @@
-# Instalação única da plataforma SAD AR5 no Windows.
+# Instalacao unica da plataforma SAD AR5 no Windows.
+# Node.js e OPCIONAL se web\dist\ ja existir (modo producao).
 $ErrorActionPreference = "Stop"
 $Root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $Api = Join-Path $Root "api"
 $Web = Join-Path $Root "web"
 $Repo = Split-Path -Parent $Root
+$DistIndex = Join-Path $Web "dist\index.html"
 
 Write-Host "==> SAD AR5 - setup Windows"
 Write-Host "    Pasta: $Root"
 Write-Host ""
 
-# Desbloquear scripts descarregados da Internet (ZIP)
 Get-ChildItem $Root -Filter "*.ps1" | ForEach-Object {
     Unblock-File -LiteralPath $_.FullName -ErrorAction SilentlyContinue
 }
 
 function Find-PythonExe {
     if (Get-Command py -ErrorAction SilentlyContinue) {
-        $v = & py -3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')" 2>$null
-        if ($v) { return @{ Cmd = "py"; VenvArgs = @("-3", "-m", "venv"); PipArgs = @("-3", "-m", "pip") } }
+        $v = & py -3 -c "import sys; print(sys.version_info[0])" 2>$null
+        if ($v -eq "3") { return @{ Cmd = "py"; VenvArgs = @("-3", "-m", "venv") } }
     }
     foreach ($c in @("python", "python3")) {
         if (Get-Command $c -ErrorAction SilentlyContinue) {
-            return @{ Cmd = $c; VenvArgs = @("-m", "venv"); PipArgs = @("-m", "pip") }
+            return @{ Cmd = $c; VenvArgs = @("-m", "venv") }
         }
     }
     return $null
@@ -35,15 +36,24 @@ if (-not $py) {
     exit 1
 }
 
-if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
-    Write-Host "ERRO: Node.js nao encontrado. Instale em https://nodejs.org/"
+$HasNode = [bool](Get-Command node -ErrorAction SilentlyContinue)
+$HasDist = Test-Path $DistIndex
+
+if (-not $HasNode -and -not $HasDist) {
+    Write-Host "ERRO: Node.js nao encontrado e web\dist em falta."
+    Write-Host "      Opcao A: git pull (dist incluido no repo) e volte a correr setup"
+    Write-Host "      Opcao B: instale Node.js 18+ em https://nodejs.org/"
+    Write-Host "      Opcao C: use Docker Desktop e .\start-docker.ps1"
     exit 1
 }
 
-Write-Host "Python: $($py.Cmd) | Node $(node -v) | npm $(npm -v)"
+if ($HasNode) {
+    Write-Host "Python: $($py.Cmd) | Node $(node -v) | npm $(npm -v)"
+} else {
+    Write-Host "Python: $($py.Cmd) | Node: (nao instalado - modo producao com dist)"
+}
 Write-Host ""
 
-# Verificar dados necessários
 $need = @(
     (Join-Path $Repo "dados\fontes\apreensoes_droga_PT.xlsx"),
     (Join-Path $Repo "resultados\validacao.json")
@@ -51,7 +61,7 @@ $need = @(
 foreach ($f in $need) {
     if (-not (Test-Path $f)) {
         Write-Host "ERRO: Ficheiro em falta: $f"
-        Write-Host "      Descarregue o ZIP completo da release v1.0-final (nao use so a pasta plataforma)."
+        Write-Host "      Descarregue o ZIP completo (pastas dados, resultados, plataforma)."
         exit 1
     }
 }
@@ -68,24 +78,30 @@ $python = Join-Path $Api ".venv\Scripts\python.exe"
 Write-Host "    OK: .venv pronto"
 Write-Host ""
 
-Write-Host "==> Frontend (npm)"
-Set-Location $Web
-npm install
-Write-Host "    OK: node_modules pronto"
+if ($HasNode) {
+    Write-Host "==> Frontend (npm - modo desenvolvimento)"
+    Set-Location $Web
+    npm install
+    Write-Host "    OK: node_modules pronto"
+} else {
+    Write-Host "==> Frontend (modo producao)"
+    Write-Host "    OK: web\dist incluido - Node.js nao necessario"
+}
 Write-Host ""
 
 $EnvEx = Join-Path $Root ".env.example"
 $Env = Join-Path $Root ".env"
 if (-not (Test-Path $Env) -and (Test-Path $EnvEx)) {
     Copy-Item $EnvEx $Env
-    Write-Host "==> Criado .env (edite AISSTREAM_API_KEY se tiver chave AIS)"
+    Write-Host "==> Criado .env"
 }
 
 Write-Host "==> Setup concluido."
 Write-Host ""
-Write-Host "Arranque (PowerShell nesta pasta):"
-Write-Host "  Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass"
-Write-Host "  .\start-win.ps1"
-Write-Host ""
-Write-Host "Ou faca duplo-clique em INICIAR.bat"
+Write-Host "Arranque: duplo-clique em INICIAR.bat"
+if ($HasNode) {
+    Write-Host "         ou .\start-win.ps1  (API :8080 + Web :5173)"
+} else {
+    Write-Host "         ou .\start-win.ps1  (tudo em http://localhost:8080)"
+}
 Write-Host ""

@@ -1,10 +1,12 @@
-# Arranca API (8080) + frontend (5173) no Windows.
-# Nota: usar apenas ASCII nas strings (compativel com Windows PowerShell 5.1).
+# Arranca plataforma SAD AR5 no Windows.
+# Modo producao (sem Node): API + interface em http://localhost:8080
+# Modo dev (com Node): API :8080 + Vite :5173
 $ErrorActionPreference = "Stop"
 $Root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $Api = Join-Path $Root "api"
 $Web = Join-Path $Root "web"
 $Run = Join-Path $Root ".run"
+$DistIndex = Join-Path $Web "dist\index.html"
 $ApiPort = if ($env:API_PORT) { $env:API_PORT } else { "8080" }
 $WebPort = if ($env:WEB_PORT) { $env:WEB_PORT } else { "5173" }
 
@@ -16,9 +18,7 @@ function Write-LogTail($path, $lines = 20) {
     }
 }
 
-function Sec-Label([int]$n) {
-    return "$n s"
-}
+function Sec-Label([int]$n) { return "$n s" }
 
 function Wait-Http($url, $label, $maxSec = 180) {
     for ($i = 0; $i -lt $maxSec; $i++) {
@@ -29,7 +29,7 @@ function Wait-Http($url, $label, $maxSec = 180) {
         } catch {
             if ($i % 10 -eq 9) {
                 $sec = Sec-Label ($i + 1)
-                Write-Host "    ... a esperar de $label ($sec)"
+                Write-Host "    ... a esperar $label ($sec)"
             }
             Start-Sleep -Seconds 1
         }
@@ -38,7 +38,6 @@ function Wait-Http($url, $label, $maxSec = 180) {
 }
 
 function Start-LoggedProcess($file, $argList, $wd, $outLog, $errLog) {
-    # PowerShell nao permite redireccionar stdout e stderr para o MESMO ficheiro.
     return Start-Process -FilePath $file -ArgumentList $argList `
         -WorkingDirectory $wd `
         -RedirectStandardOutput $outLog `
@@ -46,11 +45,24 @@ function Start-LoggedProcess($file, $argList, $wd, $outLog, $errLog) {
         -PassThru -WindowStyle Hidden
 }
 
+$HasNode = [bool](Get-Command node -ErrorAction SilentlyContinue)
+$HasDist = Test-Path $DistIndex
+$HasModules = Test-Path (Join-Path $Web "node_modules")
+$ProdMode = $HasDist -and (-not $HasNode -or -not $HasModules)
+
 New-Item -ItemType Directory -Force -Path $Run | Out-Null
 
-if (-not (Test-Path (Join-Path $Api ".venv")) -or -not (Test-Path (Join-Path $Web "node_modules"))) {
+$NeedSetup = (-not (Test-Path (Join-Path $Api ".venv")))
+if ($ProdMode) {
+    $NeedSetup = $NeedSetup -or (-not $HasDist)
+} else {
+    $NeedSetup = $NeedSetup -or (-not $HasModules)
+}
+
+if ($NeedSetup) {
     Write-Host "Dependencias em falta. A correr setup..."
     & (Join-Path $Root "setup-win.ps1")
+    if ($LASTEXITCODE -and $LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }
 
 & (Join-Path $Root "stop-win.ps1") 2>$null
@@ -64,9 +76,14 @@ if (Test-Path $EnvFile) {
     }
 }
 
-Write-Host "==> SAD AR5 - arranque Windows"
-Write-Host "    API  -> http://127.0.0.1:$ApiPort"
-Write-Host "    Web  -> http://localhost:$WebPort"
+if ($ProdMode) {
+    Write-Host "==> SAD AR5 - arranque Windows (modo producao)"
+    Write-Host "    URL  -> http://localhost:$ApiPort"
+} else {
+    Write-Host "==> SAD AR5 - arranque Windows (modo desenvolvimento)"
+    Write-Host "    API  -> http://127.0.0.1:$ApiPort"
+    Write-Host "    Web  -> http://localhost:$WebPort"
+}
 Write-Host ""
 
 $ApiLog = Join-Path $Run "api.log"
@@ -75,8 +92,6 @@ $WebLog = Join-Path $Run "web.log"
 $WebErr = Join-Path $Run "web.err.log"
 "" | Set-Content $ApiLog
 "" | Set-Content $ApiErr
-"" | Set-Content $WebLog
-"" | Set-Content $WebErr
 
 $ApiPy = Join-Path $Api ".venv\Scripts\python.exe"
 if (-not (Test-Path $ApiPy)) {
@@ -88,18 +103,17 @@ $ApiProc = Start-LoggedProcess $ApiPy @(
     "-m", "uvicorn", "main:app", "--host", "127.0.0.1", "--port", $ApiPort
 ) $Api $ApiLog $ApiErr
 $ApiProc.Id | Set-Content (Join-Path $Run "api.pid")
-Write-Host "    API PID $($ApiProc.Id) - logs $ApiLog"
+Write-Host "    API PID $($ApiProc.Id)"
 
-if (-not (Wait-Http "http://127.0.0.1:$ApiPort/api/health" "API (health)" 180)) {
-    Write-Host "ERRO: API nao respondeu em 180 s."
+if (-not (Wait-Http "http://127.0.0.1:$ApiPort/api/health" "API" 180)) {
+    Write-Host "ERRO: API nao respondeu."
     Write-LogTail $ApiLog
     Write-LogTail $ApiErr
-    Write-Host "Dica: corra .\diagnostico-win.ps1 para mais detalhes"
+    Write-Host "Corra: .\diagnostico-win.ps1"
     exit 1
 }
 
-# Aquecimento da grelha (pode demorar no 1. arranque)
-Write-Host "    A aquecer dados (grelha de risco)..."
+Write-Host "    A aquecer grelha de risco..."
 $warm = $false
 for ($i = 0; $i -lt 120; $i++) {
     try {
@@ -112,24 +126,35 @@ for ($i = 0; $i -lt 120; $i++) {
     }
     Start-Sleep -Seconds 1
 }
-if ($warm) {
-    Write-Host "    Grelha pronta"
-} else {
-    Write-Host "    AVISO: grelha ainda a carregar - a interface pode demorar"
+if ($warm) { Write-Host "    Grelha pronta" } else { Write-Host "    AVISO: grelha ainda a carregar" }
+
+if ($ProdMode) {
+    $openUrl = "http://localhost:$ApiPort"
+    Write-Host ""
+    Write-Host "=========================================="
+    Write-Host "  Plataforma pronta (sem Node.js)"
+    Write-Host "  Abrir: $openUrl"
+    Write-Host "  Parar: .\stop-win.ps1"
+    Write-Host "=========================================="
+    Start-Process $openUrl
+    Write-Host "Servico API em segundo plano."
+    exit 0
 }
 
+# --- Modo dev: Vite ---
+"" | Set-Content $WebLog
+"" | Set-Content $WebErr
 $ViteJs = Join-Path $Web "node_modules\vite\bin\vite.js"
 if (-not (Test-Path $ViteJs)) {
-    Write-Host "ERRO: Vite nao instalado. Corra: .\setup-win.ps1"
+    Write-Host "ERRO: Vite em falta. Corra: .\setup-win.ps1"
     exit 1
 }
-
 $node = (Get-Command node).Source
 $WebProc = Start-LoggedProcess $node @(
     $ViteJs, "--host", "127.0.0.1", "--port", $WebPort
 ) $Web $WebLog $WebErr
 $WebProc.Id | Set-Content (Join-Path $Run "web.pid")
-Write-Host "    Web PID $($WebProc.Id) - logs $WebLog"
+Write-Host "    Web PID $($WebProc.Id)"
 
 if (-not (Wait-Http "http://127.0.0.1:$WebPort" "Web" 60)) {
     Write-Host "ERRO: Frontend nao respondeu."
@@ -138,16 +163,12 @@ if (-not (Wait-Http "http://127.0.0.1:$WebPort" "Web" 60)) {
     exit 1
 }
 
+$openUrl = "http://localhost:$WebPort"
 Write-Host ""
 Write-Host "=========================================="
 Write-Host "  Plataforma pronta"
-Write-Host "  Abrir: http://localhost:$WebPort"
-Write-Host "  Docs API: http://127.0.0.1:$ApiPort/docs"
-Write-Host ""
-Write-Host "  Parar:  .\stop-win.ps1"
-Write-Host "  Logs:   .run\api.log  .run\web.log"
+Write-Host "  Abrir: $openUrl"
+Write-Host "  Parar: .\stop-win.ps1"
 Write-Host "=========================================="
-Write-Host ""
-
-Start-Process "http://localhost:$WebPort"
-Write-Host "Servicos em segundo plano. Use .\stop-win.ps1 para parar."
+Start-Process $openUrl
+Write-Host "Servicos em segundo plano."
