@@ -379,16 +379,20 @@ display(pd.DataFrame(rows))
 cells.append(md("### 3.5 Mapa de risco agregado (Fig. 01)"))
 cells.append(code("""COSTA_LON = [c[0] for c in COSTA_LONLAT]; COSTA_LAT = [c[1] for c in COSTA_LONLAT]
 lon = [p["lon"] for p in pts]; lat = [p["lat"] for p in pts]; rv = [p["risco"] for p in pts]
+FIG01_LAT_MIN, FIG01_LAT_MAX = 36.50, 42.25
 
 fig, ax = plt.subplots(figsize=(7, 8))
 sc = ax.scatter(lon, lat, c=rv, cmap="YlOrRd", s=14, marker="s", vmin=0, vmax=1)
 for nome, blon, blat, reg in AERODROMOS:
     ax.plot(blon, blat, "^", color="navy", ms=8)
 ax.plot(COSTA_LON, COSTA_LAT, color="#444", lw=1.5)
-ax.set_xlim(LON_MIN, LON_MAX); ax.set_ylim(LAT_MIN, LAT_MAX)
+ax.set_xlim(LON_MIN, LON_MAX); ax.set_ylim(FIG01_LAT_MIN, FIG01_LAT_MAX)
 ax.set_aspect(1.0/np.cos(np.radians(39.5)))
 plt.colorbar(sc, ax=ax, label="Risco [0–1]", shrink=0.7)
 ax.set_title("Fig. 01 — Índice de risco marítimo multi-ameaça")
+ax.legend([plt.Line2D([], [], marker="^", color="navy", ls="")],
+          ["Aeródromos candidatos"], loc="upper left")
+fig.subplots_adjust(bottom=0.10)
 fig.tight_layout(); plt.show()
 fig.savefig(FIGDIR/"01_risco.png", dpi=140)
 """))

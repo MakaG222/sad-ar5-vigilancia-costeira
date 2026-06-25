@@ -37,6 +37,10 @@ LIMIAR = 0.5  # limiar de "alto risco"
 COSTA_LON = [c[0] for c in COSTA_LONLAT]
 COSTA_LAT = [c[1] for c in COSTA_LONLAT]
 
+# Fig. 01 — margem extra a sul para o Algarve (sem alterar a grelha de dados)
+FIG01_LAT_MIN = 36.50
+FIG01_LAT_MAX = 42.25
+
 
 def circulo_lonlat(base, raio_km, n=120):
     ang = np.linspace(0, 2 * np.pi, n)
@@ -64,10 +68,12 @@ def fig_risco(pts):
     for nome, blon, blat, reg in AERODROMOS:
         ax.plot(blon, blat, "^", color="navy", ms=8, zorder=4)
     _base_map(ax)
+    ax.set_ylim(FIG01_LAT_MIN, FIG01_LAT_MAX)
     plt.colorbar(sc, ax=ax, label="Índice de risco [0–1]", shrink=0.7)
     ax.set_title("Índice de risco marítimo multi-ameaça\n(Portugal Continental)")
     ax.legend([plt.Line2D([], [], marker="^", color="navy", ls="")],
-              ["Aeródromos candidatos"], loc="lower left")
+              ["Aeródromos candidatos"], loc="upper left")
+    fig.subplots_adjust(bottom=0.10)
     fig.tight_layout(); fig.savefig(f"{FIGDIR}/01_risco.png", dpi=140)
     plt.close(fig)
 
