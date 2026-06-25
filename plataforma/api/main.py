@@ -60,34 +60,47 @@ _started_at = time.time()
 async def lifespan(app: FastAPI):
     _stop.clear()
     loop = asyncio.get_running_loop()
-    await loop.run_in_executor(None, aquecer_grelha)
-    estado.risco_celulas = await loop.run_in_executor(None, carregar_celulas, 0.12)
-    invalidar_cache_clusters()
 
-    # Resposta imediata em /api/estado — apreensões Excel em background (arranque mais rápido)
     estado.meteo_bases = (
         demo_mode.meteo_fallback_demo() if demo_mode.activo() else meteo_fallback()
     )
     estado.avisos_ipma = ipma_fallback()
     estado.noticias_rss = rss_fallback()
-    estado.risco_resumo = resumo_risco()
+    estado.risco_resumo = {"carregando": True, "n_celulas_total": 0, "n_alto_risco": 0}
+    estado.risco_celulas = []
     if demo_mode.activo():
         fixos = demo_mode.carregar_navios_fixos()
         if fixos:
             estado.navios = fixos
 
+    async def _warm_grelha():
+        try:
+            await loop.run_in_executor(None, aquecer_grelha)
+            estado.risco_celulas = await loop.run_in_executor(None, carregar_celulas, 0.12)
+            invalidar_cache_clusters()
+            estado.risco_resumo = resumo_risco()
+        except Exception as exc:
+            estado.risco_resumo = {
+                "carregando": False,
+                "erro": str(exc),
+                "n_celulas_total": 0,
+                "n_alto_risco": 0,
+            }
+
     async def _warm_apr():
         await loop.run_in_executor(None, aquecer_apreensoes)
 
     task = asyncio.create_task(worker_loop(_stop))
+    grelha_task = asyncio.create_task(_warm_grelha())
     apr_task = asyncio.create_task(_warm_apr())
     yield
     _stop.set()
-    if not apr_task.done():
-        try:
-            await asyncio.wait_for(apr_task, timeout=30.0)
-        except asyncio.TimeoutError:
-            pass
+    for t in (apr_task, grelha_task):
+        if not t.done():
+            try:
+                await asyncio.wait_for(t, timeout=30.0)
+            except asyncio.TimeoutError:
+                pass
     await task
 
 
@@ -232,7 +245,11 @@ def health():
         "version": app.version,
         "uptime_s": round(time.time() - _started_at, 1),
         "worker_ativo": not _stop.is_set(),
-        "grelha_pronta": estado.risco_resumo is not None,
+        "grelha_pronta": bool(
+            estado.risco_resumo
+            and not estado.risco_resumo.get("carregando")
+            and "erro" not in estado.risco_resumo
+        ),
         "demo_deterministico": demo_mode.activo(),
         "n_navios": len(estado.navios),
         "n_alertas": len(estado.alertas),

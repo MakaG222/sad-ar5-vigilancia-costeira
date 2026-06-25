@@ -1,6 +1,17 @@
 # Arranque no Windows — guia passo a passo
 
-Este guia corrige os erros mais comuns (`git is not recognized`, `Set-ExecutionPolicy` não funciona, scripts `.ps1` não encontrados).
+Este guia corrige os erros mais comuns (`git is not recognized`, `Set-ExecutionPolicy` não funciona, scripts `.ps1` não encontrados, **API não responde**).
+
+---
+
+## Forma mais simples (recomendada)
+
+1. Descarregue o ZIP completo da [release v1.0-final](https://github.com/MakaG222/sad-ar5-vigilancia-costeira/releases/tag/v1.0-final)
+2. Extraia a pasta (deve conter `plataforma\`, `dados\`, `resultados\`, `src\`)
+3. Abra a pasta `plataforma`
+4. **Duplo-clique em `INICIAR.bat`**
+
+Na primeira vez o setup demora alguns minutos (Python + npm). Depois abre o browser em http://localhost:5173
 
 ---
 
@@ -8,10 +19,13 @@ Este guia corrige os erros mais comuns (`git is not recognized`, `Set-ExecutionP
 
 | Mensagem | O que significa |
 |----------|-----------------|
-| `'git' is not recognized` | Git não está instalado |
+| `'git' is not recognized` | Git não está instalado — use o **ZIP** em vez de clone |
 | `'Set-ExecutionPolicy' is not recognized` | Está no **CMD** em vez do **PowerShell** |
 | `'.\setup-win.ps1' is not recognized` | Pasta errada **ou** está no CMD |
-| `O sistema não conseguiu localizar o caminho` | O projeto ainda não foi descarregado |
+| `RedirectStandardOutput and RedirectStandardError are same` | Script antigo — atualize para a versão mais recente |
+| `API não respondeu em 180s` | 1.º arranque lento ou dados em falta — ver `diagnostico-win.ps1` |
+| `Ficheiro em falta: apreensoes_droga_PT.xlsx` | ZIP incompleto — não copie só a pasta `plataforma` |
+| Interface abre mas mapa vazio | API ainda a carregar grelha — aguarde 1–2 min e F5 |
 
 > **Importante:** os scripts `.ps1` só funcionam no **PowerShell** (`PS C:\...>`), não no Prompt de Comandos (`C:\...>`).
 
@@ -69,8 +83,11 @@ cd C:\Users\Utilizador\Downloads\sad-ar5-vigilancia-costeira\plataforma
 ### Opção 1 — Docker (recomendado se tiver Docker Desktop)
 
 ```powershell
-docker compose up --build -d
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\start-docker.ps1
 ```
+
+Ou manualmente: `docker compose up --build -d`
 
 → **http://localhost:8080**
 
@@ -117,11 +134,12 @@ Deve terminar com **28/28 OK**.
 
 | Sintoma | Solução |
 |---------|---------|
-| `python` não encontrado | Reinstalar Python com «Add to PATH»; fechar e reabrir PowerShell |
+| `python` não encontrado | Reinstalar Python com «Add to PATH»; ou usar `py -3` (launcher Windows) |
 | `npm` não encontrado | Instalar Node.js; reiniciar PowerShell |
 | Porta 8080 ocupada | `.\stop-win.ps1` e voltar a arrancar |
 | Erro de execução de scripts | `Set-ExecutionPolicy -Scope Process Bypass` no **PowerShell** |
-| Interface abre mas mapa vazio | Verificar se a API responde em http://127.0.0.1:8080/api/health |
+| Interface abre mas mapa vazio | Aguardar grelha (1–2 min) ou ver http://127.0.0.1:8080/api/health |
+| Erro desconhecido | `.\diagnostico-win.ps1` e enviar o output à equipa |
 
 ---
 
@@ -131,9 +149,12 @@ Deve terminar com **28/28 OK**.
 plataforma\
 ├── api\           ← FastAPI (porta 8080)
 ├── web\           ← React/Vite (porta 5173)
+├── INICIAR.bat    ← Duplo-clique para arrancar (mais fácil)
 ├── setup-win.ps1  ← Instalação (1.ª vez)
 ├── start-win.ps1  ← Arranque
-└── stop-win.ps1   ← Paragem
+├── stop-win.ps1   ← Paragem
+├── start-docker.ps1
+└── diagnostico-win.ps1  ← Se algo falhar
 ```
 
 A API usa os dados em `..\src\`, `..\dados\` e `..\resultados\` — a plataforma funciona sem reexecutar o notebook.

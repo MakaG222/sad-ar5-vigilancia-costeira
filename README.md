@@ -102,7 +102,7 @@ Parar: `./stop-docker.sh`
 | **macOS** | [`plataforma/ARRANQUE-MACOS.md`](plataforma/ARRANQUE-MACOS.md) |
 | **Windows** | [`plataforma/ARRANQUE-WINDOWS.md`](plataforma/ARRANQUE-WINDOWS.md) |
 
-Resumo rápido: `cd plataforma` → `./setup-mac.sh` + `./start-mac.sh` (Mac) ou `.\setup-win.ps1` + `.\start-win.ps1` (PowerShell no Windows).
+Resumo rápido: `cd plataforma` → `./setup-mac.sh` + `./start-mac.sh` (Mac) ou **duplo-clique em `INICIAR.bat`** / `.\setup-win.ps1` + `.\start-win.ps1` (Windows PowerShell).
 
 ### Verificação antes da demonstração
 

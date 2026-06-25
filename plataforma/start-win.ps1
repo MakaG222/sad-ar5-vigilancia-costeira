@@ -7,6 +7,49 @@ $Run = Join-Path $Root ".run"
 $ApiPort = if ($env:API_PORT) { $env:API_PORT } else { "8080" }
 $WebPort = if ($env:WEB_PORT) { $env:WEB_PORT } else { "5173" }
 
+function Write-LogTail($path, $lines = 20) {
+    if (Test-Path $path) {
+        Write-Host "--- últimas linhas de $path ---"
+        Get-Content $path -Tail $lines -ErrorAction SilentlyContinue | ForEach-Object { Write-Host $_ }
+        Write-Host "--------------------------------"
+    }
+}
+
+function Find-Python {
+    foreach ($cmd in @("python", "python3", "py")) {
+        if (Get-Command $cmd -ErrorAction SilentlyContinue) {
+            if ($cmd -eq "py") {
+                return @{ Exe = "py"; Args = @("-3") }
+            }
+            return @{ Exe = $cmd; Args = @() }
+        }
+    }
+    return $null
+}
+
+function Wait-Http($url, $label, $maxSec = 180) {
+    for ($i = 0; $i -lt $maxSec; $i++) {
+        try {
+            Invoke-WebRequest -Uri $url -UseBasicParsing -TimeoutSec 3 | Out-Null
+            Write-Host "    $label OK"
+            return $true
+        } catch {
+            if ($i % 10 -eq 9) { Write-Host "    ... à espera de $label ($($i + 1)s)" }
+            Start-Sleep -Seconds 1
+        }
+    }
+    return $false
+}
+
+function Start-LoggedProcess($file, $argList, $wd, $outLog, $errLog) {
+    # PowerShell não permite redireccionar stdout e stderr para o MESMO ficheiro.
+    return Start-Process -FilePath $file -ArgumentList $argList `
+        -WorkingDirectory $wd `
+        -RedirectStandardOutput $outLog `
+        -RedirectStandardError $errLog `
+        -PassThru -WindowStyle Hidden
+}
+
 New-Item -ItemType Directory -Force -Path $Run | Out-Null
 
 if (-not (Test-Path (Join-Path $Api ".venv")) -or -not (Test-Path (Join-Path $Web "node_modules"))) {
@@ -31,46 +74,64 @@ Write-Host "    Web  → http://localhost:$WebPort"
 Write-Host ""
 
 $ApiLog = Join-Path $Run "api.log"
+$ApiErr = Join-Path $Run "api.err.log"
 $WebLog = Join-Path $Run "web.log"
+$WebErr = Join-Path $Run "web.err.log"
 "" | Set-Content $ApiLog
+"" | Set-Content $ApiErr
 "" | Set-Content $WebLog
+"" | Set-Content $WebErr
 
-$ApiStart = Join-Path $Api ".venv\Scripts\python.exe"
-$ApiProc = Start-Process -FilePath $ApiStart -ArgumentList "-m", "uvicorn", "main:app", "--host", "127.0.0.1", "--port", $ApiPort -WorkingDirectory $Api -RedirectStandardOutput $ApiLog -RedirectStandardError $ApiLog -PassThru -WindowStyle Hidden
-$ApiProc.Id | Set-Content (Join-Path $Run "api.pid")
-Write-Host "    API PID $($ApiProc.Id) · log $ApiLog"
-
-$max = 90
-$ok = $false
-for ($i = 0; $i -lt $max; $i++) {
-    try {
-        Invoke-WebRequest -Uri "http://127.0.0.1:$ApiPort/api/estado" -UseBasicParsing -TimeoutSec 2 | Out-Null
-        Write-Host "    API OK"
-        $ok = $true
-        break
-    } catch { Start-Sleep -Seconds 1 }
-}
-if (-not $ok) {
-    Write-Host "ERRO: API não respondeu. Ver $ApiLog"
+$ApiPy = Join-Path $Api ".venv\Scripts\python.exe"
+if (-not (Test-Path $ApiPy)) {
+    Write-Host "ERRO: venv em falta. Corra: .\setup-win.ps1"
     exit 1
 }
 
-$Vite = Join-Path $Web "node_modules\.bin\vite.cmd"
-$WebProc = Start-Process -FilePath $Vite -ArgumentList "--host", "127.0.0.1", "--port", $WebPort -WorkingDirectory $Web -RedirectStandardOutput $WebLog -RedirectStandardError $WebLog -PassThru -WindowStyle Hidden
-$WebProc.Id | Set-Content (Join-Path $Run "web.pid")
-Write-Host "    Web PID $($WebProc.Id) · log $WebLog"
+$ApiProc = Start-LoggedProcess $ApiPy @(
+    "-m", "uvicorn", "main:app", "--host", "127.0.0.1", "--port", $ApiPort
+) $Api $ApiLog $ApiErr
+$ApiProc.Id | Set-Content (Join-Path $Run "api.pid")
+Write-Host "    API PID $($ApiProc.Id) · logs $ApiLog"
 
-$ok = $false
-for ($i = 0; $i -lt $max; $i++) {
-    try {
-        Invoke-WebRequest -Uri "http://127.0.0.1:$WebPort" -UseBasicParsing -TimeoutSec 2 | Out-Null
-        Write-Host "    Web OK"
-        $ok = $true
-        break
-    } catch { Start-Sleep -Seconds 1 }
+if (-not (Wait-Http "http://127.0.0.1:$ApiPort/api/health" "API (health)" 180)) {
+    Write-Host "ERRO: API não respondeu em 180s."
+    Write-LogTail $ApiLog
+    Write-LogTail $ApiErr
+    Write-Host "Dica: corra .\diagnostico-win.ps1 para mais detalhes"
+    exit 1
 }
-if (-not $ok) {
-    Write-Host "ERRO: Web não respondeu. Ver $WebLog"
+
+# Aquecimento da grelha (pode demorar no 1.º arranque)
+Write-Host "    A aquecer dados (grelha de risco)..."
+$warm = $false
+for ($i = 0; $i -lt 120; $i++) {
+    try {
+        $r = Invoke-RestMethod -Uri "http://127.0.0.1:$ApiPort/api/health" -TimeoutSec 5
+        if ($r.grelha_pronta) { $warm = $true; break }
+    } catch { }
+    if ($i % 15 -eq 14) { Write-Host "    ... grelha ($($i + 1)s)" }
+    Start-Sleep -Seconds 1
+}
+if ($warm) { Write-Host "    Grelha pronta" } else { Write-Host "    AVISO: grelha ainda a carregar — a interface pode demorar" }
+
+$ViteJs = Join-Path $Web "node_modules\vite\bin\vite.js"
+if (-not (Test-Path $ViteJs)) {
+    Write-Host "ERRO: Vite não instalado. Corra: .\setup-win.ps1"
+    exit 1
+}
+
+$node = (Get-Command node).Source
+$WebProc = Start-LoggedProcess $node @(
+    "`"$ViteJs`"", "--host", "127.0.0.1", "--port", $WebPort
+) $Web $WebLog $WebErr
+$WebProc.Id | Set-Content (Join-Path $Run "web.pid")
+Write-Host "    Web PID $($WebProc.Id) · logs $WebLog"
+
+if (-not (Wait-Http "http://127.0.0.1:$WebPort" "Web" 60)) {
+    Write-Host "ERRO: Frontend não respondeu."
+    Write-LogTail $WebLog
+    Write-LogTail $WebErr
     exit 1
 }
 
@@ -86,5 +147,4 @@ Write-Host "=========================================="
 Write-Host ""
 
 Start-Process "http://localhost:$WebPort"
-
-Write-Host "Serviços a correr em segundo plano. Use .\stop-win.ps1 para parar."
+Write-Host "Serviços em segundo plano. Use .\stop-win.ps1 para parar."
