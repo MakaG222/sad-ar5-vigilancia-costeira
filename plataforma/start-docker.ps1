@@ -4,12 +4,12 @@ $Root = Split-Path -Parent $MyInvocation.MyCommand.Path
 Set-Location $Root
 
 if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
-    Write-Host "ERRO: Docker não encontrado. Instale Docker Desktop:"
+    Write-Host "ERRO: Docker nao encontrado. Instale Docker Desktop:"
     Write-Host "      https://www.docker.com/products/docker-desktop/"
     exit 1
 }
 
-Write-Host "==> SAD AR5 — Docker (build + arranque)"
+Write-Host "==> SAD AR5 - Docker (build + arranque)"
 docker compose up --build -d
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 

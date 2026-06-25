@@ -5,7 +5,7 @@ $Api = Join-Path $Root "api"
 $Web = Join-Path $Root "web"
 $Repo = Split-Path -Parent $Root
 
-Write-Host "==> SAD AR5 — setup Windows"
+Write-Host "==> SAD AR5 - setup Windows"
 Write-Host "    Pasta: $Root"
 Write-Host ""
 
@@ -29,18 +29,18 @@ function Find-PythonExe {
 
 $py = Find-PythonExe
 if (-not $py) {
-    Write-Host "ERRO: Python 3.10+ não encontrado."
+    Write-Host "ERRO: Python 3.10+ nao encontrado."
     Write-Host "      Instale em https://www.python.org/downloads/"
     Write-Host "      Marque 'Add python.exe to PATH' e reinicie o PowerShell."
     exit 1
 }
 
 if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
-    Write-Host "ERRO: Node.js não encontrado. Instale em https://nodejs.org/"
+    Write-Host "ERRO: Node.js nao encontrado. Instale em https://nodejs.org/"
     exit 1
 }
 
-Write-Host "Python: $($py.Cmd) · Node $(node -v) · npm $(npm -v)"
+Write-Host "Python: $($py.Cmd) | Node $(node -v) | npm $(npm -v)"
 Write-Host ""
 
 # Verificar dados necessários
@@ -51,12 +51,12 @@ $need = @(
 foreach ($f in $need) {
     if (-not (Test-Path $f)) {
         Write-Host "ERRO: Ficheiro em falta: $f"
-        Write-Host "      Descarregue o ZIP completo da release v1.0-final (não use só a pasta plataforma)."
+        Write-Host "      Descarregue o ZIP completo da release v1.0-final (nao use so a pasta plataforma)."
         exit 1
     }
 }
 
-Write-Host "==> API (venv + dependências Python)"
+Write-Host "==> API (venv + dependencias Python)"
 Set-Location $Api
 if (-not (Test-Path ".venv")) {
     & $py.Cmd @($py.VenvArgs + ".venv")
@@ -81,11 +81,11 @@ if (-not (Test-Path $Env) -and (Test-Path $EnvEx)) {
     Write-Host "==> Criado .env (edite AISSTREAM_API_KEY se tiver chave AIS)"
 }
 
-Write-Host "==> Setup concluído."
+Write-Host "==> Setup concluido."
 Write-Host ""
 Write-Host "Arranque (PowerShell nesta pasta):"
 Write-Host "  Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass"
 Write-Host "  .\start-win.ps1"
 Write-Host ""
-Write-Host "Ou faça duplo-clique em INICIAR.bat"
+Write-Host "Ou faca duplo-clique em INICIAR.bat"
 Write-Host ""

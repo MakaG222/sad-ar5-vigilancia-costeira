@@ -1,4 +1,5 @@
 # Arranca API (8080) + frontend (5173) no Windows.
+# Nota: usar apenas ASCII nas strings (compativel com Windows PowerShell 5.1).
 $ErrorActionPreference = "Stop"
 $Root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $Api = Join-Path $Root "api"
@@ -9,22 +10,14 @@ $WebPort = if ($env:WEB_PORT) { $env:WEB_PORT } else { "5173" }
 
 function Write-LogTail($path, $lines = 20) {
     if (Test-Path $path) {
-        Write-Host "--- últimas linhas de $path ---"
+        Write-Host "--- ultimas linhas de $path ---"
         Get-Content $path -Tail $lines -ErrorAction SilentlyContinue | ForEach-Object { Write-Host $_ }
         Write-Host "--------------------------------"
     }
 }
 
-function Find-Python {
-    foreach ($cmd in @("python", "python3", "py")) {
-        if (Get-Command $cmd -ErrorAction SilentlyContinue) {
-            if ($cmd -eq "py") {
-                return @{ Exe = "py"; Args = @("-3") }
-            }
-            return @{ Exe = $cmd; Args = @() }
-        }
-    }
-    return $null
+function Sec-Label([int]$n) {
+    return "$n s"
 }
 
 function Wait-Http($url, $label, $maxSec = 180) {
@@ -34,7 +27,10 @@ function Wait-Http($url, $label, $maxSec = 180) {
             Write-Host "    $label OK"
             return $true
         } catch {
-            if ($i % 10 -eq 9) { Write-Host "    ... à espera de $label ($($i + 1)s)" }
+            if ($i % 10 -eq 9) {
+                $sec = Sec-Label ($i + 1)
+                Write-Host "    ... a esperar de $label ($sec)"
+            }
             Start-Sleep -Seconds 1
         }
     }
@@ -42,7 +38,7 @@ function Wait-Http($url, $label, $maxSec = 180) {
 }
 
 function Start-LoggedProcess($file, $argList, $wd, $outLog, $errLog) {
-    # PowerShell não permite redireccionar stdout e stderr para o MESMO ficheiro.
+    # PowerShell nao permite redireccionar stdout e stderr para o MESMO ficheiro.
     return Start-Process -FilePath $file -ArgumentList $argList `
         -WorkingDirectory $wd `
         -RedirectStandardOutput $outLog `
@@ -53,7 +49,7 @@ function Start-LoggedProcess($file, $argList, $wd, $outLog, $errLog) {
 New-Item -ItemType Directory -Force -Path $Run | Out-Null
 
 if (-not (Test-Path (Join-Path $Api ".venv")) -or -not (Test-Path (Join-Path $Web "node_modules"))) {
-    Write-Host "Dependências em falta. A correr setup..."
+    Write-Host "Dependencias em falta. A correr setup..."
     & (Join-Path $Root "setup-win.ps1")
 }
 
@@ -68,9 +64,9 @@ if (Test-Path $EnvFile) {
     }
 }
 
-Write-Host "==> SAD AR5 — arranque Windows"
-Write-Host "    API  → http://127.0.0.1:$ApiPort"
-Write-Host "    Web  → http://localhost:$WebPort"
+Write-Host "==> SAD AR5 - arranque Windows"
+Write-Host "    API  -> http://127.0.0.1:$ApiPort"
+Write-Host "    Web  -> http://localhost:$WebPort"
 Write-Host ""
 
 $ApiLog = Join-Path $Run "api.log"
@@ -92,17 +88,17 @@ $ApiProc = Start-LoggedProcess $ApiPy @(
     "-m", "uvicorn", "main:app", "--host", "127.0.0.1", "--port", $ApiPort
 ) $Api $ApiLog $ApiErr
 $ApiProc.Id | Set-Content (Join-Path $Run "api.pid")
-Write-Host "    API PID $($ApiProc.Id) · logs $ApiLog"
+Write-Host "    API PID $($ApiProc.Id) - logs $ApiLog"
 
 if (-not (Wait-Http "http://127.0.0.1:$ApiPort/api/health" "API (health)" 180)) {
-    Write-Host "ERRO: API não respondeu em 180s."
+    Write-Host "ERRO: API nao respondeu em 180 s."
     Write-LogTail $ApiLog
     Write-LogTail $ApiErr
     Write-Host "Dica: corra .\diagnostico-win.ps1 para mais detalhes"
     exit 1
 }
 
-# Aquecimento da grelha (pode demorar no 1.º arranque)
+# Aquecimento da grelha (pode demorar no 1. arranque)
 Write-Host "    A aquecer dados (grelha de risco)..."
 $warm = $false
 for ($i = 0; $i -lt 120; $i++) {
@@ -110,26 +106,33 @@ for ($i = 0; $i -lt 120; $i++) {
         $r = Invoke-RestMethod -Uri "http://127.0.0.1:$ApiPort/api/health" -TimeoutSec 5
         if ($r.grelha_pronta) { $warm = $true; break }
     } catch { }
-    if ($i % 15 -eq 14) { Write-Host "    ... grelha ($($i + 1)s)" }
+    if ($i % 15 -eq 14) {
+        $sec = Sec-Label ($i + 1)
+        Write-Host "    ... grelha ($sec)"
+    }
     Start-Sleep -Seconds 1
 }
-if ($warm) { Write-Host "    Grelha pronta" } else { Write-Host "    AVISO: grelha ainda a carregar — a interface pode demorar" }
+if ($warm) {
+    Write-Host "    Grelha pronta"
+} else {
+    Write-Host "    AVISO: grelha ainda a carregar - a interface pode demorar"
+}
 
 $ViteJs = Join-Path $Web "node_modules\vite\bin\vite.js"
 if (-not (Test-Path $ViteJs)) {
-    Write-Host "ERRO: Vite não instalado. Corra: .\setup-win.ps1"
+    Write-Host "ERRO: Vite nao instalado. Corra: .\setup-win.ps1"
     exit 1
 }
 
 $node = (Get-Command node).Source
 $WebProc = Start-LoggedProcess $node @(
-    "`"$ViteJs`"", "--host", "127.0.0.1", "--port", $WebPort
+    $ViteJs, "--host", "127.0.0.1", "--port", $WebPort
 ) $Web $WebLog $WebErr
 $WebProc.Id | Set-Content (Join-Path $Run "web.pid")
-Write-Host "    Web PID $($WebProc.Id) · logs $WebLog"
+Write-Host "    Web PID $($WebProc.Id) - logs $WebLog"
 
 if (-not (Wait-Http "http://127.0.0.1:$WebPort" "Web" 60)) {
-    Write-Host "ERRO: Frontend não respondeu."
+    Write-Host "ERRO: Frontend nao respondeu."
     Write-LogTail $WebLog
     Write-LogTail $WebErr
     exit 1
@@ -147,4 +150,4 @@ Write-Host "=========================================="
 Write-Host ""
 
 Start-Process "http://localhost:$WebPort"
-Write-Host "Serviços em segundo plano. Use .\stop-win.ps1 para parar."
+Write-Host "Servicos em segundo plano. Use .\stop-win.ps1 para parar."

@@ -1,10 +1,10 @@
-# Diagnóstico rápido — enviar output à equipa se a plataforma falhar.
+# Diagnostico rapido - enviar output a equipa se a plataforma falhar.
 $ErrorActionPreference = "Continue"
 $Root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $Api = Join-Path $Root "api"
 $Repo = Split-Path -Parent $Root
 
-Write-Host "=== SAD AR5 — diagnóstico Windows ==="
+Write-Host "=== SAD AR5 - diagnostico Windows ==="
 Write-Host "Data: $(Get-Date -Format 'yyyy-MM-dd HH:mm')"
 Write-Host "Pasta: $Root"
 Write-Host ""
@@ -27,8 +27,8 @@ Write-Host "--- Ficheiros de dados ---"
 }
 
 Write-Host ""
-Write-Host "--- Dependências ---"
-if (Test-Path (Join-Path $Api ".venv")) { Write-Host "  OK  api\.venv" } else { Write-Host "  FALTA  api\.venv — corra setup-win.ps1" }
+Write-Host "--- Dependencias ---"
+if (Test-Path (Join-Path $Api ".venv")) { Write-Host "  OK  api\.venv" } else { Write-Host "  FALTA  api\.venv - corra setup-win.ps1" }
 if (Test-Path (Join-Path $Root "web\node_modules")) { Write-Host "  OK  web\node_modules" } else { Write-Host "  FALTA  web\node_modules" }
 
 Write-Host ""
@@ -60,4 +60,4 @@ foreach ($log in @("api.err.log", "api.log", "web.err.log")) {
 }
 
 Write-Host ""
-Write-Host "=== Fim diagnóstico ==="
+Write-Host "=== Fim diagnostico ==="
